@@ -26,6 +26,7 @@ import Exercises from "./pages/Exercises";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import ExerciseSession from "./pages/ExerciseSession";
 import Insights from "./pages/Insights";
+import Recommendations from "./pages/Recommendations";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
 import NotFound from "./pages/NotFound";
@@ -163,6 +164,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Insights />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/recommendations"
+            element={
+              <ProtectedRoute>
+                <Recommendations />
               </ProtectedRoute>
             }
           />

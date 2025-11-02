@@ -330,6 +330,33 @@ export type Database = {
         }
         Relationships: []
       }
+      recommendation_rules: {
+        Row: {
+          activity_template_ids: string[]
+          created_at: string | null
+          enabled: boolean | null
+          id: string
+          priority: number | null
+          trigger_condition: Json
+        }
+        Insert: {
+          activity_template_ids: string[]
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          priority?: number | null
+          trigger_condition: Json
+        }
+        Update: {
+          activity_template_ids?: string[]
+          created_at?: string | null
+          enabled?: boolean | null
+          id?: string
+          priority?: number | null
+          trigger_condition?: Json
+        }
+        Relationships: []
+      }
       test_results: {
         Row: {
           answers: Json
@@ -492,6 +519,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      user_recommendations: {
+        Row: {
+          accepted: boolean | null
+          activity_template_id: string
+          created_at: string | null
+          dismissed: boolean | null
+          expires_at: string | null
+          id: string
+          priority: number | null
+          reason: string
+          user_id: string
+        }
+        Insert: {
+          accepted?: boolean | null
+          activity_template_id: string
+          created_at?: string | null
+          dismissed?: boolean | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          reason: string
+          user_id: string
+        }
+        Update: {
+          accepted?: boolean | null
+          activity_template_id?: string
+          created_at?: string | null
+          dismissed?: boolean | null
+          expires_at?: string | null
+          id?: string
+          priority?: number | null
+          reason?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_recommendations_activity_template_id_fkey"
+            columns: ["activity_template_id"]
+            isOneToOne: false
+            referencedRelation: "activity_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
