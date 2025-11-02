@@ -275,54 +275,87 @@ export type Database = {
       }
       profiles: {
         Row: {
+          activity_reminder_minutes: number | null
+          activity_reminders_enabled: boolean | null
           age: number | null
+          analytics_enabled: boolean | null
           avatar_url: string | null
+          bio: string | null
+          color_scheme: string | null
           created_at: string | null
           evening_reflection_enabled: boolean | null
           evening_reflection_time: string | null
+          font_size: string | null
           full_name: string | null
           gender: string | null
           goals: string[] | null
+          high_contrast: boolean | null
           id: string
+          language: string | null
           morning_reflection_enabled: boolean | null
           morning_reflection_time: string | null
+          notifications_enabled: boolean | null
           onboarding_completed: boolean | null
+          reduce_motion: boolean | null
+          theme: string | null
           tracker_frequency: number | null
           tracker_times: Json | null
           updated_at: string | null
           username: string | null
         }
         Insert: {
+          activity_reminder_minutes?: number | null
+          activity_reminders_enabled?: boolean | null
           age?: number | null
+          analytics_enabled?: boolean | null
           avatar_url?: string | null
+          bio?: string | null
+          color_scheme?: string | null
           created_at?: string | null
           evening_reflection_enabled?: boolean | null
           evening_reflection_time?: string | null
+          font_size?: string | null
           full_name?: string | null
           gender?: string | null
           goals?: string[] | null
+          high_contrast?: boolean | null
           id: string
+          language?: string | null
           morning_reflection_enabled?: boolean | null
           morning_reflection_time?: string | null
+          notifications_enabled?: boolean | null
           onboarding_completed?: boolean | null
+          reduce_motion?: boolean | null
+          theme?: string | null
           tracker_frequency?: number | null
           tracker_times?: Json | null
           updated_at?: string | null
           username?: string | null
         }
         Update: {
+          activity_reminder_minutes?: number | null
+          activity_reminders_enabled?: boolean | null
           age?: number | null
+          analytics_enabled?: boolean | null
           avatar_url?: string | null
+          bio?: string | null
+          color_scheme?: string | null
           created_at?: string | null
           evening_reflection_enabled?: boolean | null
           evening_reflection_time?: string | null
+          font_size?: string | null
           full_name?: string | null
           gender?: string | null
           goals?: string[] | null
+          high_contrast?: boolean | null
           id?: string
+          language?: string | null
           morning_reflection_enabled?: boolean | null
           morning_reflection_time?: string | null
+          notifications_enabled?: boolean | null
           onboarding_completed?: boolean | null
+          reduce_motion?: boolean | null
+          theme?: string | null
           tracker_frequency?: number | null
           tracker_times?: Json | null
           updated_at?: string | null
