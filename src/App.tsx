@@ -17,6 +17,7 @@ import TrackerHistory from "./pages/TrackerHistory";
 import ActivityTemplates from "./pages/ActivityTemplates";
 import Calendar from "./pages/Calendar";
 import Journal from "./pages/Journal";
+import JournalHistory from "./pages/JournalHistory";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
@@ -83,6 +84,14 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Journal />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/journal/history"
+            element={
+              <ProtectedRoute>
+                <JournalHistory />
               </ProtectedRoute>
             }
           />
