@@ -1,0 +1,180 @@
+import React, { useState, useEffect } from 'react';
+import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { DaySection } from './DaySection';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
+
+interface ListViewProps {
+  currentDate: Date;
+  onDateChange: (date: Date) => void;
+}
+
+export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
+  const { user } = useAuth();
+  const [activities, setActivities] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
+  const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
+
+  useEffect(() => {
+    if (user) {
+      fetchActivities();
+      
+      // Subscribe to realtime updates
+      const channel = supabase
+        .channel('activities-changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'activities',
+            filter: `user_id=eq.${user.id}`
+          },
+          () => {
+            fetchActivities();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user, currentDate]);
+
+  const fetchActivities = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('activities')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('date', format(currentDate, 'yyyy-MM-dd'))
+      .order('start_time', { ascending: true });
+
+    if (!error && data) {
+      setActivities(data);
+    }
+    setLoading(false);
+  };
+
+  const selectedDayActivities = activities.filter(a => 
+    isSameDay(new Date(a.date), currentDate)
+  );
+
+  const completedCount = selectedDayActivities.filter(a => a.status === 'completed').length;
+  const totalCount = selectedDayActivities.length;
+  const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Day Selector */}
+      <ScrollArea className="border-b border-border">
+        <div className="flex gap-2 p-4">
+          {weekDays.map((day) => {
+            const isSelected = isSameDay(day, currentDate);
+            const isToday = isSameDay(day, new Date());
+            
+            return (
+              <Button
+                key={day.toString()}
+                variant={isSelected ? 'default' : 'ghost'}
+                className={`flex-1 min-w-[60px] flex flex-col h-auto py-3 ${
+                  isToday && !isSelected ? 'border-2 border-primary' : ''
+                }`}
+                onClick={() => onDateChange(day)}
+              >
+                <span className="text-xs font-medium">
+                  {format(day, 'EEE')}
+                </span>
+                <span className="text-lg font-bold mt-1">
+                  {format(day, 'd')}
+                </span>
+              </Button>
+            );
+          })}
+        </div>
+      </ScrollArea>
+
+      {/* Activities List */}
+      <ScrollArea className="flex-1">
+        <div className="p-4">
+          {loading ? (
+            <div className="space-y-4">
+              {[1, 2, 3].map(i => (
+                <Skeleton key={i} className="h-20 w-full" />
+              ))}
+            </div>
+          ) : selectedDayActivities.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <p className="text-muted-foreground mb-2">No activities yet</p>
+              <p className="text-sm text-muted-foreground">Add one to get started!</p>
+            </div>
+          ) : (
+            <>
+              <DaySection
+                title="🌅 MORNING"
+                timeRange="5:00-11:59"
+                activities={selectedDayActivities.filter(a => {
+                  if (!a.start_time) return false;
+                  const hour = parseInt(a.start_time.split(':')[0]);
+                  return hour >= 5 && hour < 12;
+                })}
+                onUpdate={fetchActivities}
+              />
+              
+              <DaySection
+                title="☀️ DAY"
+                timeRange="12:00-17:59"
+                activities={selectedDayActivities.filter(a => {
+                  if (!a.start_time) return false;
+                  const hour = parseInt(a.start_time.split(':')[0]);
+                  return hour >= 12 && hour < 18;
+                })}
+                onUpdate={fetchActivities}
+              />
+              
+              <DaySection
+                title="🌙 EVENING"
+                timeRange="18:00-23:59"
+                activities={selectedDayActivities.filter(a => {
+                  if (!a.start_time) return false;
+                  const hour = parseInt(a.start_time.split(':')[0]);
+                  return hour >= 18 || hour < 5;
+                })}
+                onUpdate={fetchActivities}
+              />
+              
+              <DaySection
+                title="📌 ANYTIME"
+                activities={selectedDayActivities.filter(a => !a.start_time)}
+                onUpdate={fetchActivities}
+              />
+            </>
+          )}
+        </div>
+      </ScrollArea>
+
+      {/* Bottom Stats */}
+      {totalCount > 0 && (
+        <div className="border-t border-border bg-card p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm font-medium">
+              {completedCount}/{totalCount} completed ({completionRate}%)
+            </span>
+            {completionRate >= 80 && (
+              <span className="text-sm text-accent font-medium">
+                🎉 Great progress!
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
