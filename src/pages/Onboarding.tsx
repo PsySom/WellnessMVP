@@ -1,103 +1,169 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import WelcomeScreen from '@/components/onboarding/WelcomeScreen';
+import BasicInfoScreen from '@/components/onboarding/BasicInfoScreen';
+import GoalsScreen from '@/components/onboarding/GoalsScreen';
+import RemindersScreen from '@/components/onboarding/RemindersScreen';
+import ReadyScreen from '@/components/onboarding/ReadyScreen';
+
+export interface OnboardingData {
+  fullName: string;
+  age: number | null;
+  gender: string;
+  goals: string[];
+  trackerFrequency: number;
+  trackerTimes: string[];
+  morningReflectionEnabled: boolean;
+  morningReflectionTime: string;
+  eveningReflectionEnabled: boolean;
+  eveningReflectionTime: string;
+}
 
 const Onboarding = () => {
   const [step, setStep] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const steps = [
-    {
-      emoji: '👋',
-      title: 'Welcome to Mental Wellness',
-      description: 'Your personal companion for mental health and wellbeing',
-    },
-    {
-      emoji: '📊',
-      title: 'Track Your Mood',
-      description: 'Easily log your emotions and understand patterns over time',
-    },
-    {
-      emoji: '📅',
-      title: 'Plan Activities',
-      description: 'Schedule self-care activities and get gentle reminders',
-    },
-    {
-      emoji: '📝',
-      title: 'Reflect Daily',
-      description: 'Keep a journal to track your thoughts and progress',
-    },
-    {
-      emoji: '💡',
-      title: 'Get Insights',
-      description: 'Receive personalized recommendations based on your data',
-    },
-  ];
+  const [data, setData] = useState<OnboardingData>({
+    fullName: user?.user_metadata?.full_name || '',
+    age: null,
+    gender: '',
+    goals: [],
+    trackerFrequency: 2,
+    trackerTimes: ['09:00', '21:00'],
+    morningReflectionEnabled: true,
+    morningReflectionTime: '08:00',
+    eveningReflectionEnabled: true,
+    eveningReflectionTime: '22:00',
+  });
 
-  const currentStep = steps[step];
+  const updateData = (newData: Partial<OnboardingData>) => {
+    setData((prev) => ({ ...prev, ...newData }));
+  };
 
-  const handleNext = () => {
-    if (step < steps.length - 1) {
-      setStep(step + 1);
-    } else {
+  const goToNext = () => {
+    setDirection('forward');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setStep((prev) => prev + 1);
+      setIsAnimating(false);
+    }, 300);
+  };
+
+  const goToPrevious = () => {
+    setDirection('backward');
+    setIsAnimating(true);
+    setTimeout(() => {
+      setStep((prev) => prev - 1);
+      setIsAnimating(false);
+    }, 300);
+  };
+
+  const skipOnboarding = async () => {
+    if (!user) return;
+    
+    try {
+      await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user.id);
+      
       navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message,
+      });
     }
   };
 
-  const handleSkip = () => {
-    navigate('/dashboard');
+  const completeOnboarding = async () => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: data.fullName,
+          age: data.age,
+          gender: data.gender,
+          goals: data.goals,
+          tracker_frequency: data.trackerFrequency,
+          tracker_times: data.trackerTimes,
+          morning_reflection_enabled: data.morningReflectionEnabled,
+          morning_reflection_time: data.morningReflectionTime,
+          evening_reflection_enabled: data.eveningReflectionEnabled,
+          evening_reflection_time: data.eveningReflectionTime,
+          onboarding_completed: true,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Welcome aboard!',
+        description: "You're all set to begin your wellness journey.",
+      });
+
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: error.message,
+      });
+    }
   };
 
+  const screens = [
+    <WelcomeScreen key="welcome" onNext={goToNext} onSkip={skipOnboarding} />,
+    <BasicInfoScreen
+      key="basic-info"
+      data={data}
+      onUpdate={updateData}
+      onNext={goToNext}
+      onBack={goToPrevious}
+      step={2}
+    />,
+    <GoalsScreen
+      key="goals"
+      data={data}
+      onUpdate={updateData}
+      onNext={goToNext}
+      onBack={goToPrevious}
+      step={3}
+    />,
+    <RemindersScreen
+      key="reminders"
+      data={data}
+      onUpdate={updateData}
+      onNext={goToNext}
+      onBack={goToPrevious}
+      step={4}
+    />,
+    <ReadyScreen key="ready" onComplete={completeOnboarding} />,
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <Card className="w-full max-w-sm p-8 space-y-8 animate-fade-in">
-        {/* Progress dots */}
-        <div className="flex justify-center gap-2">
-          {steps.map((_, index) => (
-            <div
-              key={index}
-              className={`h-2 rounded-full smooth-transition ${
-                index === step
-                  ? 'w-8 bg-primary'
-                  : index < step
-                  ? 'w-2 bg-primary/50'
-                  : 'w-2 bg-muted'
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Content */}
-        <div className="text-center space-y-4">
-          <div className="text-6xl">{currentStep.emoji}</div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {currentStep.title}
-          </h1>
-          <p className="text-muted-foreground">
-            {currentStep.description}
-          </p>
-        </div>
-
-        {/* Actions */}
-        <div className="space-y-3">
-          <Button onClick={handleNext} className="w-full">
-            {step === steps.length - 1 ? 'Get Started' : 'Next'}
-            <ChevronRight className="ml-2 h-4 w-4" />
-          </Button>
-          
-          {step < steps.length - 1 && (
-            <Button
-              variant="ghost"
-              onClick={handleSkip}
-              className="w-full"
-            >
-              Skip
-            </Button>
-          )}
-        </div>
-      </Card>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 overflow-hidden">
+      <div
+        className={`w-full max-w-md transition-all duration-300 ease-in-out ${
+          isAnimating
+            ? direction === 'forward'
+              ? 'opacity-0 -translate-x-8'
+              : 'opacity-0 translate-x-8'
+            : 'opacity-100 translate-x-0'
+        }`}
+      >
+        {screens[step]}
+      </div>
     </div>
   );
 };

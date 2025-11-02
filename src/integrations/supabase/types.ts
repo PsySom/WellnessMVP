@@ -82,10 +82,17 @@ export type Database = {
           age: number | null
           avatar_url: string | null
           created_at: string | null
+          evening_reflection_enabled: boolean | null
+          evening_reflection_time: string | null
           full_name: string | null
           gender: string | null
           goals: string[] | null
           id: string
+          morning_reflection_enabled: boolean | null
+          morning_reflection_time: string | null
+          onboarding_completed: boolean | null
+          tracker_frequency: number | null
+          tracker_times: Json | null
           updated_at: string | null
           username: string | null
         }
@@ -93,10 +100,17 @@ export type Database = {
           age?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          evening_reflection_enabled?: boolean | null
+          evening_reflection_time?: string | null
           full_name?: string | null
           gender?: string | null
           goals?: string[] | null
           id: string
+          morning_reflection_enabled?: boolean | null
+          morning_reflection_time?: string | null
+          onboarding_completed?: boolean | null
+          tracker_frequency?: number | null
+          tracker_times?: Json | null
           updated_at?: string | null
           username?: string | null
         }
@@ -104,10 +118,17 @@ export type Database = {
           age?: number | null
           avatar_url?: string | null
           created_at?: string | null
+          evening_reflection_enabled?: boolean | null
+          evening_reflection_time?: string | null
           full_name?: string | null
           gender?: string | null
           goals?: string[] | null
           id?: string
+          morning_reflection_enabled?: boolean | null
+          morning_reflection_time?: string | null
+          onboarding_completed?: boolean | null
+          tracker_frequency?: number | null
+          tracker_times?: Json | null
           updated_at?: string | null
           username?: string | null
         }
