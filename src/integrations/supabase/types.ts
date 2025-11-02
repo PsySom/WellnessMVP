@@ -241,6 +241,95 @@ export type Database = {
         }
         Relationships: []
       }
+      test_results: {
+        Row: {
+          answers: Json
+          category: string
+          completed_at: string | null
+          id: string
+          max_score: number
+          score: number
+          test_id: string
+          user_id: string
+        }
+        Insert: {
+          answers: Json
+          category: string
+          completed_at?: string | null
+          id?: string
+          max_score: number
+          score: number
+          test_id: string
+          user_id: string
+        }
+        Update: {
+          answers?: Json
+          category?: string
+          completed_at?: string | null
+          id?: string
+          max_score?: number
+          score?: number
+          test_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "test_results_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tests: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          description_en: string | null
+          description_fr: string | null
+          duration_minutes: number | null
+          id: string
+          name: string
+          name_en: string
+          name_fr: string
+          questions: Json
+          scoring_info: Json
+          slug: string
+          total_questions: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_fr?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name: string
+          name_en: string
+          name_fr: string
+          questions: Json
+          scoring_info: Json
+          slug: string
+          total_questions: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          description_en?: string | null
+          description_fr?: string | null
+          duration_minutes?: number | null
+          id?: string
+          name?: string
+          name_en?: string
+          name_fr?: string
+          questions?: Json
+          scoring_info?: Json
+          slug?: string
+          total_questions?: number
+        }
+        Relationships: []
+      }
       tracker_emotions: {
         Row: {
           category: string

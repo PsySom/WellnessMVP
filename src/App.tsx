@@ -18,6 +18,10 @@ import ActivityTemplates from "./pages/ActivityTemplates";
 import Calendar from "./pages/Calendar";
 import Journal from "./pages/Journal";
 import JournalHistory from "./pages/JournalHistory";
+import Tests from "./pages/Tests";
+import TestDetail from "./pages/TestDetail";
+import TakeTest from "./pages/TakeTest";
+import TestResult from "./pages/TestResult";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
@@ -92,6 +96,38 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <JournalHistory />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tests"
+            element={
+              <ProtectedRoute>
+                <Tests />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tests/:slug"
+            element={
+              <ProtectedRoute>
+                <TestDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tests/:slug/take"
+            element={
+              <ProtectedRoute>
+                <TakeTest />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/tests/:slug/results/:resultId"
+            element={
+              <ProtectedRoute>
+                <TestResult />
               </ProtectedRoute>
             }
           />
