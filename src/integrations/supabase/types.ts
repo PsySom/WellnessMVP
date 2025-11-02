@@ -119,6 +119,95 @@ export type Database = {
         }
         Relationships: []
       }
+      exercise_sessions: {
+        Row: {
+          completed_at: string | null
+          duration_minutes: number
+          exercise_id: string
+          id: string
+          mood_after: number | null
+          mood_before: number | null
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          duration_minutes: number
+          exercise_id: string
+          id?: string
+          mood_after?: number | null
+          mood_before?: number | null
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          duration_minutes?: number
+          exercise_id?: string
+          id?: string
+          mood_after?: number | null
+          mood_before?: number | null
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exercise_sessions_exercise_id_fkey"
+            columns: ["exercise_id"]
+            isOneToOne: false
+            referencedRelation: "exercises"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exercises: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string | null
+          difficulty: string
+          duration_minutes: number
+          effects: string[]
+          emoji: string
+          id: string
+          instructions: Json
+          name: string
+          name_en: string
+          name_fr: string
+          slug: string
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description?: string | null
+          difficulty: string
+          duration_minutes: number
+          effects: string[]
+          emoji: string
+          id?: string
+          instructions: Json
+          name: string
+          name_en: string
+          name_fr: string
+          slug: string
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          difficulty?: string
+          duration_minutes?: number
+          effects?: string[]
+          emoji?: string
+          id?: string
+          instructions?: Json
+          name?: string
+          name_en?: string
+          name_fr?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       journal_messages: {
         Row: {
           content: string

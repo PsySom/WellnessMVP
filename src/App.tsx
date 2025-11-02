@@ -22,6 +22,9 @@ import Tests from "./pages/Tests";
 import TestDetail from "./pages/TestDetail";
 import TakeTest from "./pages/TakeTest";
 import TestResult from "./pages/TestResult";
+import Exercises from "./pages/Exercises";
+import ExerciseDetail from "./pages/ExerciseDetail";
+import ExerciseSession from "./pages/ExerciseSession";
 import Insights from "./pages/Insights";
 import Profile from "./pages/Profile";
 import Onboarding from "./pages/Onboarding";
@@ -128,6 +131,30 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <TestResult />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exercises"
+            element={
+              <ProtectedRoute>
+                <Exercises />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exercises/:slug"
+            element={
+              <ProtectedRoute>
+                <ExerciseDetail />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/exercises/:slug/session"
+            element={
+              <ProtectedRoute>
+                <ExerciseSession />
               </ProtectedRoute>
             }
           />
