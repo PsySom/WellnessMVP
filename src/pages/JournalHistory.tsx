@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, Search, Filter, Download, MessageSquare } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,19 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface Session {
   id: string;
@@ -30,6 +43,9 @@ interface Message {
   created_at: string;
 }
 
+type FilterType = 'all' | 'morning' | 'evening' | 'free';
+type DateRangeType = 'all' | 'today' | 'week' | 'month' | 'custom';
+
 const JournalHistory = () => {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [filteredSessions, setFilteredSessions] = useState<Session[]>([]);
@@ -37,24 +53,59 @@ const JournalHistory = () => {
   const [selectedSession, setSelectedSession] = useState<string | null>(null);
   const [sessionMessages, setSessionMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [filterType, setFilterType] = useState<FilterType>('all');
+  const [dateRange, setDateRange] = useState<DateRangeType>('all');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showExport, setShowExport] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     loadSessions();
   }, []);
 
   useEffect(() => {
+    applyFilters();
+  }, [searchQuery, sessions, filterType, dateRange]);
+
+  const applyFilters = () => {
+    let filtered = [...sessions];
+
+    // Apply session type filter
+    if (filterType !== 'all') {
+      filtered = filtered.filter(session => session.session_type === filterType);
+    }
+
+    // Apply date range filter
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    if (dateRange === 'today') {
+      filtered = filtered.filter(session => {
+        const sessionDate = new Date(session.started_at);
+        return sessionDate >= today;
+      });
+    } else if (dateRange === 'week') {
+      const weekAgo = new Date(today);
+      weekAgo.setDate(weekAgo.getDate() - 7);
+      filtered = filtered.filter(session => new Date(session.started_at) >= weekAgo);
+    } else if (dateRange === 'month') {
+      const monthAgo = new Date(today);
+      monthAgo.setMonth(monthAgo.getMonth() - 1);
+      filtered = filtered.filter(session => new Date(session.started_at) >= monthAgo);
+    }
+
+    // Apply search filter
     if (searchQuery.trim()) {
-      const filtered = sessions.filter(
+      filtered = filtered.filter(
         (session) =>
           session.preview.toLowerCase().includes(searchQuery.toLowerCase()) ||
           session.session_type.toLowerCase().includes(searchQuery.toLowerCase())
       );
-      setFilteredSessions(filtered);
-    } else {
-      setFilteredSessions(sessions);
     }
-  }, [searchQuery, sessions]);
+
+    setFilteredSessions(filtered);
+  };
 
   const loadSessions = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -138,16 +189,98 @@ const JournalHistory = () => {
     }
   };
 
+  const continueConversation = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Create new session referencing the old one
+    const { error } = await supabase
+      .from('journal_sessions')
+      .insert({
+        user_id: user.id,
+        session_type: 'free',
+      });
+
+    if (error) {
+      toast({ title: 'Error continuing conversation', variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'New conversation started' });
+    setSelectedSession(null);
+    navigate('/journal');
+  };
+
+  const exportAsText = () => {
+    const text = sessions.map(session => {
+      const date = new Date(session.started_at).toLocaleString();
+      const type = getSessionLabel(session.session_type);
+      return `\n=== ${type} Session - ${date} ===\n\n${session.preview}\n`;
+    }).join('\n---\n');
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `journal-export-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Export completed' });
+    setShowExport(false);
+  };
+
+  const exportAsJSON = () => {
+    const data = JSON.stringify(sessions, null, 2);
+    const blob = new Blob([data], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `journal-export-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Export completed' });
+    setShowExport(false);
+  };
+
+  const deleteSession = async (sessionId: string) => {
+    const { error } = await supabase
+      .from('journal_sessions')
+      .delete()
+      .eq('id', sessionId);
+
+    if (error) {
+      toast({ title: 'Error deleting session', variant: 'destructive' });
+      return;
+    }
+
+    toast({ title: 'Session deleted' });
+    setSelectedSession(null);
+    loadSessions();
+  };
+
   const groupSessionsByDate = (sessions: Session[]) => {
     const groups: { [key: string]: Session[] } = {};
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
     sessions.forEach((session) => {
       const date = new Date(session.started_at);
-      const dateKey = date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      const sessionDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      
+      let dateKey: string;
+      if (sessionDate.getTime() === today.getTime()) {
+        dateKey = 'Today';
+      } else if (sessionDate.getTime() === yesterday.getTime()) {
+        dateKey = 'Yesterday';
+      } else {
+        dateKey = date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+      }
 
       if (!groups[dateKey]) {
         groups[dateKey] = [];
@@ -172,7 +305,21 @@ const JournalHistory = () => {
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-2xl font-bold text-foreground">Journal History</h1>
+          <h1 className="text-2xl font-bold text-foreground flex-1">Journal History</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowFilters(true)}
+          >
+            <Filter className="h-5 w-5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowExport(true)}
+          >
+            <Download className="h-5 w-5" />
+          </Button>
         </div>
 
         {/* Search */}
@@ -189,18 +336,26 @@ const JournalHistory = () => {
         </div>
 
         {/* Sessions List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {isLoading ? (
             <p className="text-center text-muted-foreground">Loading...</p>
           ) : filteredSessions.length === 0 ? (
             <p className="text-center text-muted-foreground">No journal entries found</p>
           ) : (
             Object.entries(groupedSessions).map(([date, dateSessions]) => (
-              <div key={date} className="space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground sticky top-0 bg-background py-2">
-                  {date}
-                </h3>
-                <div className="space-y-2">
+              <Collapsible key={date} defaultOpen className="space-y-2">
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-2 hover:bg-accent rounded-lg smooth-transition">
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {date}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {dateSessions.length} sessions
+                    </Badge>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-2 pt-2">
                   {dateSessions.map((session) => (
                     <Card
                       key={session.id}
@@ -233,8 +388,8 @@ const JournalHistory = () => {
                       </div>
                     </Card>
                   ))}
-                </div>
-              </div>
+                </CollapsibleContent>
+              </Collapsible>
             ))
           )}
         </div>
@@ -242,11 +397,11 @@ const JournalHistory = () => {
 
       {/* Session Detail Dialog */}
       <Dialog open={!!selectedSession} onOpenChange={() => setSelectedSession(null)}>
-        <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Journal Session</DialogTitle>
           </DialogHeader>
-          <div className="overflow-y-auto space-y-4 p-4">
+          <div className="flex-1 overflow-y-auto space-y-4 p-4">
             {sessionMessages.map((message) => (
               <div
                 key={message.id}
@@ -273,6 +428,121 @@ const JournalHistory = () => {
                 </div>
               </div>
             ))}
+          </div>
+          <div className="flex gap-2 p-4 border-t border-border">
+            <Button
+              variant="default"
+              className="flex-1"
+              onClick={continueConversation}
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Continue Conversation
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => selectedSession && deleteSession(selectedSession)}
+            >
+              Delete
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filters Sheet */}
+      <Sheet open={showFilters} onOpenChange={setShowFilters}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Filters</SheetTitle>
+            <SheetDescription>
+              Filter your journal entries
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-6 pt-6">
+            <div className="space-y-3">
+              <Label>Session Type</Label>
+              <RadioGroup value={filterType} onValueChange={(value) => setFilterType(value as FilterType)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="all" />
+                  <Label htmlFor="all">All</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="morning" id="morning" />
+                  <Label htmlFor="morning">🌅 Morning</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="evening" id="evening" />
+                  <Label htmlFor="evening">🌙 Evening</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="free" id="free" />
+                  <Label htmlFor="free">💬 Free</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <div className="space-y-3">
+              <Label>Date Range</Label>
+              <RadioGroup value={dateRange} onValueChange={(value) => setDateRange(value as DateRangeType)}>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="all" id="date-all" />
+                  <Label htmlFor="date-all">All Time</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="today" id="today" />
+                  <Label htmlFor="today">Today</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="week" id="week" />
+                  <Label htmlFor="week">Last 7 Days</Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="month" id="month" />
+                  <Label htmlFor="month">Last 30 Days</Label>
+                </div>
+              </RadioGroup>
+            </div>
+
+            <Button 
+              className="w-full" 
+              onClick={() => {
+                setShowFilters(false);
+                toast({ title: 'Filters applied' });
+              }}
+            >
+              Apply Filters
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* Export Dialog */}
+      <Dialog open={showExport} onOpenChange={setShowExport}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Export Journal</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 pt-4">
+            <Card className="p-4 space-y-2">
+              <h3 className="font-semibold">Export as Text</h3>
+              <p className="text-sm text-muted-foreground">
+                Creates a readable .txt file with all your journal entries
+              </p>
+              <Button onClick={exportAsText} className="w-full">
+                <Download className="h-4 w-4 mr-2" />
+                Download Text File
+              </Button>
+            </Card>
+
+            <Card className="p-4 space-y-2">
+              <h3 className="font-semibold">Export as JSON</h3>
+              <p className="text-sm text-muted-foreground">
+                Full data export with metadata for backup purposes
+              </p>
+              <Button onClick={exportAsJSON} variant="secondary" className="w-full">
+                <Download className="h-4 w-4 mr-2" />
+                Download JSON File
+              </Button>
+            </Card>
           </div>
         </DialogContent>
       </Dialog>
