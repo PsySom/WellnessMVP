@@ -27,6 +27,18 @@ import { ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { JournalStats } from '@/components/journal/JournalStats';
+import { JournalInsights } from '@/components/journal/JournalInsights';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Session {
   id: string;
@@ -57,11 +69,27 @@ const JournalHistory = () => {
   const [dateRange, setDateRange] = useState<DateRangeType>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [showExport, setShowExport] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: 'session' | 'all'; id?: string } | null>(null);
+  const [stats, setStats] = useState({
+    totalSessions: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    thisMonthCount: 0
+  });
+  const [insights, setInsights] = useState({
+    averageSessionsPerWeek: 0,
+    mostActiveTimeOfDay: '',
+    averageMessageCount: 0,
+    consistencyScore: 0,
+    topWords: [] as { word: string; count: number }[]
+  });
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     loadSessions();
+    calculateStats();
   }, []);
 
   useEffect(() => {
@@ -152,6 +180,134 @@ const JournalHistory = () => {
     setSessions(sessionsWithDetails);
     setFilteredSessions(sessionsWithDetails);
     setIsLoading(false);
+    calculateStats();
+  };
+
+  const calculateStats = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data: allSessions } = await supabase
+      .from('journal_sessions')
+      .select('*, journal_messages(*)')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true });
+
+    if (!allSessions || allSessions.length === 0) return;
+
+    // Calculate streaks
+    const dates = allSessions.map(s => new Date(s.started_at).toDateString());
+    const uniqueDates = [...new Set(dates)];
+    
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 1;
+    
+    const today = new Date().toDateString();
+    const yesterday = new Date(Date.now() - 86400000).toDateString();
+    
+    if (uniqueDates[uniqueDates.length - 1] === today || uniqueDates[uniqueDates.length - 1] === yesterday) {
+      currentStreak = 1;
+      for (let i = uniqueDates.length - 2; i >= 0; i--) {
+        const curr = new Date(uniqueDates[i]);
+        const next = new Date(uniqueDates[i + 1]);
+        const diffDays = Math.floor((next.getTime() - curr.getTime()) / 86400000);
+        
+        if (diffDays === 1) {
+          currentStreak++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    for (let i = 1; i < uniqueDates.length; i++) {
+      const curr = new Date(uniqueDates[i - 1]);
+      const next = new Date(uniqueDates[i]);
+      const diffDays = Math.floor((next.getTime() - curr.getTime()) / 86400000);
+      
+      if (diffDays === 1) {
+        tempStreak++;
+        longestStreak = Math.max(longestStreak, tempStreak);
+      } else {
+        tempStreak = 1;
+      }
+    }
+    longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
+
+    // This month count
+    const now = new Date();
+    const thisMonthCount = allSessions.filter(s => {
+      const sessionDate = new Date(s.started_at);
+      return sessionDate.getMonth() === now.getMonth() && 
+             sessionDate.getFullYear() === now.getFullYear();
+    }).length;
+
+    // Calculate insights
+    const totalDays = Math.max(1, Math.floor((Date.now() - new Date(allSessions[0].started_at).getTime()) / 86400000));
+    const averageSessionsPerWeek = (allSessions.length / totalDays) * 7;
+
+    // Most active time
+    const timeSlots = { morning: 0, afternoon: 0, evening: 0, night: 0 };
+    allSessions.forEach(s => {
+      const hour = new Date(s.started_at).getHours();
+      if (hour >= 5 && hour < 12) timeSlots.morning++;
+      else if (hour >= 12 && hour < 17) timeSlots.afternoon++;
+      else if (hour >= 17 && hour < 21) timeSlots.evening++;
+      else timeSlots.night++;
+    });
+    const mostActiveTime = Object.entries(timeSlots).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+    const timeLabels: { [key: string]: string } = {
+      morning: 'Morning (5AM-12PM)',
+      afternoon: 'Afternoon (12PM-5PM)',
+      evening: 'Evening (5PM-9PM)',
+      night: 'Night (9PM-5AM)'
+    };
+
+    // Average message count
+    const totalMessages = allSessions.reduce((sum, s) => sum + (s.journal_messages?.length || 0), 0);
+    const averageMessageCount = totalMessages / allSessions.length;
+
+    // Consistency score
+    const expectedSessions = Math.ceil(totalDays / 2); // Expect session every 2 days
+    const consistencyScore = Math.min(100, Math.round((allSessions.length / expectedSessions) * 100));
+
+    // Word frequency
+    const wordCounts: { [key: string]: number } = {};
+    allSessions.forEach(s => {
+      s.journal_messages?.forEach((m: any) => {
+        if (m.message_type === 'user') {
+          const words = m.content.toLowerCase()
+            .replace(/[^\w\s]/g, '')
+            .split(/\s+/)
+            .filter((w: string) => w.length > 4); // Only words longer than 4 chars
+          
+          words.forEach((word: string) => {
+            wordCounts[word] = (wordCounts[word] || 0) + 1;
+          });
+        }
+      });
+    });
+
+    const topWords = Object.entries(wordCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([word, count]) => ({ word, count }));
+
+    setStats({
+      totalSessions: allSessions.length,
+      currentStreak,
+      longestStreak,
+      thisMonthCount
+    });
+
+    setInsights({
+      averageSessionsPerWeek,
+      mostActiveTimeOfDay: timeLabels[mostActiveTime],
+      averageMessageCount,
+      consistencyScore,
+      topWords
+    });
   };
 
   const loadSessionMessages = async (sessionId: string) => {
@@ -211,12 +367,53 @@ const JournalHistory = () => {
     navigate('/journal');
   };
 
-  const exportAsText = () => {
-    const text = sessions.map(session => {
-      const date = new Date(session.started_at).toLocaleString();
+  const exportAsText = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    // Get all sessions with full messages
+    const exportData = await Promise.all(
+      sessions.map(async (session) => {
+        const { data: messages } = await supabase
+          .from('journal_messages')
+          .select('*')
+          .eq('session_id', session.id)
+          .order('created_at', { ascending: true });
+
+        return {
+          session,
+          messages: messages || []
+        };
+      })
+    );
+
+    const exportDate = new Date().toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+
+    let text = `JOURNAL EXPORT\nGenerated: ${exportDate}\n`;
+    text += '═'.repeat(50) + '\n\n';
+
+    exportData.forEach(({ session, messages }) => {
+      const date = new Date(session.started_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
       const type = getSessionLabel(session.session_type);
-      return `\n=== ${type} Session - ${date} ===\n\n${session.preview}\n`;
-    }).join('\n---\n');
+      
+      text += `${date} - ${type} Reflection\n`;
+      text += '─'.repeat(50) + '\n\n';
+
+      messages.forEach((msg) => {
+        const sender = msg.message_type === 'app' ? 'App' : 'You';
+        text += `${sender}: ${msg.content}\n\n`;
+      });
+
+      text += '─'.repeat(50) + '\n\n';
+    });
 
     const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -242,20 +439,46 @@ const JournalHistory = () => {
     setShowExport(false);
   };
 
-  const deleteSession = async (sessionId: string) => {
-    const { error } = await supabase
-      .from('journal_sessions')
-      .delete()
-      .eq('id', sessionId);
+  const confirmDelete = (type: 'session' | 'all', id?: string) => {
+    setDeleteTarget({ type, id });
+    setShowDeleteConfirm(true);
+  };
 
-    if (error) {
-      toast({ title: 'Error deleting session', variant: 'destructive' });
-      return;
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    if (deleteTarget.type === 'all') {
+      const { error } = await supabase
+        .from('journal_sessions')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        toast({ title: 'Error deleting sessions', variant: 'destructive' });
+      } else {
+        toast({ title: 'All sessions deleted' });
+        loadSessions();
+      }
+    } else if (deleteTarget.id) {
+      const { error } = await supabase
+        .from('journal_sessions')
+        .delete()
+        .eq('id', deleteTarget.id);
+
+      if (error) {
+        toast({ title: 'Error deleting session', variant: 'destructive' });
+      } else {
+        toast({ title: 'Session deleted' });
+        setSelectedSession(null);
+        loadSessions();
+      }
     }
 
-    toast({ title: 'Session deleted' });
-    setSelectedSession(null);
-    loadSessions();
+    setShowDeleteConfirm(false);
+    setDeleteTarget(null);
   };
 
   const groupSessionsByDate = (sessions: Session[]) => {
@@ -440,7 +663,7 @@ const JournalHistory = () => {
             </Button>
             <Button
               variant="destructive"
-              onClick={() => selectedSession && deleteSession(selectedSession)}
+              onClick={() => selectedSession && confirmDelete('session', selectedSession)}
             >
               Delete
             </Button>
@@ -511,6 +734,19 @@ const JournalHistory = () => {
             >
               Apply Filters
             </Button>
+
+            {sessions.length > 0 && (
+              <Button 
+                variant="destructive" 
+                className="w-full"
+                onClick={() => {
+                  setShowFilters(false);
+                  confirmDelete('all');
+                }}
+              >
+                Delete All Entries
+              </Button>
+            )}
           </div>
         </SheetContent>
       </Sheet>
@@ -546,6 +782,29 @@ const JournalHistory = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget?.type === 'all'
+                ? 'This will permanently delete all your journal entries. This action cannot be undone.'
+                : 'This will permanently delete this journal session. This action cannot be undone.'}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 };
