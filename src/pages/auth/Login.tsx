@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2 } from 'lucide-react';
 import { z } from 'zod';
+import { useTranslation } from 'react-i18next';
 
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -13,6 +14,7 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
@@ -50,13 +52,13 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
       <div className="w-full max-w-sm space-y-8 animate-fade-in">
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Welcome back</h1>
-          <p className="text-muted-foreground">Sign in to continue your wellness journey</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('app.name')}</h1>
+          <p className="text-muted-foreground">{t('app.tagline')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t('auth.email')}</Label>
             <Input
               id="email"
               type="email"
@@ -72,7 +74,7 @@ const Login = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">{t('auth.password')}</Label>
             <Input
               id="password"
               type="password"
@@ -92,7 +94,7 @@ const Login = () => {
               to="/forgot-password"
               className="text-sm text-primary hover:underline"
             >
-              Forgot password?
+              {t('auth.forgotPassword')}
             </Link>
           </div>
 
@@ -104,18 +106,18 @@ const Login = () => {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Signing in...
+                {t('common.loading')}
               </>
             ) : (
-              'Sign in'
+              t('auth.login')
             )}
           </Button>
         </form>
 
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Don't have an account? </span>
+          <span className="text-muted-foreground">{t('auth.dontHaveAccount')} </span>
           <Link to="/signup" className="text-primary hover:underline font-medium">
-            Sign up
+            {t('auth.signup')}
           </Link>
         </div>
       </div>

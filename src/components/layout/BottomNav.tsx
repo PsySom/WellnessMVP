@@ -1,17 +1,19 @@
 import { Home, Calendar, BookOpen, BarChart3, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-
-const navItems = [
-  { icon: Home, label: 'Dashboard', path: '/dashboard' },
-  { icon: Calendar, label: 'Calendar', path: '/calendar' },
-  { icon: BookOpen, label: 'Journal', path: '/journal' },
-  { icon: BarChart3, label: 'Insights', path: '/insights' },
-  { icon: User, label: 'Profile', path: '/profile' },
-];
+import { useTranslation } from 'react-i18next';
 
 export const BottomNav = () => {
   const location = useLocation();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { icon: Home, label: t('nav.dashboard'), path: '/dashboard' },
+    { icon: Calendar, label: t('nav.calendar'), path: '/calendar' },
+    { icon: BookOpen, label: t('nav.journal'), path: '/journal' },
+    { icon: BarChart3, label: t('nav.insights'), path: '/insights' },
+    { icon: User, label: t('nav.profile'), path: '/profile' },
+  ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-card border-t border-border safe-area-bottom">

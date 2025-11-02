@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { Activity, BookOpen, ClipboardList, Flame } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileStatsProps {
   userId: string;
@@ -9,6 +10,7 @@ interface ProfileStatsProps {
 }
 
 export const ProfileStats = ({ userId, joinDate }: ProfileStatsProps) => {
+  const { t } = useTranslation();
   const [stats, setStats] = useState({
     memberDays: 0,
     totalEntries: 0,
@@ -81,32 +83,32 @@ export const ProfileStats = ({ userId, joinDate }: ProfileStatsProps) => {
 
   const statItems = [
     {
-      label: 'Member for',
-      value: `${stats.memberDays} days`,
+      label: t('profile.stats.memberFor'),
+      value: `${stats.memberDays} ${t('profile.stats.days')}`,
       icon: Activity,
       color: 'text-primary',
     },
     {
-      label: 'Total entries',
+      label: t('profile.stats.totalEntries'),
       value: stats.totalEntries,
       icon: ClipboardList,
       color: 'text-secondary',
     },
     {
-      label: 'Activities completed',
+      label: t('profile.stats.activitiesCompleted'),
       value: stats.activitiesCompleted,
       icon: Activity,
       color: 'text-accent',
     },
     {
-      label: 'Tests taken',
+      label: t('profile.stats.testsTaken'),
       value: stats.testsTaken,
       icon: BookOpen,
       color: 'text-warning',
     },
     {
-      label: 'Current streak',
-      value: `${stats.currentStreak} days`,
+      label: t('profile.stats.currentStreak'),
+      value: `${stats.currentStreak} ${t('profile.stats.days')}`,
       icon: Flame,
       color: 'text-destructive',
     },
@@ -114,7 +116,7 @@ export const ProfileStats = ({ userId, joinDate }: ProfileStatsProps) => {
 
   return (
     <Card className="p-6">
-      <h2 className="text-xl font-semibold text-foreground mb-4">Statistics</h2>
+      <h2 className="text-xl font-semibold text-foreground mb-4">{t('profile.stats.title')}</h2>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         {statItems.map((stat, index) => (

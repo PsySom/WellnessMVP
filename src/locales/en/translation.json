@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Mental Wellness",
+    "tagline": "Your personal companion for mental health"
+  },
+  "auth": {
+    "login": "Login",
+    "signup": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "forgotPassword": "Forgot password?",
+    "alreadyHaveAccount": "Already have an account?",
+    "dontHaveAccount": "Don't have an account?",
+    "resetPassword": "Reset Password",
+    "backToLogin": "Back to Login",
+    "checkEmail": "Check your email for a password reset link"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to Mental Wellness",
+      "subtitle": "Your personal companion for mental health and self-care",
+      "getStarted": "Get Started",
+      "skip": "Skip"
+    },
+    "basicInfo": {
+      "title": "Tell us about yourself",
+      "fullName": "Full name",
+      "age": "Age",
+      "gender": {
+        "label": "Gender",
+        "male": "Male",
+        "female": "Female",
+        "other": "Other",
+        "preferNotToSay": "Prefer not to say"
+      }
+    },
+    "goals": {
+      "title": "What brings you here?",
+      "subtitle": "Select all that apply",
+      "trackMood": "Track my mood",
+      "reduceStress": "Reduce stress",
+      "workWithAnxiety": "Work with anxiety",
+      "improveSleep": "Improve sleep",
+      "buildHabits": "Build healthy habits",
+      "understandMyself": "Better understand myself",
+      "journaling": "Daily journaling"
+    },
+    "reminders": {
+      "title": "Set up reminders",
+      "subtitle": "We'll help you build a consistent routine",
+      "frequency": "How often would you like to track?",
+      "morning": "Morning reflection",
+      "evening": "Evening reflection"
+    },
+    "ready": {
+      "title": "You're all set!",
+      "subtitle": "Let's start your wellness journey",
+      "start": "Start Journey"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "quickTracker": "Quick Tracker",
+    "todayActivities": "Today's Activities",
+    "insights": "Insights",
+    "recommendations": "Recommendations"
+  },
+  "trackers": {
+    "title": "How are you feeling?",
+    "mood": "Mood",
+    "emotions": "Emotions",
+    "stress": "Stress",
+    "anxiety": "Anxiety",
+    "energy": "Energy",
+    "processSatisfaction": "Process satisfaction",
+    "resultSatisfaction": "Result satisfaction",
+    "save": "Save Entry",
+    "history": "Tracker History",
+    "selectEmotions": "Select emotions you're feeling",
+    "emotionCategories": {
+      "positive": "Positive",
+      "negative": "Negative",
+      "neutral": "Neutral"
+    }
+  },
+  "activities": {
+    "title": "Activities",
+    "addActivity": "Add Activity",
+    "noActivities": "No activities yet",
+    "completed": "Completed",
+    "planned": "Planned",
+    "inProgress": "In Progress",
+    "categories": {
+      "sleep": "Sleep",
+      "nutrition": "Nutrition",
+      "hydration": "Hydration",
+      "exercise": "Exercise",
+      "leisure": "Leisure",
+      "hobby": "Hobby",
+      "work": "Work",
+      "social": "Social",
+      "practice": "Practice",
+      "health": "Health",
+      "reflection": "Reflection"
+    },
+    "impactTypes": {
+      "restorative": "Restorative",
+      "draining": "Draining",
+      "neutral": "Neutral",
+      "mixed": "Mixed"
+    },
+    "form": {
+      "title": "Activity Title",
+      "description": "Description",
+      "category": "Category",
+      "impact": "Impact Type",
+      "date": "Date",
+      "time": "Time",
+      "duration": "Duration",
+      "allDay": "All Day",
+      "reminder": "Set Reminder",
+      "recurring": "Make Recurring"
+    }
+  },
+  "calendar": {
+    "title": "Calendar",
+    "today": "Today",
+    "week": "Week",
+    "month": "Month",
+    "list": "List"
+  },
+  "journal": {
+    "title": "Journal",
+    "newEntry": "New Entry",
+    "placeholder": "Write your thoughts...",
+    "morning": "Morning Reflection",
+    "evening": "Evening Reflection",
+    "free": "Free Writing",
+    "history": "Journal History",
+    "insights": "Journal Insights"
+  },
+  "tests": {
+    "title": "Psychological Tests",
+    "take": "Take Test",
+    "results": "Results",
+    "history": "History",
+    "duration": "Duration",
+    "questions": "Questions",
+    "viewDetails": "View Details",
+    "startTest": "Start Test"
+  },
+  "exercises": {
+    "title": "Exercises",
+    "start": "Start Exercise",
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "effects": "Effects",
+    "instructions": "Instructions"
+  },
+  "insights": {
+    "title": "Insights",
+    "period": {
+      "week": "Week",
+      "month": "Month",
+      "3months": "3 Months",
+      "year": "Year"
+    },
+    "mood": "Mood Trends",
+    "stress": "Stress & Anxiety",
+    "activities": "Activities",
+    "patterns": "Patterns",
+    "recommendations": "Recommendations",
+    "export": "Export",
+    "noData": "Not enough data yet",
+    "keepTracking": "Keep tracking your mood, completing activities, and journaling to see personalized insights here."
+  },
+  "recommendations": {
+    "title": "Recommendations",
+    "forYou": "Personalized for you",
+    "addToToday": "Add to Today",
+    "schedule": "Schedule",
+    "dismiss": "Dismiss",
+    "refresh": "Refresh",
+    "priority": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "reasons": {
+      "stress": "To help reduce stress",
+      "anxiety": "To calm anxiety",
+      "energy": "To boost your energy",
+      "mood": "To lift your mood",
+      "sleep": "You need more rest",
+      "exercise": "To stay active",
+      "wellbeing": "For overall wellbeing"
+    },
+    "empty": {
+      "title": "You're all set!",
+      "message": "No new recommendations right now. Keep tracking your mood and activities to get personalized suggestions."
+    }
+  },
+  "profile": {
+    "title": "Profile & Settings",
+    "editProfile": "Edit Profile",
+    "settings": "Settings",
+    "logout": "Sign Out",
+    "memberSince": "Member since",
+    "stats": {
+      "memberFor": "Member for",
+      "totalEntries": "Total entries",
+      "activitiesCompleted": "Activities completed",
+      "testsTaken": "Tests taken",
+      "currentStreak": "Current streak",
+      "days": "days"
+    },
+    "info": {
+      "title": "Profile Information",
+      "age": "Age",
+      "gender": "Gender",
+      "goals": "Goals",
+      "language": "Language",
+      "bio": "Bio"
+    }
+  },
+  "settings": {
+    "tabs": {
+      "profile": "Profile",
+      "notifications": "Notifications",
+      "appearance": "Appearance",
+      "privacy": "Privacy"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "enable": "Enable notifications",
+      "trackerReminders": "Tracker reminders",
+      "frequency": "Frequency per day",
+      "times": "Reminder times",
+      "morningReflection": "Morning reflection",
+      "eveningReflection": "Evening reflection",
+      "activityReminders": "Activity reminders",
+      "minutesBefore": "Minutes before activity"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "auto": "Auto (System)",
+      "colorScheme": "Color Scheme",
+      "fontSize": "Font Size",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "extraLarge": "Extra Large",
+      "accessibility": "Accessibility",
+      "highContrast": "High contrast mode",
+      "reduceMotion": "Reduce motion"
+    },
+    "language": {
+      "title": "Language",
+      "select": "Select Language",
+      "en": "English",
+      "ru": "Русский",
+      "fr": "Français"
+    },
+    "privacy": {
+      "title": "Data & Privacy",
+      "dataManagement": "Data Management",
+      "export": "Export Your Data",
+      "exportDescription": "Download all your data in JSON format",
+      "exporting": "Exporting...",
+      "analytics": "Anonymous analytics",
+      "analyticsDescription": "Help improve the app with usage statistics",
+      "dangerZone": "Danger Zone",
+      "deleteAccount": "Delete Account",
+      "deleteDescription": "Permanently delete your account and all associated data. This action cannot be undone.",
+      "deleteConfirm": {
+        "title": "Are you absolutely sure?",
+        "description": "This will permanently delete your account and remove all your data from our servers including:",
+        "items": {
+          "trackers": "All tracker entries",
+          "activities": "All activities",
+          "journal": "All journal entries",
+          "tests": "All test results",
+          "profile": "Your profile and settings"
+        }
+      },
+      "deleting": "Deleting..."
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "calendar": "Calendar",
+    "journal": "Journal",
+    "insights": "Insights",
+    "profile": "Profile"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "close": "Close",
+    "viewAll": "View All",
+    "noData": "No data available",
+    "tryAgain": "Try Again",
+    "refresh": "Refresh"
+  }
+}

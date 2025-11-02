@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface Recommendation {
   id: string;
@@ -29,6 +30,7 @@ interface Recommendation {
 const Recommendations = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
@@ -42,18 +44,12 @@ const Recommendations = () => {
 
   const fetchRecommendations = async () => {
     try {
+      const lang = i18n.language;
       const { data, error } = await supabase
         .from('user_recommendations')
         .select(`
           *,
-          activity_templates (
-            name,
-            emoji,
-            category,
-            impact_type,
-            default_duration_minutes,
-            description
-          )
+          activity_templates (*)
         `)
         .eq('user_id', user?.id)
         .is('accepted', null)
@@ -63,8 +59,21 @@ const Recommendations = () => {
 
       if (error) throw error;
 
-      setRecommendations(data || []);
-      setHasHighPriority((data || []).some((r: Recommendation) => r.priority === 1));
+      // Map to get language-specific names
+      const mappedData = (data || []).map((rec: any) => ({
+        ...rec,
+        activity_templates: {
+          name: rec.activity_templates[`name_${lang}`] || rec.activity_templates.name_en,
+          emoji: rec.activity_templates.emoji,
+          category: rec.activity_templates.category,
+          impact_type: rec.activity_templates.impact_type,
+          default_duration_minutes: rec.activity_templates.default_duration_minutes,
+          description: rec.activity_templates[`description_${lang}`] || rec.activity_templates.description_en,
+        }
+      }));
+
+      setRecommendations(mappedData);
+      setHasHighPriority(mappedData.some((r: Recommendation) => r.priority === 1));
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       toast.error('Failed to load recommendations');
@@ -178,8 +187,8 @@ const Recommendations = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Recommendations</h1>
-            <p className="text-muted-foreground mt-1">Personalized for you</p>
+            <h1 className="text-3xl font-bold text-foreground">{t('recommendations.title')}</h1>
+            <p className="text-muted-foreground mt-1">{t('recommendations.forYou')}</p>
           </div>
           <Button
             onClick={generateRecommendations}
@@ -188,7 +197,7 @@ const Recommendations = () => {
             size="sm"
           >
             <RefreshCw className={`h-4 w-4 mr-2 ${generating ? 'animate-spin' : ''}`} />
-            Refresh
+            {t('recommendations.refresh')}
           </Button>
         </div>
 

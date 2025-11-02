@@ -1,0 +1,321 @@
+{
+  "app": {
+    "name": "Bien-être Mental",
+    "tagline": "Votre compagnon personnel pour la santé mentale"
+  },
+  "auth": {
+    "login": "Se connecter",
+    "signup": "S'inscrire",
+    "email": "Email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "forgotPassword": "Mot de passe oublié?",
+    "alreadyHaveAccount": "Vous avez déjà un compte?",
+    "dontHaveAccount": "Vous n'avez pas de compte?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "backToLogin": "Retour à la connexion",
+    "checkEmail": "Vérifiez votre email pour un lien de réinitialisation du mot de passe"
+  },
+  "onboarding": {
+    "welcome": {
+      "title": "Bienvenue dans Bien-être Mental",
+      "subtitle": "Votre compagnon personnel pour la santé mentale et les soins personnels",
+      "getStarted": "Commencer",
+      "skip": "Passer"
+    },
+    "basicInfo": {
+      "title": "Parlez-nous de vous",
+      "fullName": "Nom complet",
+      "age": "Âge",
+      "gender": {
+        "label": "Genre",
+        "male": "Homme",
+        "female": "Femme",
+        "other": "Autre",
+        "preferNotToSay": "Je préfère ne pas dire"
+      }
+    },
+    "goals": {
+      "title": "Qu'est-ce qui vous amène ici?",
+      "subtitle": "Sélectionnez tout ce qui s'applique",
+      "trackMood": "Suivre mon humeur",
+      "reduceStress": "Réduire le stress",
+      "workWithAnxiety": "Gérer l'anxiété",
+      "improveSleep": "Améliorer le sommeil",
+      "buildHabits": "Créer des habitudes saines",
+      "understandMyself": "Mieux me comprendre",
+      "journaling": "Journal quotidien"
+    },
+    "reminders": {
+      "title": "Configurer les rappels",
+      "subtitle": "Nous vous aiderons à créer une routine cohérente",
+      "frequency": "À quelle fréquence souhaitez-vous suivre?",
+      "morning": "Réflexion matinale",
+      "evening": "Réflexion du soir"
+    },
+    "ready": {
+      "title": "Vous êtes prêt!",
+      "subtitle": "Commençons votre voyage vers le bien-être",
+      "start": "Commencer le voyage"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de bord",
+    "quickTracker": "Suivi rapide",
+    "todayActivities": "Activités d'aujourd'hui",
+    "insights": "Aperçus",
+    "recommendations": "Recommandations"
+  },
+  "trackers": {
+    "title": "Comment vous sentez-vous?",
+    "mood": "Humeur",
+    "emotions": "Émotions",
+    "stress": "Stress",
+    "anxiety": "Anxiété",
+    "energy": "Énergie",
+    "processSatisfaction": "Satisfaction du processus",
+    "resultSatisfaction": "Satisfaction du résultat",
+    "save": "Enregistrer l'entrée",
+    "history": "Historique du suivi",
+    "selectEmotions": "Sélectionnez les émotions que vous ressentez",
+    "emotionCategories": {
+      "positive": "Positives",
+      "negative": "Négatives",
+      "neutral": "Neutres"
+    }
+  },
+  "activities": {
+    "title": "Activités",
+    "addActivity": "Ajouter une activité",
+    "noActivities": "Pas encore d'activités",
+    "completed": "Terminé",
+    "planned": "Planifié",
+    "inProgress": "En cours",
+    "categories": {
+      "sleep": "Sommeil",
+      "nutrition": "Nutrition",
+      "hydration": "Hydratation",
+      "exercise": "Exercice",
+      "leisure": "Loisirs",
+      "hobby": "Passe-temps",
+      "work": "Travail",
+      "social": "Social",
+      "practice": "Pratique",
+      "health": "Santé",
+      "reflection": "Réflexion"
+    },
+    "impactTypes": {
+      "restorative": "Réparateur",
+      "draining": "Épuisant",
+      "neutral": "Neutre",
+      "mixed": "Mixte"
+    },
+    "form": {
+      "title": "Titre de l'activité",
+      "description": "Description",
+      "category": "Catégorie",
+      "impact": "Type d'impact",
+      "date": "Date",
+      "time": "Heure",
+      "duration": "Durée",
+      "allDay": "Toute la journée",
+      "reminder": "Définir un rappel",
+      "recurring": "Rendre récurrent"
+    }
+  },
+  "calendar": {
+    "title": "Calendrier",
+    "today": "Aujourd'hui",
+    "week": "Semaine",
+    "month": "Mois",
+    "list": "Liste"
+  },
+  "journal": {
+    "title": "Journal",
+    "newEntry": "Nouvelle entrée",
+    "placeholder": "Écrivez vos pensées...",
+    "morning": "Réflexion matinale",
+    "evening": "Réflexion du soir",
+    "free": "Écriture libre",
+    "history": "Historique du journal",
+    "insights": "Aperçus du journal"
+  },
+  "tests": {
+    "title": "Tests psychologiques",
+    "take": "Passer le test",
+    "results": "Résultats",
+    "history": "Historique",
+    "duration": "Durée",
+    "questions": "Questions",
+    "viewDetails": "Voir les détails",
+    "startTest": "Commencer le test"
+  },
+  "exercises": {
+    "title": "Exercices",
+    "start": "Commencer l'exercice",
+    "difficulty": {
+      "easy": "Facile",
+      "medium": "Moyen",
+      "hard": "Difficile"
+    },
+    "effects": "Effets",
+    "instructions": "Instructions"
+  },
+  "insights": {
+    "title": "Aperçus",
+    "period": {
+      "week": "Semaine",
+      "month": "Mois",
+      "3months": "3 mois",
+      "year": "Année"
+    },
+    "mood": "Tendances d'humeur",
+    "stress": "Stress et anxiété",
+    "activities": "Activités",
+    "patterns": "Modèles",
+    "recommendations": "Recommandations",
+    "export": "Exporter",
+    "noData": "Pas encore assez de données",
+    "keepTracking": "Continuez à suivre votre humeur, à compléter des activités et à tenir un journal pour voir des aperçus personnalisés ici."
+  },
+  "recommendations": {
+    "title": "Recommandations",
+    "forYou": "Personnalisé pour vous",
+    "addToToday": "Ajouter à aujourd'hui",
+    "schedule": "Planifier",
+    "dismiss": "Rejeter",
+    "refresh": "Actualiser",
+    "priority": {
+      "high": "Élevée",
+      "medium": "Moyenne",
+      "low": "Faible"
+    },
+    "reasons": {
+      "stress": "Pour réduire le stress",
+      "anxiety": "Pour calmer l'anxiété",
+      "energy": "Pour augmenter votre énergie",
+      "mood": "Pour améliorer votre humeur",
+      "sleep": "Vous avez besoin de plus de repos",
+      "exercise": "Pour rester actif",
+      "wellbeing": "Pour le bien-être général"
+    },
+    "empty": {
+      "title": "Vous êtes prêt!",
+      "message": "Pas de nouvelles recommandations pour le moment. Continuez à suivre votre humeur et vos activités pour obtenir des suggestions personnalisées."
+    }
+  },
+  "profile": {
+    "title": "Profil et paramètres",
+    "editProfile": "Modifier le profil",
+    "settings": "Paramètres",
+    "logout": "Se déconnecter",
+    "memberSince": "Membre depuis",
+    "stats": {
+      "memberFor": "Membre depuis",
+      "totalEntries": "Entrées totales",
+      "activitiesCompleted": "Activités terminées",
+      "testsTaken": "Tests passés",
+      "currentStreak": "Série actuelle",
+      "days": "jours"
+    },
+    "info": {
+      "title": "Informations du profil",
+      "age": "Âge",
+      "gender": "Genre",
+      "goals": "Objectifs",
+      "language": "Langue",
+      "bio": "Bio"
+    }
+  },
+  "settings": {
+    "tabs": {
+      "profile": "Profil",
+      "notifications": "Notifications",
+      "appearance": "Apparence",
+      "privacy": "Confidentialité"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "enable": "Activer les notifications",
+      "trackerReminders": "Rappels de suivi",
+      "frequency": "Fréquence par jour",
+      "times": "Heures de rappel",
+      "morningReflection": "Réflexion matinale",
+      "eveningReflection": "Réflexion du soir",
+      "activityReminders": "Rappels d'activité",
+      "minutesBefore": "Minutes avant l'activité"
+    },
+    "appearance": {
+      "title": "Apparence",
+      "theme": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "auto": "Auto (système)",
+      "colorScheme": "Schéma de couleurs",
+      "fontSize": "Taille de police",
+      "small": "Petit",
+      "medium": "Moyen",
+      "large": "Grand",
+      "extraLarge": "Très grand",
+      "accessibility": "Accessibilité",
+      "highContrast": "Mode contraste élevé",
+      "reduceMotion": "Réduire les animations"
+    },
+    "language": {
+      "title": "Langue",
+      "select": "Sélectionner la langue",
+      "en": "English",
+      "ru": "Русский",
+      "fr": "Français"
+    },
+    "privacy": {
+      "title": "Données et confidentialité",
+      "dataManagement": "Gestion des données",
+      "export": "Exporter vos données",
+      "exportDescription": "Télécharger toutes vos données au format JSON",
+      "exporting": "Exportation...",
+      "analytics": "Analyses anonymes",
+      "analyticsDescription": "Aidez à améliorer l'application avec des statistiques d'utilisation",
+      "dangerZone": "Zone dangereuse",
+      "deleteAccount": "Supprimer le compte",
+      "deleteDescription": "Supprimer définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+      "deleteConfirm": {
+        "title": "Êtes-vous absolument sûr?",
+        "description": "Cela supprimera définitivement votre compte et toutes vos données de nos serveurs, y compris:",
+        "items": {
+          "trackers": "Toutes les entrées de suivi",
+          "activities": "Toutes les activités",
+          "journal": "Toutes les entrées de journal",
+          "tests": "Tous les résultats de tests",
+          "profile": "Votre profil et paramètres"
+        }
+      },
+      "deleting": "Suppression..."
+    }
+  },
+  "nav": {
+    "dashboard": "Tableau de bord",
+    "calendar": "Calendrier",
+    "journal": "Journal",
+    "insights": "Aperçus",
+    "profile": "Profil"
+  },
+  "common": {
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "back": "Retour",
+    "next": "Suivant",
+    "done": "Terminé",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "confirm": "Confirmer",
+    "close": "Fermer",
+    "viewAll": "Voir tout",
+    "noData": "Aucune donnée disponible",
+    "tryAgain": "Réessayer",
+    "refresh": "Actualiser"
+  }
+}
