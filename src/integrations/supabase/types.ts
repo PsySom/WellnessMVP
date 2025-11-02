@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      activities: {
+        Row: {
+          category: Database["public"]["Enums"]["activity_category"]
+          created_at: string | null
+          date: string
+          description: string | null
+          duration_minutes: number | null
+          end_time: string | null
+          id: string
+          impact_type: Database["public"]["Enums"]["activity_impact"]
+          is_recurring: boolean | null
+          recurrence_pattern: Json | null
+          reminder_enabled: boolean | null
+          reminder_minutes_before: number | null
+          start_time: string | null
+          status: Database["public"]["Enums"]["activity_status"] | null
+          template_id: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["activity_category"]
+          created_at?: string | null
+          date: string
+          description?: string | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          id?: string
+          impact_type: Database["public"]["Enums"]["activity_impact"]
+          is_recurring?: boolean | null
+          recurrence_pattern?: Json | null
+          reminder_enabled?: boolean | null
+          reminder_minutes_before?: number | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["activity_status"] | null
+          template_id?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["activity_category"]
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          duration_minutes?: number | null
+          end_time?: string | null
+          id?: string
+          impact_type?: Database["public"]["Enums"]["activity_impact"]
+          is_recurring?: boolean | null
+          recurrence_pattern?: Json | null
+          reminder_enabled?: boolean | null
+          reminder_minutes_before?: number | null
+          start_time?: string | null
+          status?: Database["public"]["Enums"]["activity_status"] | null
+          template_id?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
@@ -50,6 +113,80 @@ export type Database = {
         }
         Relationships: []
       }
+      tracker_emotions: {
+        Row: {
+          category: string
+          emotion_label: string
+          id: string
+          intensity: number
+          tracker_entry_id: string
+        }
+        Insert: {
+          category: string
+          emotion_label: string
+          id?: string
+          intensity: number
+          tracker_entry_id: string
+        }
+        Update: {
+          category?: string
+          emotion_label?: string
+          id?: string
+          intensity?: number
+          tracker_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracker_emotions_tracker_entry_id_fkey"
+            columns: ["tracker_entry_id"]
+            isOneToOne: false
+            referencedRelation: "tracker_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracker_entries: {
+        Row: {
+          anxiety_level: number | null
+          created_at: string | null
+          energy_level: number | null
+          entry_date: string
+          entry_time: string
+          id: string
+          mood_score: number | null
+          process_satisfaction: number | null
+          result_satisfaction: number | null
+          stress_level: number | null
+          user_id: string
+        }
+        Insert: {
+          anxiety_level?: number | null
+          created_at?: string | null
+          energy_level?: number | null
+          entry_date: string
+          entry_time: string
+          id?: string
+          mood_score?: number | null
+          process_satisfaction?: number | null
+          result_satisfaction?: number | null
+          stress_level?: number | null
+          user_id: string
+        }
+        Update: {
+          anxiety_level?: number | null
+          created_at?: string | null
+          energy_level?: number | null
+          entry_date?: string
+          entry_time?: string
+          id?: string
+          mood_score?: number | null
+          process_satisfaction?: number | null
+          result_satisfaction?: number | null
+          stress_level?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -58,7 +195,20 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      activity_category:
+        | "sleep"
+        | "nutrition"
+        | "hydration"
+        | "exercise"
+        | "leisure"
+        | "hobby"
+        | "work"
+        | "social"
+        | "practice"
+        | "health"
+        | "reflection"
+      activity_impact: "restorative" | "draining" | "neutral" | "mixed"
+      activity_status: "planned" | "in_progress" | "completed" | "cancelled"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -185,6 +335,22 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      activity_category: [
+        "sleep",
+        "nutrition",
+        "hydration",
+        "exercise",
+        "leisure",
+        "hobby",
+        "work",
+        "social",
+        "practice",
+        "health",
+        "reflection",
+      ],
+      activity_impact: ["restorative", "draining", "neutral", "mixed"],
+      activity_status: ["planned", "in_progress", "completed", "cancelled"],
+    },
   },
 } as const
