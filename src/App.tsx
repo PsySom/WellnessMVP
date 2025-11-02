@@ -13,6 +13,7 @@ import ForgotPassword from "./pages/auth/ForgotPassword";
 
 // App pages
 import Dashboard from "./pages/Dashboard";
+import TrackerHistory from "./pages/TrackerHistory";
 import Calendar from "./pages/Calendar";
 import Journal from "./pages/Journal";
 import Insights from "./pages/Insights";
@@ -44,15 +45,23 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tracker-history"
+              element={
+                <ProtectedRoute>
+                  <TrackerHistory />
+                </ProtectedRoute>
+              }
+            />
+            <Route
             path="/calendar"
             element={
               <ProtectedRoute>

@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
+import { Button } from '@/components/ui/button';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import QuickTrackerCard from '@/components/dashboard/QuickTrackerCard';
 import TodayActivitiesCard from '@/components/dashboard/TodayActivitiesCard';
@@ -21,6 +23,7 @@ export interface TrackerData {
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [todayEntries, setTodayEntries] = useState<any[]>([]);
 
@@ -78,6 +81,15 @@ const Dashboard = () => {
         <TodayActivitiesCard />
         
         <QuickStatsCard entriesCount={todayEntries.length} />
+        
+        {/* Link to Tracker History */}
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={() => navigate('/tracker-history')}
+        >
+          View Full History & Analytics
+        </Button>
         
         <InsightsPreview />
       </div>
