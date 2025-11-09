@@ -109,7 +109,7 @@
     }
   },
   "trackers": {
-    "title": "How are you feeling?",
+    "title": "Mood/State/Satisfaction",
     "mood": "Mood",
     "emotions": "Emotions",
     "stress": "Stress",
@@ -122,6 +122,11 @@
     "history": "Tracker History",
     "selectEmotions": "Select emotions you're feeling",
     "intensity": "Intensity",
+    "sections": {
+      "moodEmotions": "Mood and Emotions",
+      "state": "State",
+      "satisfaction": "Satisfaction"
+    },
     "emotionCategories": {
       "positive": "Positive",
       "negative": "Negative",

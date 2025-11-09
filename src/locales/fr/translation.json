@@ -109,7 +109,7 @@
     }
   },
   "trackers": {
-    "title": "Comment vous sentez-vous?",
+    "title": "Humeur/État/Satisfaction",
     "mood": "Humeur",
     "emotions": "Émotions",
     "stress": "Stress",
@@ -122,6 +122,11 @@
     "history": "Historique du suivi",
     "selectEmotions": "Sélectionnez les émotions que vous ressentez",
     "intensity": "Intensité",
+    "sections": {
+      "moodEmotions": "Humeur et Émotions",
+      "state": "État",
+      "satisfaction": "Satisfaction"
+    },
     "emotionCategories": {
       "positive": "Positives",
       "negative": "Négatives",

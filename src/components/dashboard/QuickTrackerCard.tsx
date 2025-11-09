@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { TrackerData } from '@/pages/Dashboard';
 import MoodSlider from './trackers/MoodSlider';
 import EmotionsSelector from './trackers/EmotionsSelector';
@@ -12,8 +12,13 @@ import StressSlider from './trackers/StressSlider';
 import AnxietySlider from './trackers/AnxietySlider';
 import EnergySlider from './trackers/EnergySlider';
 import SatisfactionSliders from './trackers/SatisfactionSliders';
-import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface QuickTrackerCardProps {
   onEntrySaved: () => void;
@@ -23,7 +28,6 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [isExpanded, setIsExpanded] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
   const [trackerData, setTrackerData] = useState<TrackerData>({
@@ -112,84 +116,81 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
     }
   };
 
-  const currentTime = new Date().toLocaleTimeString('en-US', { 
-    hour: 'numeric', 
-    minute: '2-digit',
-    hour12: true 
-  });
-
   return (
     <Card className="overflow-hidden">
-      {/* Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-lg flex items-center justify-between hover:bg-muted/50 medium-transition ease-out-expo"
-      >
-        <div className="text-left">
-          <h2 className="text-xl font-bold text-foreground">{t('trackers.title')}</h2>
-          <p className="text-sm text-muted-foreground">{currentTime}</p>
-        </div>
-        <div className="medium-transition spring-smooth" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-          <ChevronDown className="h-5 w-5 text-muted-foreground" />
-        </div>
-      </button>
+      <div className="p-lg">
+        <h2 className="text-xl font-bold text-foreground mb-6">{t('trackers.title')}</h2>
+        
+        <Accordion type="multiple" className="space-y-4">
+          {/* Секция 1: Настроение и Эмоции */}
+          <AccordionItem value="mood-emotions" className="border rounded-lg px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="text-base font-semibold">{t('trackers.sections.moodEmotions')}</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-4">
+              <MoodSlider 
+                value={trackerData.moodScore} 
+                onChange={(value) => updateTrackerData({ moodScore: value })} 
+              />
+              <EmotionsSelector
+                selectedEmotions={trackerData.selectedEmotions}
+                onChange={(emotions) => updateTrackerData({ selectedEmotions: emotions })}
+              />
+            </AccordionContent>
+          </AccordionItem>
 
-      {/* Content */}
-      <div
-        className={cn(
-          'overflow-hidden slow-transition ease-out-expo',
-          isExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-        )}
-      >
-        <div className="p-lg pt-0 space-y-xl">
-          <MoodSlider 
-            value={trackerData.moodScore} 
-            onChange={(value) => updateTrackerData({ moodScore: value })} 
-          />
+          {/* Секция 2: Состояние */}
+          <AccordionItem value="state" className="border rounded-lg px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="text-base font-semibold">{t('trackers.sections.state')}</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-4">
+              <StressSlider 
+                value={trackerData.stressLevel} 
+                onChange={(value) => updateTrackerData({ stressLevel: value })} 
+              />
+              <AnxietySlider 
+                value={trackerData.anxietyLevel} 
+                onChange={(value) => updateTrackerData({ anxietyLevel: value })} 
+              />
+              <EnergySlider 
+                value={trackerData.energyLevel} 
+                onChange={(value) => updateTrackerData({ energyLevel: value })} 
+              />
+            </AccordionContent>
+          </AccordionItem>
 
-          <EmotionsSelector
-            selectedEmotions={trackerData.selectedEmotions}
-            onChange={(emotions) => updateTrackerData({ selectedEmotions: emotions })}
-          />
+          {/* Секция 3: Удовлетворенность */}
+          <AccordionItem value="satisfaction" className="border rounded-lg px-4">
+            <AccordionTrigger className="hover:no-underline">
+              <span className="text-base font-semibold">{t('trackers.sections.satisfaction')}</span>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-4">
+              <SatisfactionSliders
+                processValue={trackerData.processSatisfaction}
+                resultValue={trackerData.resultSatisfaction}
+                onProcessChange={(value) => updateTrackerData({ processSatisfaction: value })}
+                onResultChange={(value) => updateTrackerData({ resultSatisfaction: value })}
+              />
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
 
-          <StressSlider 
-            value={trackerData.stressLevel} 
-            onChange={(value) => updateTrackerData({ stressLevel: value })} 
-          />
-
-          <AnxietySlider 
-            value={trackerData.anxietyLevel} 
-            onChange={(value) => updateTrackerData({ anxietyLevel: value })} 
-          />
-
-          <EnergySlider 
-            value={trackerData.energyLevel} 
-            onChange={(value) => updateTrackerData({ energyLevel: value })} 
-          />
-
-          <SatisfactionSliders
-            processValue={trackerData.processSatisfaction}
-            resultValue={trackerData.resultSatisfaction}
-            onProcessChange={(value) => updateTrackerData({ processSatisfaction: value })}
-            onResultChange={(value) => updateTrackerData({ resultSatisfaction: value })}
-          />
-
-          <Button 
-            onClick={handleSaveEntry} 
-            className="w-full medium-transition spring-bounce hover:scale-[1.02]" 
-            size="lg"
-            disabled={isSaving}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('trackers.saving')}
-              </>
-            ) : (
-              t('trackers.save')
-            )}
-          </Button>
-        </div>
+        <Button 
+          onClick={handleSaveEntry} 
+          className="w-full mt-6 medium-transition spring-bounce hover:scale-[1.02]" 
+          size="lg"
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {t('trackers.saving')}
+            </>
+          ) : (
+            t('trackers.save')
+          )}
+        </Button>
       </div>
     </Card>
   );
