@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { AppLayout } from '@/components/layout/AppLayout';
 import TemplateCard from '@/components/activity-templates/TemplateCard';
 import CategoryFilter from '@/components/activity-templates/CategoryFilter';
 import TemplateDetailModal from '@/components/activity-templates/TemplateDetailModal';
@@ -47,18 +48,18 @@ const ActivityTemplates = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm border-b">
-        <div className="container max-w-4xl mx-auto p-md space-y-md">
-          <h1 className="text-2xl font-bold text-foreground">Activity Templates</h1>
+    <AppLayout>
+      <div className="space-y-6 lg:space-y-8 animate-fade-in">
+        <div className="space-y-md lg:space-y-lg">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Activity Templates</h1>
           
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="relative max-w-2xl">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               placeholder="Search activities..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-12 text-base"
             />
           </div>
 
@@ -67,38 +68,38 @@ const ActivityTemplates = () => {
             onCategoryChange={setSelectedCategory}
           />
         </div>
-      </div>
 
-      <div className="container max-w-4xl mx-auto p-md">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        ) : filteredTemplates.length === 0 ? (
-          <div className="text-center py-xl">
-            <p className="text-muted-foreground">No templates found</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-            {filteredTemplates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                onClick={() => setSelectedTemplate(template)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+        <div>
+          {isLoading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : filteredTemplates.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-muted-foreground">No templates found</p>
+            </div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+              {filteredTemplates.map((template) => (
+                <TemplateCard
+                  key={template.id}
+                  template={template}
+                  onClick={() => setSelectedTemplate(template)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
 
-      <TemplateDetailModal
-        template={selectedTemplate}
-        open={selectedTemplate !== null}
-        onClose={() => setSelectedTemplate(null)}
-      />
-    </div>
+        <TemplateDetailModal
+          template={selectedTemplate}
+          open={!!selectedTemplate}
+          onClose={() => setSelectedTemplate(null)}
+        />
+      </div>
+    </AppLayout>
   );
 };
 
