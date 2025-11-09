@@ -65,7 +65,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <AppLayout>
-        <div className="p-6 space-y-6">
+        <div className="space-y-6">
           <Skeleton className="h-16 w-full" />
           <Skeleton className="h-96 w-full" />
           <Skeleton className="h-48 w-full" />
@@ -76,7 +76,7 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <div className="p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
+      <div className="space-y-6 md:space-y-8">
         <DashboardHeader />
         
         {/* Main Content Grid - 2 columns on desktop */}

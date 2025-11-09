@@ -354,6 +354,7 @@
     "settings": "Настройки",
     "logout": "Выйти",
     "memberSince": "Участник с",
+    "user": "Пользователь",
     "stats": {
       "memberFor": "Участник",
       "totalEntries": "Всего записей",
@@ -442,7 +443,8 @@
     "calendar": "Календарь",
     "journal": "Дневник",
     "insights": "Аналитика",
-    "profile": "Профиль"
+    "profile": "Профиль",
+    "main": "Навигация"
   },
   "common": {
     "save": "Сохранить",

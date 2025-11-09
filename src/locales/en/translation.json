@@ -354,6 +354,7 @@
     "settings": "Settings",
     "logout": "Sign Out",
     "memberSince": "Member since",
+    "user": "User",
     "stats": {
       "memberFor": "Member for",
       "totalEntries": "Total entries",
@@ -442,7 +443,8 @@
     "calendar": "Calendar",
     "journal": "Journal",
     "insights": "Insights",
-    "profile": "Profile"
+    "profile": "Profile",
+    "main": "Navigation"
   },
   "common": {
     "save": "Save",
