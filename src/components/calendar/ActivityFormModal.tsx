@@ -51,8 +51,8 @@ const CATEGORIES = [
 ];
 
 const IMPACT_TYPES = [
-  { value: 'positive', label: 'Positive', color: 'bg-green-500' },
-  { value: 'negative', label: 'Negative', color: 'bg-red-500' },
+  { value: 'restorative', label: 'Restorative', color: 'bg-green-500' },
+  { value: 'draining', label: 'Draining', color: 'bg-red-500' },
   { value: 'neutral', label: 'Neutral', color: 'bg-orange-500' },
   { value: 'mixed', label: 'Mixed', color: 'bg-blue-500' }
 ];

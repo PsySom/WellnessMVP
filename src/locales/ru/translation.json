@@ -260,10 +260,32 @@
       "hydration": "Гидратация"
     },
     "activityTypes": {
-      "positive": "Восстанавливающие",
-      "negative": "Истощающие",
+      "restorative": "Восстанавливающие",
+      "draining": "Истощающие",
       "neutral": "Нейтральные",
       "mixed": "Смешанные"
+    },
+    "status": {
+      "planned": "Запланировано",
+      "completed": "Выполнено",
+      "cancelled": "Отменено"
+    },
+    "detail": {
+      "description": "Описание",
+      "date": "Дата",
+      "category": "Категория",
+      "startTime": "Время начала",
+      "endTime": "Время окончания",
+      "duration": "Продолжительность",
+      "minutes": "минут",
+      "activityType": "Тип активности",
+      "status": "Статус",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "deleteTitle": "Удалить активность",
+      "deleteConfirmation": "Вы уверены, что хотите удалить эту активность? Это действие необратимо.",
+      "deleteSuccess": "Активность успешно удалена",
+      "deleteError": "Не удалось удалить активность"
     },
     "weekdays": {
       "short": {

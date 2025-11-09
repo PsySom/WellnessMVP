@@ -11,10 +11,10 @@ interface CalendarViewProps {
 }
 
 const IMPACT_COLORS: Record<string, string> = {
-  positive: 'bg-accent',
-  negative: 'bg-destructive',
-  neutral: 'bg-muted-foreground',
-  mixed: 'bg-warning'
+  restorative: 'bg-green-500',
+  draining: 'bg-red-500',
+  neutral: 'bg-orange-500',
+  mixed: 'bg-blue-500'
 };
 
 export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) => {

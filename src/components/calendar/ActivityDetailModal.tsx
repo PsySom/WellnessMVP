@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Edit, Trash2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { ActivityFormModal } from './ActivityFormModal';
 import {
   AlertDialog,
@@ -39,7 +40,15 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   hydration: '💧'
 };
 
+const IMPACT_COLORS: Record<string, string> = {
+  restorative: 'bg-green-500',
+  draining: 'bg-red-500',
+  neutral: 'bg-orange-500',
+  mixed: 'bg-blue-500'
+};
+
 export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: ActivityDetailModalProps) => {
+  const { t } = useTranslation();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
@@ -51,14 +60,14 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
 
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to delete activity',
+        title: t('common.error'),
+        description: t('calendar.detail.deleteError'),
         variant: 'destructive'
       });
     } else {
       toast({
-        title: 'Success',
-        description: 'Activity deleted'
+        title: t('common.success'),
+        description: t('calendar.detail.deleteSuccess')
       });
       onOpenChange(false);
       onUpdate();
@@ -66,6 +75,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
   };
 
   const emoji = CATEGORY_EMOJIS[activity.category] || '📌';
+  const impactColor = IMPACT_COLORS[activity.impact_type] || 'bg-muted';
 
   return (
     <>
@@ -81,40 +91,62 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
           <div className="space-y-5 md:space-y-6">
             {activity.description && (
               <div className="p-4 md:p-5 rounded-lg bg-muted/50">
-                <h4 className="text-sm md:text-base font-medium mb-2">Description</h4>
+                <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.description')}</h4>
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed">{activity.description}</p>
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               <div className="p-4 md:p-5 rounded-lg bg-muted/50">
-                <h4 className="text-sm md:text-base font-medium mb-2">Date</h4>
+                <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.date')}</h4>
                 <p className="text-sm md:text-base">{format(new Date(activity.date), 'PPP')}</p>
+              </div>
+
+              <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+                <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.category')}</h4>
+                <p className="text-sm md:text-base">{t(`calendar.categories.${activity.category}`)}</p>
               </div>
 
               {activity.start_time && (
                 <div className="p-4 md:p-5 rounded-lg bg-muted/50">
-                  <h4 className="text-sm md:text-base font-medium mb-2">Time</h4>
+                  <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.startTime')}</h4>
                   <p className="text-sm md:text-base">
                     {format(new Date(`2000-01-01T${activity.start_time}`), 'HH:mm')}
                   </p>
                 </div>
               )}
 
+              {activity.end_time && (
+                <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+                  <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.endTime')}</h4>
+                  <p className="text-sm md:text-base">
+                    {format(new Date(`2000-01-01T${activity.end_time}`), 'HH:mm')}
+                  </p>
+                </div>
+              )}
+
               {activity.duration_minutes && (
                 <div className="p-4 md:p-5 rounded-lg bg-muted/50">
-                  <h4 className="text-sm md:text-base font-medium mb-2">Duration</h4>
-                  <p className="text-sm md:text-base">{activity.duration_minutes} minutes</p>
+                  <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.duration')}</h4>
+                  <p className="text-sm md:text-base">{activity.duration_minutes} {t('calendar.detail.minutes')}</p>
                 </div>
               )}
 
               <div className="p-4 md:p-5 rounded-lg bg-muted/50">
-                <h4 className="text-sm md:text-base font-medium mb-2">Status</h4>
+                <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.activityType')}</h4>
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${impactColor}`} />
+                  <span className="text-sm md:text-base">{t(`calendar.activityTypes.${activity.impact_type}`)}</span>
+                </div>
+              </div>
+
+              <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+                <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.status')}</h4>
                 <Badge 
                   variant={activity.status === 'completed' ? 'default' : 'secondary'}
                   className="text-xs md:text-sm"
                 >
-                  {activity.status}
+                  {t(`calendar.status.${activity.status}`)}
                 </Badge>
               </div>
             </div>
@@ -129,7 +161,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
                 className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
               >
                 <Edit className="h-4 w-4 md:h-5 md:w-5 mr-2" />
-                Edit
+                {t('calendar.detail.edit')}
               </Button>
               <Button
                 variant="destructive"
@@ -137,7 +169,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
                 className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
               >
                 <Trash2 className="h-4 w-4 md:h-5 md:w-5 mr-2" />
-                Delete
+                {t('calendar.detail.delete')}
               </Button>
             </div>
           </div>
@@ -158,15 +190,15 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Activity</AlertDialogTitle>
+            <AlertDialogTitle>{t('calendar.detail.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this activity? This action cannot be undone.
+              {t('calendar.detail.deleteConfirmation')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
-              Delete
+              {t('calendar.detail.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

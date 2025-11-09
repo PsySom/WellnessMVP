@@ -260,10 +260,32 @@
       "hydration": "Hydratation"
     },
     "activityTypes": {
-      "positive": "Réparatrice",
-      "negative": "Épuisante",
+      "restorative": "Réparatrice",
+      "draining": "Épuisante",
       "neutral": "Neutre",
       "mixed": "Mixte"
+    },
+    "status": {
+      "planned": "Planifié",
+      "completed": "Terminé",
+      "cancelled": "Annulé"
+    },
+    "detail": {
+      "description": "Description",
+      "date": "Date",
+      "category": "Catégorie",
+      "startTime": "Heure de début",
+      "endTime": "Heure de fin",
+      "duration": "Durée",
+      "minutes": "minutes",
+      "activityType": "Type d'activité",
+      "status": "Statut",
+      "edit": "Modifier",
+      "delete": "Supprimer",
+      "deleteTitle": "Supprimer l'activité",
+      "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette activité ? Cette action est irréversible.",
+      "deleteSuccess": "Activité supprimée avec succès",
+      "deleteError": "Échec de la suppression de l'activité"
     },
     "weekdays": {
       "short": {
