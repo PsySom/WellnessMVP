@@ -784,6 +784,705 @@ CREATE TYPE activity_status AS ENUM (
    - Ленивая загрузка изображений
    - Минимизация rerenders
 
+## 📊 Детальное описание системы трекеров благополучия
+
+### Обзор функциональности
+
+Система трекеров благополучия - это ключевой модуль приложения для мониторинга психологического и эмоционального состояния пользователя. Она позволяет отслеживать множество показателей в течение дня, анализировать динамику и выявлять паттерны в изменениях настроения и самочувствия.
+
+### 🎯 Основные метрики
+
+Система отслеживает следующие показатели:
+
+1. **Mood Score (Настроение)** - общая оценка эмоционального состояния
+   - Диапазон: от -5 (очень плохо) до +5 (отлично)
+   - Визуализация: слайдер с emoji-индикаторами
+   - Цветовая кодировка: от красного (негативное) до зелёного (позитивное)
+
+2. **Emotions (Эмоции)** - конкретные эмоциональные переживания
+   - 14 предопределённых эмоций в трёх категориях:
+     - Negative (негативные): грусть, тревога, страх, злость, стыд, вина
+     - Neutral (нейтральные): спокойствие, любопытство, удивление
+     - Positive (позитивные): радость, счастье, вдохновение, благодарность, удовлетворённость
+   - Интенсивность каждой эмоции: от 0 до 10
+   - Возможность выбора нескольких эмоций одновременно
+
+3. **Stress Level (Уровень стресса)**
+   - Диапазон: от 0 (нет стресса) до 10 (экстремальный стресс)
+   - Визуализация: горизонтальный слайдер
+
+4. **Anxiety Level (Уровень тревожности)**
+   - Диапазон: от 0 (спокойствие) до 10 (сильная тревога)
+   - Визуализация: горизонтальный слайдер
+
+5. **Energy Level (Уровень энергии)**
+   - Диапазон: от -5 (истощение) до +5 (высокая энергия)
+   - Визуализация: слайдер с emoji-индикаторами
+
+6. **Process Satisfaction (Удовлетворённость процессом)**
+   - Диапазон: от 0 до 10
+   - Оценка удовлетворённости текущими делами и занятиями
+
+7. **Result Satisfaction (Удовлетворённость результатом)**
+   - Диапазон: от 0 до 10
+   - Оценка удовлетворённости достигнутыми результатами
+
+### 🏗️ Архитектура компонентов
+
+#### Основные компоненты
+
+**1. QuickTrackerCard** (`src/components/dashboard/QuickTrackerCard.tsx`)
+
+Главный компонент для быстрого ввода данных трекеров на дашборде.
+
+**Функциональность:**
+- Collapsible карточка с возможностью сворачивания/разворачивания
+- Единая форма для ввода всех показателей
+- Валидация данных перед сохранением
+- Сброс формы после успешного сохранения
+- Toast-уведомления о результате операции
+
+**Структура данных:**
+```typescript
+interface TrackerData {
+  moodScore: number;           // -5 to 5
+  selectedEmotions: Array<{
+    label: string;             // Название эмоции
+    intensity: number;         // 0 to 10
+    category: string;          // negative | neutral | positive
+  }>;
+  stressLevel: number;         // 0 to 10
+  anxietyLevel: number;        // 0 to 10
+  energyLevel: number;         // -5 to 5
+  processSatisfaction: number; // 0 to 10
+  resultSatisfaction: number;  // 0 to 10
+}
+```
+
+**2. Компоненты отдельных трекеров**
+
+Каждый показатель имеет свой специализированный компонент:
+
+- **MoodSlider** (`src/components/dashboard/trackers/MoodSlider.tsx`)
+  - Интерактивный слайдер с 5 уровнями настроения
+  - Динамическая цветовая индикация (HSL gradient)
+  - Emoji-индикаторы для каждого уровня
+  - Быстрый выбор через клик по emoji
+
+```typescript
+const moods = [
+  { value: -5, emoji: '😢', label: 'Very Bad' },
+  { value: -3, emoji: '😟', label: 'Bad' },
+  { value: 0, emoji: '😐', label: 'Neutral' },
+  { value: 3, emoji: '🙂', label: 'Good' },
+  { value: 5, emoji: '😄', label: 'Great' },
+];
+
+const getColor = (val: number) => {
+  const normalized = (val + 5) / 10; // 0 to 1
+  const hue = normalized * 120;      // 0 (red) to 120 (green)
+  return `hsl(${hue}, 70%, 50%)`;
+};
+```
+
+- **EmotionsSelector** (`src/components/dashboard/trackers/EmotionsSelector.tsx`)
+  - Набор кнопок-тегов для выбора эмоций
+  - Цветовая кодировка по категориям (negative/neutral/positive)
+  - Слайдеры интенсивности для выбранных эмоций
+  - Поддержка множественного выбора
+
+```typescript
+const emotions: Emotion[] = [
+  { label: 'Sad', emoji: '😢', category: 'negative' },
+  { label: 'Anxious', emoji: '😰', category: 'negative' },
+  { label: 'Calm', emoji: '😌', category: 'neutral' },
+  { label: 'Joy', emoji: '😊', category: 'positive' },
+  // ... остальные эмоции
+];
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case 'negative': return 'border-destructive bg-destructive/10';
+    case 'neutral': return 'border-secondary bg-secondary/10';
+    case 'positive': return 'border-accent bg-accent/10';
+  }
+};
+```
+
+- **StressSlider, AnxietySlider** - простые горизонтальные слайдеры 0-10
+- **EnergySlider** - аналогичен MoodSlider с диапазоном -5 до +5
+- **SatisfactionSliders** - два слайдера для процесса и результата
+
+### 💾 Логика сохранения данных
+
+#### Процесс сохранения записи трекера
+
+**Компонент:** `QuickTrackerCard.handleSaveEntry()`
+
+**Алгоритм:**
+
+1. **Валидация пользователя**
+```typescript
+if (!user) return; // Проверка авторизации
+```
+
+2. **Подготовка временных меток**
+```typescript
+const now = new Date();
+const entryDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
+const entryTime = now.toTimeString().split(' ')[0]; // HH:MM:SS
+```
+
+3. **Сохранение основной записи в таблицу `tracker_entries`**
+```typescript
+const { data: entry, error: entryError } = await supabase
+  .from('tracker_entries')
+  .insert({
+    user_id: user.id,
+    entry_date: entryDate,
+    entry_time: entryTime,
+    mood_score: trackerData.moodScore,
+    stress_level: trackerData.stressLevel,
+    anxiety_level: trackerData.anxietyLevel,
+    energy_level: trackerData.energyLevel,
+    process_satisfaction: trackerData.processSatisfaction,
+    result_satisfaction: trackerData.resultSatisfaction,
+  })
+  .select()
+  .single();
+```
+
+4. **Сохранение эмоций в таблицу `tracker_emotions`** (если выбраны)
+```typescript
+if (trackerData.selectedEmotions.length > 0 && entry) {
+  const emotions = trackerData.selectedEmotions.map((emotion) => ({
+    tracker_entry_id: entry.id,
+    emotion_label: emotion.label,
+    intensity: emotion.intensity,
+    category: emotion.category,
+  }));
+
+  await supabase
+    .from('tracker_emotions')
+    .insert(emotions);
+}
+```
+
+5. **Уведомление и сброс формы**
+```typescript
+toast({
+  title: 'Entry saved!',
+  description: 'Your wellness data has been recorded.',
+});
+
+setTrackerData({
+  moodScore: 0,
+  selectedEmotions: [],
+  stressLevel: 5,
+  anxietyLevel: 5,
+  energyLevel: 0,
+  processSatisfaction: 5,
+  resultSatisfaction: 5,
+});
+```
+
+### 📊 Структура базы данных
+
+#### Таблица: tracker_entries
+
+Основная таблица для хранения записей трекеров.
+
+```sql
+CREATE TABLE tracker_entries (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  entry_date DATE NOT NULL,
+  entry_time TIME NOT NULL,
+  mood_score INTEGER,              -- -5 to 5
+  stress_level INTEGER,            -- 0 to 10
+  anxiety_level INTEGER,           -- 0 to 10
+  energy_level INTEGER,            -- -5 to 5
+  process_satisfaction INTEGER,    -- 0 to 10
+  result_satisfaction INTEGER,     -- 0 to 10
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- RLS политики
+ALTER TABLE tracker_entries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own tracker entries"
+  ON tracker_entries FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own tracker entries"
+  ON tracker_entries FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own tracker entries"
+  ON tracker_entries FOR UPDATE
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own tracker entries"
+  ON tracker_entries FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Индексы для оптимизации запросов
+CREATE INDEX idx_tracker_entries_user_date 
+  ON tracker_entries(user_id, entry_date DESC, entry_time DESC);
+
+CREATE INDEX idx_tracker_entries_date_range 
+  ON tracker_entries(user_id, entry_date);
+```
+
+#### Таблица: tracker_emotions
+
+Связанная таблица для хранения детализированных эмоций.
+
+```sql
+CREATE TABLE tracker_emotions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tracker_entry_id UUID NOT NULL REFERENCES tracker_entries(id) ON DELETE CASCADE,
+  emotion_label TEXT NOT NULL,
+  intensity INTEGER NOT NULL,      -- 0 to 10
+  category TEXT NOT NULL           -- negative | neutral | positive
+);
+
+-- RLS политики
+ALTER TABLE tracker_emotions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users can view own emotions"
+  ON tracker_emotions FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM tracker_entries
+      WHERE tracker_entries.id = tracker_emotions.tracker_entry_id
+      AND tracker_entries.user_id = auth.uid()
+    )
+  );
+
+CREATE POLICY "Users can insert own emotions"
+  ON tracker_emotions FOR INSERT
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM tracker_entries
+      WHERE tracker_entries.id = tracker_emotions.tracker_entry_id
+      AND tracker_entries.user_id = auth.uid()
+    )
+  );
+
+-- Аналогичные политики для UPDATE и DELETE
+
+-- Индекс для быстрого поиска эмоций по записи
+CREATE INDEX idx_tracker_emotions_entry 
+  ON tracker_emotions(tracker_entry_id);
+```
+
+**Связь между таблицами:**
+- Отношение один-ко-многим (1:N)
+- Одна запись `tracker_entries` может иметь несколько записей `tracker_emotions`
+- Cascade delete - при удалении записи трекера удаляются все связанные эмоции
+- RLS политики обеспечивают доступ только к собственным данным
+
+### 📈 Визуализация и аналитика
+
+#### Страница истории трекеров
+
+**Компонент:** `TrackerHistory` (`src/pages/TrackerHistory.tsx`)
+
+**Функциональность:**
+
+1. **Выбор периода отображения**
+   - Day (последние 24 часа)
+   - Week (последние 7 дней)
+   - Month (последний месяц)
+
+2. **Загрузка данных**
+```typescript
+const fetchEntries = async () => {
+  // 1. Получаем записи трекеров за период
+  const { data: entriesData } = await supabase
+    .from('tracker_entries')
+    .select('*')
+    .eq('user_id', user.id)
+    .gte('entry_date', startDate.toISOString().split('T')[0])
+    .order('entry_date', { ascending: true })
+    .order('entry_time', { ascending: true });
+
+  // 2. Получаем эмоции для всех записей
+  const entryIds = entriesData.map(e => e.id);
+  const { data: emotionsData } = await supabase
+    .from('tracker_emotions')
+    .select('*')
+    .in('tracker_entry_id', entryIds);
+
+  // 3. Объединяем данные
+  const entriesWithEmotions = entriesData.map(entry => ({
+    ...entry,
+    emotions: emotionsData?.filter(e => e.tracker_entry_id === entry.id) || []
+  }));
+
+  setEntries(entriesWithEmotions);
+};
+```
+
+3. **Экспорт данных**
+   - Экспорт в JSON формате
+   - Включает все метрики и эмоции
+   - Скачивание файла с timestamp в названии
+
+#### Компоненты визуализации
+
+**1. MoodGraph** (`src/components/tracker-history/MoodGraph.tsx`)
+- Линейный график изменения настроения
+- Использует библиотеку Recharts
+- Цветовая градация по значениям
+- Tooltip с детальной информацией
+- Адаптивная высота для разных экранов
+
+```typescript
+<LineChart data={entries}>
+  <XAxis 
+    dataKey="entry_date" 
+    tickFormatter={(date) => format(new Date(date), 'MMM d')}
+  />
+  <YAxis domain={[-5, 5]} />
+  <Tooltip content={<CustomTooltip />} />
+  <Line 
+    type="monotone" 
+    dataKey="mood_score" 
+    stroke="hsl(var(--primary))"
+    strokeWidth={2}
+  />
+</LineChart>
+```
+
+**2. EmotionsDistribution** (`src/components/tracker-history/EmotionsDistribution.tsx`)
+- Круговая диаграмма распределения эмоций
+- Группировка по категориям (negative/neutral/positive)
+- Подсчёт частоты каждой эмоции
+- Цветовая кодировка по типам
+
+```typescript
+// Агрегация данных эмоций
+const emotionsCounts = entries
+  .flatMap(e => e.emotions || [])
+  .reduce((acc, emotion) => {
+    acc[emotion.emotion_label] = (acc[emotion.emotion_label] || 0) + 1;
+    return acc;
+  }, {});
+
+// Подготовка данных для PieChart
+const chartData = Object.entries(emotionsCounts).map(([label, count]) => ({
+  name: label,
+  value: count,
+  fill: getCategoryColor(label)
+}));
+```
+
+**3. StressAnxietyGraph** (`src/components/tracker-history/StressAnxietyGraph.tsx`)
+- Двойной линейный график для стресса и тревожности
+- Две линии разных цветов на одном графике
+- Общая шкала 0-10
+- Легенда для различения метрик
+
+**4. EnergyGraph** (`src/components/tracker-history/EnergyGraph.tsx`)
+- Линейный график уровня энергии
+- Диапазон от -5 до +5
+- Цветовая индикация положительных/отрицательных значений
+- Area chart для визуализации зон
+
+**5. SatisfactionMetrics** (`src/components/tracker-history/SatisfactionMetrics.tsx`)
+- Двойной bar chart для удовлетворённости
+- Сравнение процесса и результата
+- Средние значения за период
+- Визуальное сравнение метрик
+
+**6. EntriesList** (`src/components/tracker-history/EntriesList.tsx`)
+- Табличное представление всех записей
+- Детальная информация по каждой записи
+- Возможность удаления записей
+- Модальное окно с подробностями (`EntryDetailsModal`)
+
+```typescript
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableCell>Date & Time</TableCell>
+      <TableCell>Mood</TableCell>
+      <TableCell>Stress</TableCell>
+      <TableCell>Anxiety</TableCell>
+      <TableCell>Energy</TableCell>
+      <TableCell>Actions</TableCell>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    {entries.map(entry => (
+      <TableRow key={entry.id}>
+        <TableCell>
+          {format(new Date(entry.entry_date), 'MMM d, yyyy')}
+          <br/>
+          <span className="text-muted-foreground">
+            {entry.entry_time}
+          </span>
+        </TableCell>
+        <TableCell>
+          {getMoodEmoji(entry.mood_score)} {entry.mood_score}
+        </TableCell>
+        {/* ... остальные колонки */}
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+```
+
+### 🔗 Интеграция с другими модулями
+
+#### 1. Интеграция с Dashboard
+
+На дашборде отображаются:
+- **QuickTrackerCard** - быстрый ввод текущих показателей
+- **QuickStatsCard** - визуализация последних записей
+- **InsightsPreview** - краткая аналитика трендов
+
+#### 2. Интеграция с системой рекомендаций
+
+Edge Function `generate-recommendations` анализирует данные трекеров:
+
+```typescript
+// Анализ трекеров за последние 7 дней
+const recentTrackers = await supabase
+  .from('tracker_entries')
+  .select('*, tracker_emotions(*)')
+  .eq('user_id', userId)
+  .gte('entry_date', sevenDaysAgo)
+  .lte('entry_date', today);
+
+// Расчёт средних значений
+const avgMood = calculateAverage(recentTrackers, 'mood_score');
+const avgStress = calculateAverage(recentTrackers, 'stress_level');
+const avgAnxiety = calculateAverage(recentTrackers, 'anxiety_level');
+const avgEnergy = calculateAverage(recentTrackers, 'energy_level');
+
+// Определение проблемных областей
+if (avgMood < -2 || avgStress > 7 || avgAnxiety > 7) {
+  // Генерация рекомендаций для улучшения состояния
+  recommendedActivities = getRelaxationActivities();
+}
+
+if (avgEnergy < -2) {
+  // Рекомендации для повышения энергии
+  recommendedActivities = getEnergyBoostingActivities();
+}
+
+// Анализ эмоций
+const negativeEmotionsCount = recentTrackers
+  .flatMap(t => t.tracker_emotions || [])
+  .filter(e => e.category === 'negative')
+  .length;
+
+if (negativeEmotionsCount > threshold) {
+  // Рекомендации для работы с негативными эмоциями
+  recommendedActivities = getEmotionalRegulationActivities();
+}
+```
+
+#### 3. Интеграция с Insights
+
+Страница Insights использует данные трекеров для:
+- **Mood Trends** - долгосрочные тренды настроения
+- **Emotion Balance** - баланс позитивных/негативных эмоций
+- **Energy Patterns** - паттерны изменения энергии по времени суток
+- **Stress/Anxiety Correlation** - корреляция между стрессом и тревожностью
+
+```typescript
+// Компонент MoodTrendsChart
+const MoodTrendsChart = ({ period }: { period: '7d' | '30d' | '90d' }) => {
+  const { data: entries } = useQuery({
+    queryKey: ['mood-trends', period],
+    queryFn: async () => {
+      const days = period === '7d' ? 7 : period === '30d' ? 30 : 90;
+      const startDate = subDays(new Date(), days);
+      
+      return await supabase
+        .from('tracker_entries')
+        .select('entry_date, mood_score, stress_level, anxiety_level')
+        .eq('user_id', user.id)
+        .gte('entry_date', format(startDate, 'yyyy-MM-dd'))
+        .order('entry_date');
+    }
+  });
+
+  // Группировка по дням и расчёт средних
+  const aggregatedData = groupByDate(entries);
+  
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <AreaChart data={aggregatedData}>
+        <defs>
+          <linearGradient id="moodGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+          </linearGradient>
+        </defs>
+        <XAxis dataKey="date" />
+        <YAxis domain={[-5, 5]} />
+        <Tooltip />
+        <Area 
+          type="monotone" 
+          dataKey="avgMood" 
+          stroke="hsl(var(--primary))"
+          fill="url(#moodGradient)"
+        />
+      </AreaChart>
+    </ResponsiveContainer>
+  );
+};
+```
+
+### 🎨 Дизайн-система трекеров
+
+#### Цветовая схема
+
+```css
+/* Настроение и энергия - gradient от красного к зелёному */
+.mood-negative {
+  color: hsl(0, 70%, 50%);      /* Красный */
+}
+.mood-neutral {
+  color: hsl(60, 70%, 50%);     /* Жёлтый */
+}
+.mood-positive {
+  color: hsl(120, 70%, 50%);    /* Зелёный */
+}
+
+/* Категории эмоций */
+.emotion-negative {
+  border-color: hsl(var(--destructive));
+  background: hsl(var(--destructive) / 0.1);
+}
+.emotion-neutral {
+  border-color: hsl(var(--secondary));
+  background: hsl(var(--secondary) / 0.1);
+}
+.emotion-positive {
+  border-color: hsl(var(--accent));
+  background: hsl(var(--accent) / 0.1);
+}
+
+/* Стресс и тревожность - оттенки красного */
+.stress-low {
+  color: hsl(120, 50%, 50%);
+}
+.stress-high {
+  color: hsl(0, 70%, 50%);
+}
+```
+
+#### Адаптивные компоненты
+
+```typescript
+// Адаптивный размер слайдеров
+const sliderSize = useBreakpointValue({
+  base: 'sm',    // mobile
+  md: 'md',      // tablet
+  lg: 'lg'       // desktop
+});
+
+// Адаптивное количество колонок для эмоций
+<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+  {emotions.map(...)}
+</div>
+```
+
+### 🔐 Безопасность и приватность
+
+1. **Row Level Security (RLS)**
+   - Все записи трекеров изолированы по пользователям
+   - Невозможно просмотреть или изменить чужие данные
+   - Политики проверяются на уровне базы данных
+
+2. **Валидация данных**
+   - Клиентская валидация диапазонов значений
+   - Проверка типов данных перед отправкой
+   - Санитизация текстовых полей (названия эмоций)
+
+3. **Шифрование**
+   - Данные передаются через HTTPS
+   - Хранение в зашифрованной БД Supabase
+   - JWT токены для аутентификации запросов
+
+### 🚀 Производительность
+
+1. **Оптимизация запросов**
+   ```typescript
+   // Батчинг запросов эмоций
+   const entryIds = entries.map(e => e.id);
+   const emotions = await supabase
+     .from('tracker_emotions')
+     .select('*')
+     .in('tracker_entry_id', entryIds); // Один запрос вместо N
+   ```
+
+2. **Кэширование с TanStack Query**
+   ```typescript
+   const { data: entries } = useQuery({
+     queryKey: ['tracker-entries', period],
+     queryFn: fetchEntries,
+     staleTime: 5 * 60 * 1000, // 5 минут
+     cacheTime: 10 * 60 * 1000  // 10 минут
+   });
+   ```
+
+3. **Индексы базы данных**
+   - Composite index на (user_id, entry_date)
+   - Covering index для частых запросов
+   - Foreign key index для joins
+
+4. **Lazy loading графиков**
+   ```typescript
+   const MoodGraph = lazy(() => import('./MoodGraph'));
+   
+   <Suspense fallback={<Skeleton className="h-64" />}>
+     <MoodGraph entries={entries} />
+   </Suspense>
+   ```
+
+### 📱 Мобильная оптимизация
+
+1. **Touch-friendly слайдеры**
+   - Увеличенная область захвата (44x44px minimum)
+   - Haptic feedback при изменении значений (где поддерживается)
+   - Плавные transition и animations
+
+2. **Оптимизация рендеринга**
+   ```typescript
+   // Мемоизация тяжёлых вычислений
+   const emotionCounts = useMemo(() => 
+     calculateEmotionDistribution(entries),
+     [entries]
+   );
+   
+   // Throttle для слайдеров
+   const handleMoodChange = useCallback(
+     throttle((value: number) => {
+       updateTrackerData({ moodScore: value });
+     }, 100),
+     []
+   );
+   ```
+
+3. **Reduced motion mode**
+   ```typescript
+   const prefersReducedMotion = useMediaQuery('(prefers-reduced-motion: reduce)');
+   
+   <motion.div
+     animate={prefersReducedMotion ? {} : { scale: [1, 1.05, 1] }}
+     transition={{ duration: 0.3 }}
+   >
+     {/* Content */}
+   </motion.div>
+   ```
+
 ## 📦 Установка и запуск
 
 ### Требования
