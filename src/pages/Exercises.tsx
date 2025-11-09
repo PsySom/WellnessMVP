@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
+import { useLocale } from '@/hooks/useLocale';
 
 interface Exercise {
   id: string;
@@ -30,6 +31,7 @@ const Exercises = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { getLocalizedField } = useLocale();
 
   useEffect(() => {
     loadExercises();
@@ -64,10 +66,12 @@ const Exercises = () => {
 
     // Search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(ex =>
-        ex.name_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        ex.effects.some(effect => effect.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+      filtered = filtered.filter(ex => {
+        const localizedName = getLocalizedField(ex, 'name');
+        const localizedEffects = getLocalizedField(ex, 'effects');
+        return localizedName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (Array.isArray(localizedEffects) && localizedEffects.some((effect: string) => effect.toLowerCase().includes(searchQuery.toLowerCase())));
+      });
     }
 
     setFilteredExercises(filtered);
@@ -76,16 +80,6 @@ const Exercises = () => {
   const getDifficultyDots = (difficulty: string) => {
     const count = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 2 : 3;
     return '•'.repeat(count);
-  };
-
-  const getCategoryLabel = (category: string) => {
-    const labels: { [key: string]: string } = {
-      grounding: 'Grounding',
-      stress: 'Stress Relief',
-      anxiety: 'Anxiety',
-      cognitive: 'Cognitive'
-    };
-    return labels[category] || category;
   };
 
   return (
@@ -151,10 +145,12 @@ const Exercises = () => {
 
                   <div>
                     <h3 className="text-xl md:text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
-                      {exercise.name_en}
+                      {getLocalizedField(exercise, 'name')}
                     </h3>
                     <div className="flex items-center gap-2 mt-2 md:mt-3">
-                      <Badge variant="secondary" className="text-xs md:text-sm">{getCategoryLabel(exercise.category)}</Badge>
+                      <Badge variant="secondary" className="text-xs md:text-sm">
+                        {t(`exercises.categories.${exercise.category}`)}
+                      </Badge>
                       <span className="text-sm md:text-base text-muted-foreground">
                         {getDifficultyDots(exercise.difficulty)}
                       </span>
@@ -163,11 +159,11 @@ const Exercises = () => {
 
                   <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
                     <Clock className="h-4 w-4 md:h-5 md:w-5" />
-                    {exercise.duration_minutes} min
+                    {exercise.duration_minutes} {t('exercises.minutes')}
                   </div>
 
                   <div className="space-y-1 md:space-y-2">
-                    {exercise.effects.slice(0, 2).map((effect, i) => (
+                    {getLocalizedField(exercise, 'effects').slice(0, 2).map((effect: string, i: number) => (
                       <p key={i} className="text-sm md:text-base text-muted-foreground">
                         • {effect}
                       </p>
