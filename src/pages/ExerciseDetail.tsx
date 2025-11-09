@@ -9,6 +9,7 @@ import { ArrowLeft, Clock, Play, Calendar, Share2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
+import { useLocale } from '@/hooks/useLocale';
 
 interface Exercise {
   id: string;
@@ -33,6 +34,7 @@ const ExerciseDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
+  const { getLocalizedField } = useLocale();
   const [exercise, setExercise] = useState<Exercise | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -67,7 +69,7 @@ const ExerciseDetail = () => {
     navigate('/calendar', {
       state: {
         prefill: {
-          title: exercise?.name_en,
+          title: exercise ? getLocalizedField(exercise, 'name') : '',
           category: 'practice',
           impact_type: 'restorative',
           duration_minutes: exercise?.duration_minutes
@@ -135,17 +137,17 @@ const ExerciseDetail = () => {
           <div className="text-6xl">{exercise.emoji}</div>
           
           <div>
-            <h1 className="text-3xl font-bold text-foreground">{exercise.name_en}</h1>
-            <p className="text-muted-foreground mt-2">{exercise.description}</p>
+            <h1 className="text-3xl font-bold text-foreground">{getLocalizedField(exercise, 'name')}</h1>
+            <p className="text-muted-foreground mt-2">{getLocalizedField(exercise, 'description')}</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
             <Badge variant="outline" className="gap-2">
               <Clock className="h-4 w-4" />
-              {exercise.duration_minutes} minutes
+              {exercise.duration_minutes} {t('exercises.minutes')}
             </Badge>
             <Badge variant="secondary">
-              {exercise.category}
+              {t(`calendar.categories.${exercise.category}`)}
             </Badge>
             <Badge variant="outline">
               {getDifficultyLabel(exercise.difficulty)}
@@ -159,7 +161,7 @@ const ExerciseDetail = () => {
             ✨ {t('exerciseDetail.whatThisHelps')}
           </h3>
           <div className="flex flex-wrap gap-2">
-            {exercise.effects.map((effect, i) => (
+            {(getLocalizedField(exercise, 'effects') as string[]).map((effect, i) => (
               <Badge key={i} variant="secondary">
                 {effect}
               </Badge>
@@ -183,7 +185,7 @@ const ExerciseDetail = () => {
                   {instruction.step}
                 </div>
                 <div className="flex-1">
-                  <h4 className="font-medium text-sm">{instruction.title}</h4>
+                  <h4 className="font-medium text-sm">{getLocalizedField(instruction, 'title')}</h4>
                 </div>
               </div>
             ))}

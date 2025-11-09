@@ -185,30 +185,17 @@ const Exercises = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-sm md:text-base text-muted-foreground">
-                    <Clock className="h-4 w-4 md:h-5 md:w-5" />
-                    {exercise.duration_minutes} {t('exercises.minutes')}
-                  </div>
-
-                  <div className="space-y-1 md:space-y-2">
-                    {getLocalizedField(exercise, 'effects').slice(0, 2).map((effect: string, i: number) => (
-                      <p key={i} className="text-sm md:text-base text-muted-foreground">
-                        • {effect}
-                      </p>
-                    ))}
-                  </div>
-
-                  <div className="flex gap-2">
+                  <div className="space-y-2">
                     <Button 
                       variant="outline" 
-                      className="flex-1 hover-scale transition-all" 
+                      className="w-full hover-scale transition-all" 
                       size="default"
                       onClick={(e) => handleScheduleExercise(exercise, e)}
                     >
                       <CalendarPlus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
                       {t('exercises.schedule')}
                     </Button>
-                    <Button className="flex-1 hover-scale transition-all" size="default">
+                    <Button className="w-full hover-scale transition-all" size="default">
                       {t('exercises.start')}
                       <ChevronRight className="h-4 w-4 md:h-5 md:w-5 ml-2" />
                     </Button>
