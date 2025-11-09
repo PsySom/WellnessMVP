@@ -102,8 +102,8 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
                 className={`
                   relative aspect-square p-1 sm:p-2 md:p-3 lg:p-4 rounded-md sm:rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-lg
                   ${isCurrentMonth ? 'border-border hover:border-primary/50' : 'border-transparent'}
-                  ${isToday ? 'border-2 border-primary animate-pulse' : ''}
-                  ${isSelected ? 'bg-primary text-primary-foreground shadow-lg scale-105' : 'bg-card hover:bg-accent/20'}
+                  ${isToday && !isSelected ? 'border-2 border-primary' : ''}
+                  ${isSelected ? 'bg-primary text-primary-foreground shadow-lg scale-105 border-primary' : 'bg-card hover:bg-accent/20'}
                   ${!isCurrentMonth ? 'opacity-40' : ''}
                 `}
               >
