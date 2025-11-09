@@ -114,52 +114,63 @@ const TemplateDetailModal = ({ template, open, onClose }: TemplateDetailModalPro
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-5xl">{template.emoji}</span>
+      <DialogContent className="max-w-md md:max-w-lg animate-scale-in">
+        <DialogHeader className="space-y-4">
+          <div className="flex items-center gap-4 md:gap-5">
+            <span className="text-5xl md:text-6xl transition-transform hover:scale-110">{template.emoji}</span>
             <div className="flex-1">
-              <DialogTitle className="text-xl">{template.name_en}</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl">{template.name_en}</DialogTitle>
             </div>
           </div>
           {template.description && (
-            <DialogDescription>{template.description}</DialogDescription>
+            <DialogDescription className="text-sm md:text-base leading-relaxed">
+              {template.description}
+            </DialogDescription>
           )}
         </DialogHeader>
 
-        <div className="space-y-4">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">Category</p>
-            <Badge variant="outline">{getCategoryLabel(template.category)}</Badge>
-          </div>
+        <div className="space-y-5 md:space-y-6">
+          <div className="grid md:grid-cols-2 gap-5 md:gap-6">
+            <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+              <p className="text-sm md:text-base font-medium text-muted-foreground mb-2">Category</p>
+              <Badge variant="outline" className="text-sm md:text-base">{getCategoryLabel(template.category)}</Badge>
+            </div>
 
-          <div>
-            <p className="text-sm font-medium text-muted-foreground mb-2">Impact Type</p>
-            <div className="space-y-2">
-              <Badge variant="outline" className={impactInfo.color}>
-                {impactInfo.label}
-              </Badge>
-              <p className="text-sm text-muted-foreground">{impactInfo.description}</p>
+            <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+              <p className="text-sm md:text-base font-medium text-muted-foreground mb-2">Impact Type</p>
+              <div className="space-y-2">
+                <Badge variant="outline" className={`${impactInfo.color} text-sm md:text-base`}>
+                  {impactInfo.label}
+                </Badge>
+                <p className="text-sm md:text-base text-muted-foreground">{impactInfo.description}</p>
+              </div>
             </div>
           </div>
 
           {template.default_duration_minutes !== null && template.default_duration_minutes > 0 && (
-            <div>
-              <p className="text-sm font-medium text-muted-foreground mb-2">Default Duration</p>
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground" />
+            <div className="p-4 md:p-5 rounded-lg bg-muted/50">
+              <p className="text-sm md:text-base font-medium text-muted-foreground mb-3">Default Duration</p>
+              <div className="flex items-center gap-2 md:gap-3 text-sm md:text-base">
+                <Clock className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
                 <span>{template.default_duration_minutes} minutes</span>
               </div>
             </div>
           )}
 
-          <div className="flex gap-2 pt-4">
-            <Button onClick={handleAddToToday} className="flex-1 gap-2">
-              <Plus className="h-4 w-4" />
+          <div className="flex gap-3 md:gap-4 pt-6">
+            <Button 
+              onClick={handleAddToToday} 
+              className="flex-1 gap-2 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
+            >
+              <Plus className="h-4 w-4 md:h-5 md:w-5" />
               Add to today
             </Button>
-            <Button variant="outline" className="flex-1 gap-2" onClick={onClose}>
-              <Calendar className="h-4 w-4" />
+            <Button 
+              variant="outline" 
+              className="flex-1 gap-2 h-10 md:h-11 text-sm md:text-base hover-scale transition-all" 
+              onClick={onClose}
+            >
+              <Calendar className="h-4 w-4 md:h-5 md:w-5" />
               Schedule
             </Button>
           </div>

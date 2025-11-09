@@ -123,90 +123,97 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{activity ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
+      <DialogContent className="max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
+        <DialogHeader className="space-y-3">
+          <DialogTitle className="text-xl md:text-2xl">{activity ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
           <div>
-            <Label htmlFor="title">Title *</Label>
+            <Label htmlFor="title" className="text-sm md:text-base">Title *</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
+              className="h-10 md:h-11 text-sm md:text-base"
+              placeholder="Enter activity title"
             />
           </div>
 
           <div>
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-sm md:text-base">Description</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
+              className="text-sm md:text-base resize-none"
+              placeholder="Add details about this activity..."
             />
           </div>
 
-          <div>
-            <Label>Category</Label>
-            <Select 
-              value={formData.category} 
-              onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map(cat => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+            <div>
+              <Label className="text-sm md:text-base">Category</Label>
+              <Select 
+                value={formData.category} 
+                onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
+              >
+                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base">
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <Label className="text-sm md:text-base">Date</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start h-10 md:h-11 text-sm md:text-base">
+                    <CalendarIcon className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                    {format(formData.date, 'PPP')}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formData.date}
+                    onSelect={(date) => date && setFormData({ ...formData, date })}
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
           <div>
-            <Label>Impact Type</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
+            <Label className="text-sm md:text-base mb-3 block">Impact Type</Label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {IMPACT_TYPES.map(type => (
                 <Button
                   key={type.value}
                   type="button"
                   variant={formData.impact_type === type.value ? 'default' : 'outline'}
                   onClick={() => setFormData({ ...formData, impact_type: type.value as typeof formData.impact_type })}
-                  className="justify-start"
+                  className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
                 >
-                  <div className={`w-3 h-3 rounded-full ${type.color} mr-2`} />
+                  <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full ${type.color} mr-2`} />
                   {type.label}
                 </Button>
               ))}
             </div>
           </div>
 
-          <div>
-            <Label>Date</Label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(formData.date, 'PPP')}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={formData.date}
-                  onSelect={(date) => date && setFormData({ ...formData, date })}
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <Label htmlFor="all-day">All Day</Label>
+          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
+            <Label htmlFor="all-day" className="text-sm md:text-base cursor-pointer">All Day Event</Label>
             <Switch
               id="all-day"
               checked={formData.all_day}
@@ -215,18 +222,19 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           </div>
 
           {!formData.all_day && (
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 md:gap-6 animate-fade-in">
               <div>
-                <Label htmlFor="start-time">Start Time</Label>
+                <Label htmlFor="start-time" className="text-sm md:text-base">Start Time</Label>
                 <Input
                   id="start-time"
                   type="time"
                   value={formData.start_time}
                   onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+                  className="h-10 md:h-11 text-sm md:text-base"
                 />
               </div>
               <div>
-                <Label htmlFor="duration">Duration (min)</Label>
+                <Label htmlFor="duration" className="text-sm md:text-base">Duration (min)</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -234,13 +242,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                   step="5"
                   value={formData.duration_minutes}
                   onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })}
+                  className="h-10 md:h-11 text-sm md:text-base"
                 />
               </div>
             </div>
           )}
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="reminder">Reminder</Label>
+          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
+            <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">Enable Reminder</Label>
             <Switch
               id="reminder"
               checked={formData.reminder_enabled}
@@ -249,32 +258,41 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           </div>
 
           {formData.reminder_enabled && (
-            <div>
-              <Label>Remind me before</Label>
+            <div className="animate-fade-in">
+              <Label className="text-sm md:text-base">Remind me before</Label>
               <Select
                 value={formData.reminder_minutes_before.toString()}
                 onValueChange={(v) => setFormData({ ...formData, reminder_minutes_before: parseInt(v) })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5">5 minutes</SelectItem>
-                  <SelectItem value="10">10 minutes</SelectItem>
-                  <SelectItem value="15">15 minutes</SelectItem>
-                  <SelectItem value="30">30 minutes</SelectItem>
-                  <SelectItem value="60">1 hour</SelectItem>
+                  <SelectItem value="5" className="text-sm md:text-base">5 minutes</SelectItem>
+                  <SelectItem value="10" className="text-sm md:text-base">10 minutes</SelectItem>
+                  <SelectItem value="15" className="text-sm md:text-base">15 minutes</SelectItem>
+                  <SelectItem value="30" className="text-sm md:text-base">30 minutes</SelectItem>
+                  <SelectItem value="60" className="text-sm md:text-base">1 hour</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+          <div className="flex gap-3 md:gap-4 pt-6">
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => onOpenChange(false)} 
+              className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? 'Saving...' : 'Save'}
+            <Button 
+              type="submit" 
+              disabled={loading} 
+              className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
+            >
+              {loading ? 'Saving...' : 'Save Activity'}
             </Button>
           </div>
         </form>

@@ -77,28 +77,28 @@ const EntryDetailsModal = ({ entry, isOpen, onClose, onDeleted }: EntryDetailsMo
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Entry Details</DialogTitle>
-            <p className="text-sm text-muted-foreground">
+        <DialogContent className="max-w-md md:max-w-lg lg:max-w-xl max-h-[90vh] overflow-y-auto animate-scale-in">
+          <DialogHeader className="space-y-2">
+            <DialogTitle className="text-xl md:text-2xl">Entry Details</DialogTitle>
+            <p className="text-sm md:text-base text-muted-foreground">
               {format(date, 'MMMM d, yyyy')} at {format(date, 'h:mm a')}
             </p>
           </DialogHeader>
 
-          <div className="space-y-6 py-4">
+          <div className="space-y-5 md:space-y-6 py-4">
             {/* Mood */}
-            <div className="space-y-2">
-              <h4 className="font-semibold text-sm">Mood</h4>
-              <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-                <span className="text-2xl">
+            <div className="space-y-3">
+              <h4 className="font-semibold text-sm md:text-base">Mood</h4>
+              <div className="flex items-center gap-3 md:gap-4 p-4 md:p-5 rounded-lg bg-muted/50 transition-all hover:shadow-md">
+                <span className="text-3xl md:text-4xl transition-transform hover:scale-110">
                   {entry.mood_score !== null && entry.mood_score >= 3 ? '😄' :
                    entry.mood_score !== null && entry.mood_score >= 1 ? '🙂' :
                    entry.mood_score !== null && entry.mood_score >= -1 ? '😐' :
                    entry.mood_score !== null && entry.mood_score >= -3 ? '😟' : '😢'}
                 </span>
                 <div>
-                  <p className="font-medium">{getMoodLabel(entry.mood_score)}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="font-medium text-base md:text-lg">{getMoodLabel(entry.mood_score)}</p>
+                  <p className="text-sm md:text-base text-muted-foreground">
                     Score: {entry.mood_score !== null ? (entry.mood_score > 0 ? '+' : '') + entry.mood_score : 'N/A'}
                   </p>
                 </div>
@@ -131,19 +131,19 @@ const EntryDetailsModal = ({ entry, isOpen, onClose, onDeleted }: EntryDetailsMo
             )}
 
             {/* Stress & Anxiety */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold text-sm">Stress</h4>
-                <div className="p-3 rounded-lg bg-muted/50 text-center">
-                  <p className="text-2xl font-bold">{entry.stress_level ?? 'N/A'}</p>
-                  <p className="text-xs text-muted-foreground">/10</p>
+            <div className="grid grid-cols-2 gap-4 md:gap-6">
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm md:text-base">Stress</h4>
+                <div className="p-4 md:p-5 rounded-lg bg-muted/50 text-center transition-all hover:shadow-md">
+                  <p className="text-3xl md:text-4xl font-bold">{entry.stress_level ?? 'N/A'}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">/10</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold text-sm">Anxiety</h4>
-                <div className="p-3 rounded-lg bg-muted/50 text-center">
-                  <p className="text-2xl font-bold">{entry.anxiety_level ?? 'N/A'}</p>
-                  <p className="text-xs text-muted-foreground">/10</p>
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm md:text-base">Anxiety</h4>
+                <div className="p-4 md:p-5 rounded-lg bg-muted/50 text-center transition-all hover:shadow-md">
+                  <p className="text-3xl md:text-4xl font-bold">{entry.anxiety_level ?? 'N/A'}</p>
+                  <p className="text-xs md:text-sm text-muted-foreground">/10</p>
                 </div>
               </div>
             </div>
@@ -178,16 +178,21 @@ const EntryDetailsModal = ({ entry, isOpen, onClose, onDeleted }: EntryDetailsMo
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={onClose}>
+          <DialogFooter className="gap-3 md:gap-4">
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              className="h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
+            >
               Close
             </Button>
             <Button
               variant="destructive"
               onClick={() => setShowDeleteAlert(true)}
               disabled={isDeleting}
+              className="h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
             >
-              <Trash2 className="h-4 w-4 mr-2" />
+              <Trash2 className="h-4 w-4 md:h-5 md:w-5 mr-2" />
               Delete
             </Button>
           </DialogFooter>

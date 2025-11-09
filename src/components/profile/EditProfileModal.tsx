@@ -81,60 +81,64 @@ export const EditProfileModal = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="max-w-md md:max-w-lg animate-scale-in">
         <DialogHeader>
-          <DialogTitle>Edit Profile</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl">Edit Profile</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="full_name">Full Name</Label>
-            <Input
-              id="full_name"
-              value={formData.full_name}
-              onChange={(e) =>
-                setFormData({ ...formData, full_name: e.target.value })
-              }
-              placeholder="Your name"
-              required
-            />
+        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
+            <div>
+              <Label htmlFor="full_name" className="text-sm md:text-base">Full Name</Label>
+              <Input
+                id="full_name"
+                value={formData.full_name}
+                onChange={(e) =>
+                  setFormData({ ...formData, full_name: e.target.value })
+                }
+                placeholder="Your name"
+                required
+                className="h-10 md:h-11 text-sm md:text-base"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="age" className="text-sm md:text-base">Age</Label>
+              <Input
+                id="age"
+                type="number"
+                min="13"
+                max="120"
+                value={formData.age}
+                onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                placeholder="Your age"
+                className="h-10 md:h-11 text-sm md:text-base"
+              />
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="age">Age</Label>
-            <Input
-              id="age"
-              type="number"
-              min="13"
-              max="120"
-              value={formData.age}
-              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-              placeholder="Your age"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="gender">Gender</Label>
+            <Label htmlFor="gender" className="text-sm md:text-base">Gender</Label>
             <Select
               value={formData.gender}
               onValueChange={(value) =>
                 setFormData({ ...formData, gender: value })
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="male">Male</SelectItem>
-                <SelectItem value="female">Female</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-                <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
+                <SelectItem value="male" className="text-sm md:text-base">Male</SelectItem>
+                <SelectItem value="female" className="text-sm md:text-base">Female</SelectItem>
+                <SelectItem value="other" className="text-sm md:text-base">Other</SelectItem>
+                <SelectItem value="prefer-not-to-say" className="text-sm md:text-base">Prefer not to say</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label htmlFor="bio">Bio</Label>
+            <Label htmlFor="bio" className="text-sm md:text-base">Bio</Label>
             <Textarea
               id="bio"
               value={formData.bio}
@@ -142,22 +146,28 @@ export const EditProfileModal = ({
               placeholder="Tell us about yourself..."
               rows={4}
               maxLength={500}
+              className="text-sm md:text-base resize-none"
             />
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs md:text-sm text-muted-foreground mt-2">
               {formData.bio.length}/500 characters
             </p>
           </div>
 
-          <div className="flex gap-2 justify-end">
+          <div className="flex gap-3 md:gap-4 justify-end pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={saving}
+              className="h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={saving}>
+            <Button 
+              type="submit" 
+              disabled={saving}
+              className="h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
+            >
               {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
