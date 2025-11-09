@@ -14,6 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -22,18 +23,31 @@ interface ActivityFormModalProps {
   activity?: any;
 }
 
+const activitySchema = z.object({
+  title: z.string()
+    .trim()
+    .min(1, { message: 'Title is required' })
+    .max(200, { message: 'Title must be less than 200 characters' }),
+  description: z.string()
+    .max(1000, { message: 'Description must be less than 1000 characters' })
+    .optional(),
+  duration_minutes: z.number()
+    .min(5, { message: 'Duration must be at least 5 minutes' })
+    .max(1440, { message: 'Duration cannot exceed 24 hours' }),
+});
+
 const CATEGORIES = [
-  { value: 'exercise' as const, label: '🏃 Exercise', emoji: '🏃' },
-  { value: 'health' as const, label: '💊 Health', emoji: '💊' },
-  { value: 'hobby' as const, label: '🎨 Hobby', emoji: '🎨' },
-  { value: 'work' as const, label: '💼 Work', emoji: '💼' },
-  { value: 'practice' as const, label: '📚 Practice', emoji: '📚' },
-  { value: 'reflection' as const, label: '💆 Reflection', emoji: '💆' },
-  { value: 'sleep' as const, label: '😴 Sleep', emoji: '😴' },
-  { value: 'nutrition' as const, label: '🍎 Nutrition', emoji: '🍎' },
-  { value: 'social' as const, label: '👥 Social', emoji: '👥' },
-  { value: 'leisure' as const, label: '🎮 Leisure', emoji: '🎮' },
-  { value: 'hydration' as const, label: '💧 Hydration', emoji: '💧' }
+  { value: 'exercise' as const, emoji: '🏃' },
+  { value: 'health' as const, emoji: '💊' },
+  { value: 'hobby' as const, emoji: '🎨' },
+  { value: 'work' as const, emoji: '💼' },
+  { value: 'practice' as const, emoji: '📚' },
+  { value: 'reflection' as const, emoji: '💆' },
+  { value: 'sleep' as const, emoji: '😴' },
+  { value: 'nutrition' as const, emoji: '🍎' },
+  { value: 'social' as const, emoji: '👥' },
+  { value: 'leisure' as const, emoji: '🎮' },
+  { value: 'hydration' as const, emoji: '💧' }
 ];
 
 const IMPACT_TYPES = [
@@ -85,12 +99,30 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
     e.preventDefault();
     if (!user) return;
 
+    // Validate form data
+    try {
+      activitySchema.parse({
+        title: formData.title,
+        description: formData.description,
+        duration_minutes: formData.duration_minutes,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast({
+          title: t('common.error'),
+          description: error.errors[0].message,
+          variant: 'destructive'
+        });
+        return;
+      }
+    }
+
     setLoading(true);
 
     const activityData = {
       user_id: user.id,
-      title: formData.title,
-      description: formData.description || null,
+      title: formData.title.trim(),
+      description: formData.description?.trim() || null,
       category: formData.category,
       impact_type: formData.impact_type,
       date: format(formData.date, 'yyyy-MM-dd'),
@@ -138,6 +170,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
+              maxLength={200}
               className="h-10 md:h-11 text-sm md:text-base"
               placeholder={t('calendar.form.titlePlaceholder')}
             />
@@ -150,6 +183,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
+              maxLength={1000}
               className="text-sm md:text-base resize-none"
               placeholder={t('calendar.form.descriptionPlaceholder')}
             />
@@ -163,12 +197,17 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                 onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
               >
                 <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                  <SelectValue />
+                  <SelectValue>
+                    {CATEGORIES.find(c => c.value === formData.category)?.emoji} {t(`calendar.categories.${formData.category}`)}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base">
-                      {t(`calendar.categories.${cat.value}`)}
+                      <span className="flex items-center gap-2">
+                        <span>{cat.emoji}</span>
+                        <span>{t(`calendar.categories.${cat.value}`)}</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -241,10 +280,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                   id="duration"
                   type="number"
                   min="5"
+                  max="1440"
                   step="5"
                   value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 5 })}
                   className="h-10 md:h-11 text-sm md:text-base"
+                  placeholder="60"
                 />
               </div>
             </div>
