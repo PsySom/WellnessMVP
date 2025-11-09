@@ -15,7 +15,7 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
   if (isMobile) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <main className="max-w-md mx-auto px-4">
+        <main className="max-w-md mx-auto px-4 pt-4">
           {children}
         </main>
         <BottomNav />
