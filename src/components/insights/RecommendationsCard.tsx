@@ -80,14 +80,14 @@ const RecommendationsCard = ({ data }: RecommendationsCardProps) => {
 
   if (recommendations.length === 0) {
     return (
-      <Card className="p-6 bg-gradient-to-br from-accent/5 to-primary/5 border-accent/20">
-        <div className="flex items-start gap-4">
-          <div className="p-3 bg-accent/10 rounded-lg">
-            <Sparkles className="h-6 w-6 text-accent" />
+      <Card className="p-6 md:p-8 bg-gradient-to-br from-accent/5 to-primary/5 border-accent/20 animate-fade-in hover:shadow-lg transition-all duration-300">
+        <div className="flex items-start gap-4 md:gap-6">
+          <div className="p-3 md:p-4 bg-accent/10 rounded-lg transition-transform duration-300 hover:scale-110">
+            <Sparkles className="h-6 w-6 md:h-8 md:w-8 text-accent" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-foreground mb-2">You're doing great! 🎉</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-base md:text-lg font-semibold text-foreground mb-2">You're doing great! 🎉</h3>
+            <p className="text-sm md:text-base text-muted-foreground">
               Keep up the good work with tracking your mood, completing activities, and maintaining your wellness routine.
             </p>
           </div>
@@ -97,19 +97,28 @@ const RecommendationsCard = ({ data }: RecommendationsCardProps) => {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-foreground">Recommendations</h2>
-      <div className="space-y-3">
+    <div className="space-y-4 lg:space-y-6">
+      <h2 className="text-xl md:text-2xl font-semibold text-foreground animate-fade-in">Recommendations</h2>
+      <div className="space-y-3 md:space-y-4">
         {recommendations.map((rec, index) => (
-          <Card key={index} className={`p-4 ${rec.bgColor} border-opacity-30`}>
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg bg-card`}>
-                <rec.icon className={`h-5 w-5 ${rec.color}`} />
+          <Card 
+            key={index} 
+            className={`p-4 md:p-5 lg:p-6 ${rec.bgColor} border-opacity-30 animate-fade-in hover:shadow-lg transition-all duration-300 group`}
+            style={{ animationDelay: `${index * 100}ms` }}
+          >
+            <div className="flex items-start gap-3 md:gap-4">
+              <div className={`p-2 md:p-3 rounded-lg bg-card transition-transform duration-300 group-hover:scale-110`}>
+                <rec.icon className={`h-5 w-5 md:h-6 md:w-6 ${rec.color}`} />
               </div>
-              <div className="flex-1 space-y-2">
-                <h4 className="font-semibold text-foreground">{rec.title}</h4>
-                <p className="text-sm text-muted-foreground">{rec.description}</p>
-                <Button size="sm" onClick={rec.onClick} variant="default">
+              <div className="flex-1 space-y-2 md:space-y-3">
+                <h4 className="text-sm md:text-base font-semibold text-foreground">{rec.title}</h4>
+                <p className="text-sm md:text-base text-muted-foreground">{rec.description}</p>
+                <Button 
+                  size="default" 
+                  onClick={rec.onClick} 
+                  variant="default"
+                  className="hover-scale transition-transform duration-300"
+                >
                   {rec.action}
                 </Button>
               </div>

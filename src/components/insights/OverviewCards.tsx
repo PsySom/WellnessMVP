@@ -92,24 +92,28 @@ const OverviewCards = ({ data }: OverviewCardsProps) => {
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
       {stats.map((stat, index) => (
-        <Card key={index} className="p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div className={`p-2 rounded-lg ${stat.bgColor}`}>
+        <Card 
+          key={index} 
+          className="p-4 md:p-5 lg:p-6 animate-fade-in hover-scale transition-all duration-300 hover:shadow-lg cursor-pointer"
+          style={{ animationDelay: `${index * 100}ms` }}
+        >
+          <div className="flex items-start justify-between mb-3 md:mb-4">
+            <div className={`p-2 md:p-2.5 lg:p-3 rounded-lg ${stat.bgColor} transition-transform duration-300 hover:scale-110`}>
               {typeof stat.icon === 'string' ? (
-                <span className="text-2xl">{stat.icon}</span>
+                <span className="text-2xl md:text-3xl">{stat.icon}</span>
               ) : (
-                <stat.icon className={`h-5 w-5 ${stat.color}`} />
+                <stat.icon className={`h-5 w-5 md:h-6 md:w-6 ${stat.color}`} />
               )}
             </div>
           </div>
           <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">{stat.title}</p>
+            <p className="text-xs md:text-sm text-muted-foreground">{stat.title}</p>
             <div className="flex items-baseline gap-2">
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{stat.value}</p>
               {stat.subtitle && (
-                <p className="text-xs text-muted-foreground">{stat.subtitle}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">{stat.subtitle}</p>
               )}
             </div>
           </div>

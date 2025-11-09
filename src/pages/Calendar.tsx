@@ -54,7 +54,7 @@ const Calendar = () => {
               variant="outline"
               size="default"
               onClick={goToToday}
-              className="self-start md:self-auto"
+              className="self-start md:self-auto hover-scale transition-all duration-300"
             >
               {t('calendar.today')}
             </Button>
@@ -68,7 +68,11 @@ const Calendar = () => {
               </TabsList>
             </Tabs>
 
-            <Button onClick={() => setIsAddModalOpen(true)} size="default" className="w-full sm:w-auto">
+            <Button 
+              onClick={() => setIsAddModalOpen(true)} 
+              size="default" 
+              className="w-full sm:w-auto hover-scale transition-all duration-300 shadow-md hover:shadow-lg"
+            >
               <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
               {t('calendar.addActivity')}
             </Button>

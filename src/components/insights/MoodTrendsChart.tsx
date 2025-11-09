@@ -62,7 +62,7 @@ const MoodTrendsChart = ({ entries, period }: MoodTrendsChartProps) => {
   }
 
   return (
-    <Card className="p-4 md:p-6 lg:p-8 h-full">
+    <Card className="p-4 md:p-6 lg:p-8 h-full animate-fade-in hover:shadow-lg transition-all duration-300">
       <h3 className="text-base md:text-lg font-semibold text-foreground mb-4 lg:mb-6">{t('insights.moodChart.title')}</h3>
       
       <ResponsiveContainer width="100%" height={300} className="md:h-[350px] lg:h-[400px]">

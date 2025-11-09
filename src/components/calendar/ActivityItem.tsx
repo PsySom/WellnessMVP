@@ -76,7 +76,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     <>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div
-          className={`group relative bg-card border border-border rounded-lg p-3 transition-all hover:shadow-md ${
+          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-pointer animate-fade-in ${
             isCompleted ? 'opacity-60' : ''
           }`}
           onClick={() => setIsDetailOpen(true)}
@@ -91,22 +91,22 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">{emoji}</span>
-                <h4 className={`font-medium text-sm ${isCompleted ? 'line-through' : ''}`}>
+              <div className="flex items-center gap-2 mb-1 md:mb-2">
+                <span className="text-lg md:text-xl transition-transform duration-300 group-hover:scale-110">{emoji}</span>
+                <h4 className={`font-medium text-sm md:text-base transition-colors duration-300 ${isCompleted ? 'line-through' : ''}`}>
                   {activity.title}
                 </h4>
-                <div className={`w-2 h-2 rounded-full ${impactColor}`} />
+                <div className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${impactColor} transition-all duration-300 group-hover:scale-125`} />
               </div>
 
               <div className="flex items-center gap-2 flex-wrap">
                 {activity.start_time && (
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs md:text-sm text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
                     {format(new Date(`2000-01-01T${activity.start_time}`), 'HH:mm')}
                   </span>
                 )}
                 {activity.duration_minutes && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs md:text-sm transition-all duration-300 group-hover:border-primary">
                     {activity.duration_minutes}m
                   </Badge>
                 )}

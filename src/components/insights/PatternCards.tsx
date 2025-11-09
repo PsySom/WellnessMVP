@@ -133,18 +133,22 @@ const PatternCards = ({ data }: PatternCardsProps) => {
   }
 
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-foreground">{t('insights.patterns.title')}</h2>
-      <div className="grid md:grid-cols-2 gap-4">
+    <div className="space-y-4 lg:space-y-6">
+      <h2 className="text-xl md:text-2xl font-semibold text-foreground animate-fade-in">{t('insights.patterns.title')}</h2>
+      <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
         {patterns.map((pattern, index) => (
-          <Card key={index} className="p-4">
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg ${pattern.bgColor}`}>
-                <pattern.icon className={`h-5 w-5 ${pattern.color}`} />
+          <Card 
+            key={index} 
+            className="p-4 md:p-5 lg:p-6 animate-fade-in hover-scale transition-all duration-300 hover:shadow-lg cursor-pointer group"
+            style={{ animationDelay: `${index * 150}ms` }}
+          >
+            <div className="flex items-start gap-3 md:gap-4">
+              <div className={`p-2 md:p-3 rounded-lg ${pattern.bgColor} transition-transform duration-300 group-hover:scale-110`}>
+                <pattern.icon className={`h-5 w-5 md:h-6 md:w-6 ${pattern.color}`} />
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-foreground mb-1">{pattern.title}</h4>
-                <p className="text-sm text-muted-foreground">{pattern.description}</p>
+                <h4 className="font-semibold text-foreground mb-1 md:mb-2 text-sm md:text-base">{pattern.title}</h4>
+                <p className="text-sm md:text-base text-muted-foreground">{pattern.description}</p>
               </div>
             </div>
           </Card>

@@ -160,7 +160,13 @@ const Insights = () => {
               <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{t('insights.title')}</h1>
               <p className="text-muted-foreground text-sm md:text-base mt-1">{getPeriodLabel()}</p>
             </div>
-            <Button onClick={handleExport} variant="outline" size="default" disabled={!hasData} className="self-start lg:self-auto">
+            <Button 
+              onClick={handleExport} 
+              variant="outline" 
+              size="default" 
+              disabled={!hasData} 
+              className="self-start lg:self-auto hover-scale transition-all duration-300 shadow-sm hover:shadow-md"
+            >
               <Download className="h-4 w-4 mr-2" />
               {t('insights.export')}
             </Button>
