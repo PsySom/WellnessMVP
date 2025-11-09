@@ -62,10 +62,10 @@ const MoodTrendsChart = ({ entries, period }: MoodTrendsChartProps) => {
   }
 
   return (
-    <Card className="p-6">
-      <h3 className="font-semibold text-foreground mb-4">{t('insights.moodChart.title')}</h3>
+    <Card className="p-4 md:p-6 lg:p-8 h-full">
+      <h3 className="text-base md:text-lg font-semibold text-foreground mb-4 lg:mb-6">{t('insights.moodChart.title')}</h3>
       
-      <ResponsiveContainer width="100%" height={300}>
+      <ResponsiveContainer width="100%" height={300} className="md:h-[350px] lg:h-[400px]">
         <AreaChart data={data}>
           <defs>
             <linearGradient id="moodGradientPositive" x1="0" y1="0" x2="0" y2="1">
@@ -109,17 +109,17 @@ const MoodTrendsChart = ({ entries, period }: MoodTrendsChartProps) => {
         </AreaChart>
       </ResponsiveContainer>
 
-      <div className="flex items-center justify-center gap-6 text-xs mt-4">
+      <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-xs md:text-sm mt-4 lg:mt-6">
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-accent" />
+          <div className="h-3 w-3 md:h-4 md:w-4 rounded bg-accent" />
           <span className="text-muted-foreground">{t('insights.moodChart.positive')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-3 w-3 rounded bg-destructive" />
+          <div className="h-3 w-3 md:h-4 md:w-4 rounded bg-destructive" />
           <span className="text-muted-foreground">{t('insights.moodChart.negative')}</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="h-0.5 w-6 bg-primary" style={{ borderTop: '2px dashed hsl(var(--primary))' }} />
+          <div className="h-0.5 w-6 md:w-8 bg-primary" style={{ borderTop: '2px dashed hsl(var(--primary))' }} />
           <span className="text-muted-foreground">{t('insights.moodChart.average')}: {avgMood.toFixed(1)}</span>
         </div>
       </div>

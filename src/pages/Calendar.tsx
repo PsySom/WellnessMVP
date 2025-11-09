@@ -26,49 +26,50 @@ const Calendar = () => {
     <AppLayout>
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="p-4 border-b border-border bg-card">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+        <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-card">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-6">
+            <div className="flex items-center gap-2 md:gap-4">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={goToPreviousWeek}
-                className="h-8 w-8"
+                className="h-8 w-8 md:h-10 md:w-10"
               >
-                <ChevronLeft className="h-4 w-4" />
+                <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
-              <h1 className="text-lg font-semibold min-w-[140px] text-center">
+              <h1 className="text-lg md:text-xl lg:text-2xl font-semibold min-w-[140px] md:min-w-[180px] text-center">
                 {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
               </h1>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={goToNextWeek}
-                className="h-8 w-8"
+                className="h-8 w-8 md:h-10 md:w-10"
               >
-                <ChevronRight className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </div>
             
             <Button
               variant="outline"
-              size="sm"
+              size="default"
               onClick={goToToday}
+              className="self-start md:self-auto"
             >
               {t('calendar.today')}
             </Button>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
-              <TabsList>
-                <TabsTrigger value="list">{t('calendar.list')}</TabsTrigger>
-                <TabsTrigger value="calendar">{t('calendar.calendar')}</TabsTrigger>
+              <TabsList className="w-full sm:w-auto">
+                <TabsTrigger value="list" className="flex-1 sm:flex-none">{t('calendar.list')}</TabsTrigger>
+                <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{t('calendar.calendar')}</TabsTrigger>
               </TabsList>
             </Tabs>
 
-            <Button onClick={() => setIsAddModalOpen(true)} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button onClick={() => setIsAddModalOpen(true)} size="default" className="w-full sm:w-auto">
+              <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
               {t('calendar.addActivity')}
             </Button>
           </div>

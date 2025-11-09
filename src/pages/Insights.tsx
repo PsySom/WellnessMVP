@@ -152,15 +152,15 @@ const Insights = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-6xl mx-auto p-6 space-y-6">
+      <div className="space-y-6 lg:space-y-8">
         {/* Header */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="space-y-4 lg:space-y-6">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">{t('insights.title')}</h1>
-              <p className="text-muted-foreground text-sm mt-1">{getPeriodLabel()}</p>
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{t('insights.title')}</h1>
+              <p className="text-muted-foreground text-sm md:text-base mt-1">{getPeriodLabel()}</p>
             </div>
-            <Button onClick={handleExport} variant="outline" size="sm" disabled={!hasData}>
+            <Button onClick={handleExport} variant="outline" size="default" disabled={!hasData} className="self-start lg:self-auto">
               <Download className="h-4 w-4 mr-2" />
               {t('insights.export')}
             </Button>
@@ -168,25 +168,25 @@ const Insights = () => {
 
           {/* Period Selector */}
           <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-            <TabsList className="grid grid-cols-4 w-full max-w-md">
-              <TabsTrigger value="week">{t('insights.period.week')}</TabsTrigger>
-              <TabsTrigger value="month">{t('insights.period.month')}</TabsTrigger>
-              <TabsTrigger value="3months">{t('insights.period.3months')}</TabsTrigger>
-              <TabsTrigger value="year">{t('insights.period.year')}</TabsTrigger>
+            <TabsList className="grid grid-cols-4 w-full max-w-md lg:max-w-lg">
+              <TabsTrigger value="week" className="text-xs md:text-sm">{t('insights.period.week')}</TabsTrigger>
+              <TabsTrigger value="month" className="text-xs md:text-sm">{t('insights.period.month')}</TabsTrigger>
+              <TabsTrigger value="3months" className="text-xs md:text-sm">{t('insights.period.3months')}</TabsTrigger>
+              <TabsTrigger value="year" className="text-xs md:text-sm">{t('insights.period.year')}</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
 
         {/* Content */}
         {loading ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="space-y-6 lg:space-y-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 lg:gap-6">
               {[...Array(4)].map((_, i) => (
-                <Skeleton key={i} className="h-24" />
+                <Skeleton key={i} className="h-24 md:h-28 lg:h-32" />
               ))}
             </div>
             {[...Array(4)].map((_, i) => (
-              <Skeleton key={i} className="h-64" />
+              <Skeleton key={i} className="h-64 lg:h-80" />
             ))}
           </div>
         ) : !hasData ? (
@@ -198,22 +198,28 @@ const Insights = () => {
             </p>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 lg:space-y-8">
             {/* Overview Cards */}
             <OverviewCards data={data} />
 
             {/* Mood Section */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">{t('insights.mood')}</h2>
-              <MoodTrendsChart entries={data.trackerEntries} period={period} />
-              <MoodDistribution entries={data.trackerEntries} />
+            <div className="space-y-4 lg:space-y-6">
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('insights.mood')}</h2>
+              <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
+                <div className="lg:col-span-2">
+                  <MoodTrendsChart entries={data.trackerEntries} period={period} />
+                </div>
+                <div className="lg:col-span-1">
+                  <MoodDistribution entries={data.trackerEntries} />
+                </div>
+              </div>
             </div>
 
             {/* Emotional Landscape */}
             {data.trackerEntries.some((e: any) => e.tracker_emotions?.length > 0) && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-foreground">{t('insights.emotionalLandscape')}</h2>
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-4 lg:space-y-6">
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('insights.emotionalLandscape')}</h2>
+                <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
                   <TopEmotions entries={data.trackerEntries} />
                   <EmotionBalance entries={data.trackerEntries} />
                 </div>
@@ -222,16 +228,16 @@ const Insights = () => {
 
             {/* Stress & Anxiety */}
             {data.trackerEntries.some((e: any) => e.stress_level !== null || e.anxiety_level !== null) && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-foreground">{t('insights.stressAndAnxiety')}</h2>
+              <div className="space-y-4 lg:space-y-6">
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('insights.stressAndAnxiety')}</h2>
                 <StressAnxietyChart entries={data.trackerEntries} period={period} />
               </div>
             )}
 
             {/* Energy & Satisfaction */}
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold text-foreground">{t('insights.energyAndSatisfaction')}</h2>
-              <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-4 lg:space-y-6">
+              <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('insights.energyAndSatisfaction')}</h2>
+              <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
                 <EnergyPatterns entries={data.trackerEntries} period={period} />
                 <SatisfactionCharts entries={data.trackerEntries} />
               </div>
@@ -239,9 +245,9 @@ const Insights = () => {
 
             {/* Activities */}
             {data.activities.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-foreground">{t('insights.activities')}</h2>
-                <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-4 lg:space-y-6">
+                <h2 className="text-xl md:text-2xl font-semibold text-foreground">{t('insights.activities')}</h2>
+                <div className="grid md:grid-cols-2 gap-4 lg:gap-6">
                   <ActivityCompletion activities={data.activities} period={period} />
                   <ActivityBreakdown activities={data.activities} />
                 </div>
@@ -249,8 +255,10 @@ const Insights = () => {
             )}
 
             {/* Patterns & Recommendations */}
-            <PatternCards data={data} />
-            <RecommendationsCard data={data} />
+            <div className="grid lg:grid-cols-2 gap-4 lg:gap-6">
+              <PatternCards data={data} />
+              <RecommendationsCard data={data} />
+            </div>
           </div>
         )}
       </div>

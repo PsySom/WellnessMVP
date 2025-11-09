@@ -72,22 +72,22 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
 
   return (
     <ScrollArea className="h-full">
-      <div className="p-2 sm:p-4">
-        <div className="text-center mb-3 sm:mb-4">
-          <h2 className="text-lg sm:text-xl font-semibold">{format(currentDate, 'MMMM yyyy')}</h2>
+      <div className="p-2 sm:p-4 md:p-6 lg:p-8">
+        <div className="text-center mb-3 sm:mb-4 lg:mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-semibold">{format(currentDate, 'MMMM yyyy')}</h2>
         </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1 sm:mb-2">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 lg:gap-3 mb-1 sm:mb-2">
           {weekdays.map((day, index) => (
-            <div key={`${day}-${index}`} className="text-center text-[10px] sm:text-xs font-medium text-muted-foreground py-1 sm:py-2">
+            <div key={`${day}-${index}`} className="text-center text-[10px] sm:text-xs md:text-sm font-medium text-muted-foreground py-1 sm:py-2 md:py-3">
               {day}
             </div>
           ))}
         </div>
 
         {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
+        <div className="grid grid-cols-7 gap-0.5 sm:gap-1 md:gap-2 lg:gap-3">
           {days.map((day) => {
             const dayActivities = getActivitiesForDay(day);
             const isCurrentMonth = isSameMonth(day, currentDate);
@@ -100,7 +100,7 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
                 key={day.toString()}
                 onClick={() => onDateChange(day)}
                 className={`
-                  relative aspect-square p-1 sm:p-2 rounded-md sm:rounded-lg border transition-all
+                  relative aspect-square p-1 sm:p-2 md:p-3 lg:p-4 rounded-md sm:rounded-lg border transition-all
                   ${isCurrentMonth ? 'border-border' : 'border-transparent'}
                   ${isToday ? 'border-2 border-primary' : ''}
                   ${isSelected ? 'bg-primary text-primary-foreground' : 'bg-card hover:bg-accent/10'}
@@ -108,27 +108,27 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
                 `}
               >
                 <div className="flex flex-col h-full">
-                  <span className={`text-xs sm:text-sm font-medium ${isSelected ? 'text-primary-foreground' : ''}`}>
+                  <span className={`text-xs sm:text-sm md:text-base font-medium ${isSelected ? 'text-primary-foreground' : ''}`}>
                     {format(day, 'd')}
                   </span>
 
                   {/* Activity Dots */}
                   {dayActivities.length > 0 && (
-                    <div className="flex-1 flex flex-col items-center justify-center gap-0.5 sm:gap-1 mt-0.5 sm:mt-1">
-                      <div className="flex gap-0.5 sm:gap-1 flex-wrap justify-center">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-0.5 sm:gap-1 md:gap-1.5 mt-0.5 sm:mt-1 md:mt-2">
+                      <div className="flex gap-0.5 sm:gap-1 md:gap-1.5 flex-wrap justify-center">
                         {dayActivities.slice(0, 3).map((activity, i) => {
                           const color = IMPACT_COLORS[activity.impact_type] || 'bg-muted';
                           return (
                             <div
                               key={i}
-                              className={`w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full ${color}`}
+                              className={`w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full ${color}`}
                             />
                           );
                         })}
                       </div>
 
                       {/* Completion Circle */}
-                      <div className="relative w-4 h-4 sm:w-6 sm:h-6">
+                      <div className="relative w-4 h-4 sm:w-6 sm:h-6 md:w-8 md:h-8">
                         <svg className="w-full h-full transform -rotate-90">
                           <circle
                             cx="50%"
