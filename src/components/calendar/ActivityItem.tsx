@@ -142,7 +142,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                 </CollapsibleContent>
               )}
 
-              {activity.exercise_id && activity.exercises?.slug && (
+              {(activity.exercise_id && activity.exercises?.slug) ? (
                 <Button
                   size="sm"
                   className="mt-2"
@@ -154,7 +154,19 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                   <Play className="h-3 w-3 mr-1" />
                   {t('exercises.start')}
                 </Button>
-              )}
+              ) : (activity.test_id && activity.tests?.slug) ? (
+                <Button
+                  size="sm"
+                  className="mt-2"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/tests/${activity.tests.slug}/take`);
+                  }}
+                >
+                  <Play className="h-3 w-3 mr-1" />
+                  {t('exercises.start')}
+                </Button>
+              ) : null}
             </div>
 
             {activity.description && (

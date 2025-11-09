@@ -210,7 +210,7 @@ const Exercises = () => {
       <ActivityFormModal
         open={activityModalOpen}
         onOpenChange={setActivityModalOpen}
-        activity={getPrefilledActivity()}
+        initialValues={getPrefilledActivity()}
         exerciseId={selectedExercise?.id}
       />
     </AppLayout>

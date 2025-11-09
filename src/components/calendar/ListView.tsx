@@ -54,7 +54,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
     setLoading(true);
     const { data, error } = await supabase
       .from('activities')
-      .select('*, exercises(slug)')
+      .select('*, exercises(slug), tests(slug)')
       .eq('user_id', user.id)
       .eq('date', format(currentDate, 'yyyy-MM-dd'))
       .order('start_time', { ascending: true });

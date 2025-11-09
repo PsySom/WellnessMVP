@@ -22,6 +22,7 @@ interface ActivityFormModalProps {
   defaultDate?: Date;
   activity?: any;
   exerciseId?: string;
+  initialValues?: any;
 }
 
 const activitySchema = z.object({
@@ -58,10 +59,11 @@ const IMPACT_TYPES = [
   { value: 'mixed', label: 'Mixed', color: 'bg-blue-500' }
 ];
 
-export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId }: ActivityFormModalProps) => {
+export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
+  const isEditing = Boolean(activity?.id);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -78,7 +80,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   });
 
   useEffect(() => {
-    if (activity) {
+    if (activity && activity.id) {
       setFormData({
         title: activity.title || '',
         description: activity.description || '',
@@ -93,10 +95,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         reminder_enabled: activity.reminder_enabled || false,
         reminder_minutes_before: activity.reminder_minutes_before || 15
       });
+    } else if (initialValues) {
+      setFormData(prev => ({ ...prev, ...initialValues }));
     } else if (defaultDate) {
       setFormData(prev => ({ ...prev, date: defaultDate }));
     }
-  }, [activity, defaultDate, open]);
+  }, [activity, initialValues, defaultDate, open]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +126,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
     setLoading(true);
 
-    const activityData = {
+    const baseData = {
       user_id: user.id,
       title: formData.title.trim(),
       description: formData.description?.trim() || null,
@@ -136,13 +140,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
-      status: 'planned' as const,
-      exercise_id: exerciseId || null
+      status: 'planned' as const
     };
 
-    const { error } = activity
-      ? await supabase.from('activities').update(activityData).eq('id', activity.id)
-      : await supabase.from('activities').insert(activityData);
+    const { error } = isEditing
+      ? await supabase.from('activities').update(baseData).eq('id', activity.id)
+      : await supabase.from('activities').insert({ ...baseData, exercise_id: exerciseId ?? null });
 
     if (error) {
       toast({
@@ -165,7 +168,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl md:text-2xl">{activity ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl">{isEditing ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">

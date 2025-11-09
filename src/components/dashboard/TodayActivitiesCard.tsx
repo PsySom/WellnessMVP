@@ -17,7 +17,11 @@ interface Activity {
   status: string;
   impact_type: string;
   exercise_id: string | null;
+  test_id: string | null;
   exercises?: {
+    slug: string;
+  };
+  tests?: {
     slug: string;
   };
 }
@@ -44,7 +48,7 @@ const TodayActivitiesCard = () => {
       
       const { data, error } = await supabase
         .from('activities')
-        .select('id, title, start_time, status, impact_type, exercise_id, exercises(slug)')
+        .select('id, title, start_time, status, impact_type, exercise_id, test_id, exercises(slug), tests(slug)')
         .eq('user_id', user.id)
         .eq('date', today)
         .order('start_time', { ascending: true });
@@ -175,7 +179,7 @@ const TodayActivitiesCard = () => {
                   {activity.start_time ? activity.start_time.slice(0, 5) : t('dashboard.todayActivitiesCard.noTime')}
                 </p>
               </div>
-              {activity.exercise_id && activity.exercises?.slug && (
+              {(activity.exercise_id && activity.exercises?.slug) ? (
                 <Button
                   size="sm"
                   variant="default"
@@ -187,7 +191,19 @@ const TodayActivitiesCard = () => {
                 >
                   {t('exercises.start')}
                 </Button>
-              )}
+              ) : (activity.test_id && activity.tests?.slug) ? (
+                <Button
+                  size="sm"
+                  variant="default"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/tests/${activity.tests.slug}/take`);
+                  }}
+                  className="shrink-0"
+                >
+                  {t('exercises.start')}
+                </Button>
+              ) : null}
             </div>
           ))}
         </div>
