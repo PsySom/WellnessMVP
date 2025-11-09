@@ -96,9 +96,9 @@ const Exercises = () => {
     if (searchQuery.trim()) {
       filtered = filtered.filter(ex => {
         const localizedName = getLocalizedField(ex, 'name');
-        const localizedEffects = getLocalizedField(ex, 'effects');
+        const localizedEffects = getLocalizedArray(ex, 'effects');
         return localizedName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (Array.isArray(localizedEffects) && localizedEffects.some((effect: string) => effect.toLowerCase().includes(searchQuery.toLowerCase())));
+          localizedEffects.some((effect: string) => effect.toLowerCase().includes(searchQuery.toLowerCase()));
       });
     }
 
