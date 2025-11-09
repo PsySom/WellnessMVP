@@ -11,8 +11,16 @@ interface DaySectionProps {
 export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectionProps) => {
   if (activities.length === 0) return null;
 
-  const completedCount = activities.filter(a => a.status === 'completed').length;
-  const totalCount = activities.length;
+  // Sort activities by start_time
+  const sortedActivities = [...activities].sort((a, b) => {
+    if (!a.start_time && !b.start_time) return 0;
+    if (!a.start_time) return 1;
+    if (!b.start_time) return -1;
+    return a.start_time.localeCompare(b.start_time);
+  });
+
+  const completedCount = sortedActivities.filter(a => a.status === 'completed').length;
+  const totalCount = sortedActivities.length;
 
   return (
     <div className="mb-lg">
@@ -29,7 +37,7 @@ export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectio
       </div>
 
       <div className="space-y-sm">
-        {activities.map((activity) => (
+        {sortedActivities.map((activity) => (
           <ActivityItem
             key={activity.id}
             activity={activity}

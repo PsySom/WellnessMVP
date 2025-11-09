@@ -67,9 +67,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
     category: 'leisure' as const,
     impact_type: 'neutral' as const,
     date: defaultDate || new Date(),
-    all_day: true,
     start_time: '09:00',
-    end_time: '10:00',
     duration_minutes: 60,
     reminder_enabled: false,
     reminder_minutes_before: 15
@@ -83,9 +81,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
         category: activity.category || 'leisure',
         impact_type: activity.impact_type || 'neutral',
         date: new Date(activity.date),
-        all_day: !activity.start_time,
         start_time: activity.start_time || '09:00',
-        end_time: activity.end_time || '10:00',
         duration_minutes: activity.duration_minutes || 60,
         reminder_enabled: activity.reminder_enabled || false,
         reminder_minutes_before: activity.reminder_minutes_before || 15
@@ -126,8 +122,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
       category: formData.category,
       impact_type: formData.impact_type,
       date: format(formData.date, 'yyyy-MM-dd'),
-      start_time: formData.all_day ? null : formData.start_time,
-      end_time: formData.all_day ? null : formData.end_time,
+      start_time: formData.start_time,
+      end_time: null,
       duration_minutes: formData.duration_minutes,
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
@@ -228,39 +224,29 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
             </Popover>
           </div>
 
-          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="all-day" className="text-sm md:text-base cursor-pointer">{t('calendar.form.allDay')}</Label>
-            <Switch
-              id="all-day"
-              checked={formData.all_day}
-              onCheckedChange={(checked) => setFormData({ ...formData, all_day: checked })}
+          <div>
+            <Label htmlFor="start-time" className="text-sm md:text-base">{t('calendar.form.startTime')}</Label>
+            <Input
+              id="start-time"
+              type="time"
+              value={formData.start_time}
+              onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
+              className="h-10 md:h-11 text-sm md:text-base"
             />
           </div>
 
-          {!formData.all_day && (
-            <div className="grid grid-cols-2 gap-4 md:gap-6 animate-fade-in">
-              <div>
-                <Label htmlFor="start-time" className="text-sm md:text-base">{t('calendar.form.startTime')}</Label>
-                <Input
-                  id="start-time"
-                  type="time"
-                  value={formData.start_time}
-                  onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                  className="h-10 md:h-11 text-sm md:text-base"
-                />
-              </div>
-              <div>
-                <Label htmlFor="end-time" className="text-sm md:text-base">{t('calendar.form.endTime')}</Label>
-                <Input
-                  id="end-time"
-                  type="time"
-                  value={formData.end_time}
-                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
-                  className="h-10 md:h-11 text-sm md:text-base"
-                />
-              </div>
-            </div>
-          )}
+          <div>
+            <Label htmlFor="duration" className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
+            <Input
+              id="duration"
+              type="number"
+              min="5"
+              max="1440"
+              value={formData.duration_minutes}
+              onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 60 })}
+              className="h-10 md:h-11 text-sm md:text-base"
+            />
+          </div>
 
           <div>
             <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.activityType')}</Label>
