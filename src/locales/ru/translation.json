@@ -227,7 +227,8 @@
       "descriptionPlaceholder": "Добавьте детали об этой активности...",
       "category": "Категория",
       "date": "Дата",
-      "impactType": "Тип влияния",
+      "activityType": "Типы активности",
+      "endTime": "Время окончания",
       "allDay": "Весь день",
       "startTime": "Время начала",
       "duration": "Продолжительность (мин)",
@@ -258,11 +259,11 @@
       "leisure": "Досуг",
       "hydration": "Гидратация"
     },
-    "impactTypes": {
-      "positive": "Позитивное",
-      "negative": "Негативное",
-      "neutral": "Нейтральное",
-      "mixed": "Смешанное"
+    "activityTypes": {
+      "positive": "Восстанавливающие",
+      "negative": "Истощающие",
+      "neutral": "Нейтральные",
+      "mixed": "Смешанные"
     },
     "weekdays": {
       "short": {

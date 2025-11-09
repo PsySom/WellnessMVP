@@ -227,7 +227,8 @@
       "descriptionPlaceholder": "Add details about this activity...",
       "category": "Category",
       "date": "Date",
-      "impactType": "Impact Type",
+      "activityType": "Activity Type",
+      "endTime": "End Time",
       "allDay": "All Day Event",
       "startTime": "Start Time",
       "duration": "Duration (min)",
@@ -258,9 +259,9 @@
       "leisure": "Leisure",
       "hydration": "Hydration"
     },
-    "impactTypes": {
-      "positive": "Positive",
-      "negative": "Negative",
+    "activityTypes": {
+      "positive": "Restorative",
+      "negative": "Depleting",
       "neutral": "Neutral",
       "mixed": "Mixed"
     },

@@ -227,7 +227,8 @@
       "descriptionPlaceholder": "Ajoutez des détails sur cette activité...",
       "category": "Catégorie",
       "date": "Date",
-      "impactType": "Type d'impact",
+      "activityType": "Type d'activité",
+      "endTime": "Heure de fin",
       "allDay": "Événement toute la journée",
       "startTime": "Heure de début",
       "duration": "Durée (min)",
@@ -258,9 +259,9 @@
       "leisure": "Loisirs",
       "hydration": "Hydratation"
     },
-    "impactTypes": {
-      "positive": "Positif",
-      "negative": "Négatif",
+    "activityTypes": {
+      "positive": "Réparatrice",
+      "negative": "Épuisante",
       "neutral": "Neutre",
       "mixed": "Mixte"
     },

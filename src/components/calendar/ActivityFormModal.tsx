@@ -51,10 +51,10 @@ const CATEGORIES = [
 ];
 
 const IMPACT_TYPES = [
-  { value: 'positive', label: 'Positive', color: 'bg-accent' },
-  { value: 'negative', label: 'Negative', color: 'bg-destructive' },
-  { value: 'neutral', label: 'Neutral', color: 'bg-muted' },
-  { value: 'mixed', label: 'Mixed', color: 'bg-warning' }
+  { value: 'positive', label: 'Positive', color: 'bg-green-500' },
+  { value: 'negative', label: 'Negative', color: 'bg-red-500' },
+  { value: 'neutral', label: 'Neutral', color: 'bg-gray-400' },
+  { value: 'mixed', label: 'Mixed', color: 'bg-yellow-500' }
 ];
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }: ActivityFormModalProps) => {
@@ -189,63 +189,43 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
             />
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4 md:gap-6">
-            <div>
-              <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
-              >
-                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {CATEGORIES.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
-                      {cat.emoji} {t(`calendar.categories.${cat.value}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label className="text-sm md:text-base">{t('calendar.form.date')}</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start h-10 md:h-11 text-sm md:text-base">
-                    <CalendarIcon className="mr-2 h-4 w-4 md:h-5 md:w-5" />
-                    {format(formData.date, 'PPP')}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.date}
-                    onSelect={(date) => date && setFormData({ ...formData, date })}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+          <div>
+            <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
+            >
+              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(cat => (
+                  <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
+                    {cat.emoji} {t(`calendar.categories.${cat.value}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
-            <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.impactType')}</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
-              {IMPACT_TYPES.map(type => (
-                <Button
-                  key={type.value}
-                  type="button"
-                  variant={formData.impact_type === type.value ? 'default' : 'outline'}
-                  onClick={() => setFormData({ ...formData, impact_type: type.value as typeof formData.impact_type })}
-                  className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
-                >
-                  <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full ${type.color} mr-2`} />
-                  {t(`calendar.impactTypes.${type.value}`)}
+            <Label className="text-sm md:text-base">{t('calendar.form.date')}</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start h-10 md:h-11 text-sm md:text-base">
+                  <CalendarIcon className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                  {format(formData.date, 'PPP')}
                 </Button>
-              ))}
-            </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.date}
+                  onSelect={(date) => date && setFormData({ ...formData, date })}
+                  className="pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
@@ -270,21 +250,35 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                 />
               </div>
               <div>
-                <Label htmlFor="duration" className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
+                <Label htmlFor="end-time" className="text-sm md:text-base">{t('calendar.form.endTime')}</Label>
                 <Input
-                  id="duration"
-                  type="number"
-                  min="5"
-                  max="1440"
-                  step="5"
-                  value={formData.duration_minutes}
-                  onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 5 })}
+                  id="end-time"
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => setFormData({ ...formData, end_time: e.target.value })}
                   className="h-10 md:h-11 text-sm md:text-base"
-                  placeholder="60"
                 />
               </div>
             </div>
           )}
+
+          <div>
+            <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.activityType')}</Label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+              {IMPACT_TYPES.map(type => (
+                <Button
+                  key={type.value}
+                  type="button"
+                  variant={formData.impact_type === type.value ? 'default' : 'outline'}
+                  onClick={() => setFormData({ ...formData, impact_type: type.value as typeof formData.impact_type })}
+                  className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
+                >
+                  <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full ${type.color} mr-2`} />
+                  {t(`calendar.activityTypes.${type.value}`)}
+                </Button>
+              ))}
+            </div>
+          </div>
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
             <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">{t('calendar.form.reminder')}</Label>
