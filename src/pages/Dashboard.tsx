@@ -12,6 +12,8 @@ import QuickStatsCard from '@/components/dashboard/QuickStatsCard';
 import InsightsPreview from '@/components/dashboard/InsightsPreview';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
+import { usePullToRefresh } from '@/hooks/usePullToRefresh';
+import { PullToRefresh } from '@/components/common/PullToRefresh';
 
 export interface TrackerData {
   moodScore: number;
@@ -62,6 +64,14 @@ const Dashboard = () => {
     fetchTodayEntries();
   };
 
+  const handleRefresh = async () => {
+    await fetchTodayEntries();
+  };
+
+  const { containerRef, pullDistance, isRefreshing, shouldShowIndicator } = usePullToRefresh({
+    onRefresh: handleRefresh,
+  });
+
   if (loading) {
     return (
       <AppLayout>
@@ -76,7 +86,14 @@ const Dashboard = () => {
 
   return (
     <AppLayout>
-      <div className="space-y-lg md:space-y-xl">
+      <div ref={containerRef} className="space-y-lg md:space-y-xl relative overflow-auto">
+        {shouldShowIndicator && (
+          <PullToRefresh 
+            pullDistance={pullDistance} 
+            isRefreshing={isRefreshing} 
+          />
+        )}
+        
         <DashboardHeader />
         
         {/* Main Content Grid - 2 columns on desktop */}
