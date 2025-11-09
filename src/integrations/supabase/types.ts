@@ -488,13 +488,19 @@ export type Database = {
           description: string | null
           description_en: string | null
           description_fr: string | null
+          description_ru: string | null
           duration_minutes: number | null
           id: string
           name: string
           name_en: string
           name_fr: string
+          name_ru: string | null
           questions: Json
+          questions_fr: Json | null
+          questions_ru: Json | null
           scoring_info: Json
+          scoring_info_fr: Json | null
+          scoring_info_ru: Json | null
           slug: string
           total_questions: number
         }
@@ -503,13 +509,19 @@ export type Database = {
           description?: string | null
           description_en?: string | null
           description_fr?: string | null
+          description_ru?: string | null
           duration_minutes?: number | null
           id?: string
           name: string
           name_en: string
           name_fr: string
+          name_ru?: string | null
           questions: Json
+          questions_fr?: Json | null
+          questions_ru?: Json | null
           scoring_info: Json
+          scoring_info_fr?: Json | null
+          scoring_info_ru?: Json | null
           slug: string
           total_questions: number
         }
@@ -518,13 +530,19 @@ export type Database = {
           description?: string | null
           description_en?: string | null
           description_fr?: string | null
+          description_ru?: string | null
           duration_minutes?: number | null
           id?: string
           name?: string
           name_en?: string
           name_fr?: string
+          name_ru?: string | null
           questions?: Json
+          questions_fr?: Json | null
+          questions_ru?: Json | null
           scoring_info?: Json
+          scoring_info_fr?: Json | null
+          scoring_info_ru?: Json | null
           slug?: string
           total_questions?: number
         }
