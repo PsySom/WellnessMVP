@@ -70,6 +70,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
     anytime: true,
     start_time: '09:00',
     duration_minutes: 60,
+    is_recurring: false,
+    recurrence_pattern: { type: 'none' as 'none' | 'daily' | 'weekly' | 'times_per_day_1' | 'times_per_day_2' | 'times_per_day_3' },
     reminder_enabled: false,
     reminder_minutes_before: 15
   });
@@ -85,6 +87,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
         anytime: !activity.start_time,
         start_time: activity.start_time || '09:00',
         duration_minutes: activity.duration_minutes || 60,
+        is_recurring: activity.is_recurring || false,
+        recurrence_pattern: activity.recurrence_pattern || { type: 'none' },
         reminder_enabled: activity.reminder_enabled || false,
         reminder_minutes_before: activity.reminder_minutes_before || 15
       });
@@ -127,6 +131,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
       start_time: formData.anytime ? null : formData.start_time,
       end_time: null,
       duration_minutes: formData.duration_minutes,
+      is_recurring: formData.is_recurring,
+      recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
       status: 'planned' as const
@@ -249,16 +255,26 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           )}
 
           <div>
-            <Label htmlFor="duration" className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
-            <Input
-              id="duration"
-              type="number"
-              min="5"
-              max="1440"
-              value={formData.duration_minutes}
-              onChange={(e) => setFormData({ ...formData, duration_minutes: parseInt(e.target.value) || 60 })}
-              className="h-10 md:h-11 text-sm md:text-base"
-            />
+            <Label className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
+            <Select
+              value={formData.duration_minutes.toString()}
+              onValueChange={(v) => setFormData({ ...formData, duration_minutes: parseInt(v) })}
+            >
+              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10" className="text-sm md:text-base">10 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="15" className="text-sm md:text-base">15 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="30" className="text-sm md:text-base">30 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="45" className="text-sm md:text-base">45 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="60" className="text-sm md:text-base">1 {t('calendar.form.hour')}</SelectItem>
+                <SelectItem value="120" className="text-sm md:text-base">2 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="180" className="text-sm md:text-base">3 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="240" className="text-sm md:text-base">4 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="300" className="text-sm md:text-base">{t('calendar.form.more')}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -278,6 +294,36 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
               ))}
             </div>
           </div>
+
+          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
+            <Label htmlFor="recurring" className="text-sm md:text-base cursor-pointer">{t('calendar.form.recurring')}</Label>
+            <Switch
+              id="recurring"
+              checked={formData.is_recurring}
+              onCheckedChange={(checked) => setFormData({ ...formData, is_recurring: checked, recurrence_pattern: { type: checked ? 'daily' : 'none' } })}
+            />
+          </div>
+
+          {formData.is_recurring && (
+            <div className="animate-fade-in">
+              <Label className="text-sm md:text-base">{t('calendar.form.recurrenceType')}</Label>
+              <Select
+                value={formData.recurrence_pattern.type}
+                onValueChange={(v) => setFormData({ ...formData, recurrence_pattern: { type: v as any } })}
+              >
+                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="times_per_day_1" className="text-sm md:text-base">{t('calendar.form.oncePerDay')}</SelectItem>
+                  <SelectItem value="times_per_day_2" className="text-sm md:text-base">{t('calendar.form.twicePerDay')}</SelectItem>
+                  <SelectItem value="times_per_day_3" className="text-sm md:text-base">{t('calendar.form.thricePerDay')}</SelectItem>
+                  <SelectItem value="daily" className="text-sm md:text-base">{t('calendar.form.everyDay')}</SelectItem>
+                  <SelectItem value="weekly" className="text-sm md:text-base">{t('calendar.form.everyWeek')}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
             <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">{t('calendar.form.reminder')}</Label>

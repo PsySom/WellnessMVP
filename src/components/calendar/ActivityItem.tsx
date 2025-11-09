@@ -38,7 +38,21 @@ const IMPACT_COLORS: Record<string, string> = {
 export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const isCompleted = activity.status === 'completed';
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    setIsDragging(true);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('activityId', activity.id);
+    e.dataTransfer.setData('startTime', activity.start_time || '');
+    e.dataTransfer.setData('duration', activity.duration_minutes?.toString() || '60');
+  };
+
+  const handleDragEnd = () => {
+    setIsDragging(false);
+  };
 
   const handleToggleComplete = async () => {
     
@@ -76,9 +90,12 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     <>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div
+          draggable={!isCompleted && !!activity.start_time}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
           className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-pointer animate-fade-in ${
             isCompleted ? 'opacity-60' : ''
-          }`}
+          } ${isDragging ? 'opacity-50' : ''} ${!isCompleted && activity.start_time ? 'cursor-move' : ''}`}
           onClick={() => setIsDetailOpen(true)}
         >
           <div className="flex items-start gap-3">
