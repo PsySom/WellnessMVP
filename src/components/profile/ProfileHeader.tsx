@@ -5,6 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Camera, Edit, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 interface ProfileHeaderProps {
   profile: any;
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
 }
 
 export const ProfileHeader = ({ profile, onEdit, onAvatarUpdate }: ProfileHeaderProps) => {
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,7 +111,9 @@ export const ProfileHeader = ({ profile, onEdit, onAvatarUpdate }: ProfileHeader
           <h1 className="text-3xl font-bold text-foreground mb-1">
             {profile.full_name || 'Anonymous User'}
           </h1>
-          <p className="text-muted-foreground mb-4">Member since {joinDate}</p>
+          <p className="text-base text-muted-foreground mb-md">
+            {t('profile.memberSince')} {joinDate}
+          </p>
           <Button onClick={onEdit} aria-label="Edit profile information">
             <Edit className="h-4 w-4 mr-2" aria-hidden="true" />
             Edit Profile

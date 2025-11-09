@@ -103,7 +103,7 @@ const Profile = () => {
     <AppLayout>
       <div className="space-y-6 lg:space-y-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{t('profile.title')}</h1>
+          <h1 className="text-3xl font-bold text-foreground animate-slide-up">{t('profile.title')}</h1>
           <Button variant="outline" onClick={signOut} className="hover-scale transition-all">
             <LogOut className="h-4 w-4 md:h-5 md:w-5 mr-2" />
             {t('profile.logout')}
@@ -111,12 +111,12 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1 md:gap-2">
-            <TabsTrigger value="profile" className="text-xs md:text-sm">{t('settings.tabs.profile')}</TabsTrigger>
-            <TabsTrigger value="notifications" className="text-xs md:text-sm">{t('settings.tabs.notifications')}</TabsTrigger>
-            <TabsTrigger value="appearance" className="text-xs md:text-sm">{t('settings.tabs.appearance')}</TabsTrigger>
-            <TabsTrigger value="language" className="text-xs md:text-sm">{t('settings.language.title')}</TabsTrigger>
-            <TabsTrigger value="privacy" className="text-xs md:text-sm">{t('settings.tabs.privacy')}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+            <TabsTrigger value="profile" className="text-sm">{t('settings.tabs.profile')}</TabsTrigger>
+            <TabsTrigger value="notifications" className="text-sm">{t('settings.tabs.notifications')}</TabsTrigger>
+            <TabsTrigger value="appearance" className="text-sm">{t('settings.tabs.appearance')}</TabsTrigger>
+            <TabsTrigger value="language" className="text-sm">{t('settings.language.title')}</TabsTrigger>
+            <TabsTrigger value="privacy" className="text-sm">{t('settings.tabs.privacy')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="space-y-6 lg:space-y-8 mt-6 animate-fade-in">

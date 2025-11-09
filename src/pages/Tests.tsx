@@ -122,21 +122,21 @@ const Tests = () => {
                 >
                   <div className="space-y-4 md:space-y-5">
                     <div>
-                      <h3 className="text-xl md:text-2xl font-semibold text-foreground transition-colors duration-300 group-hover:text-primary">
+                       <h3 className="text-2xl font-semibold text-foreground medium-transition group-hover:text-primary">
                         {test.name_en}
                       </h3>
-                      <p className="text-sm md:text-base text-muted-foreground mt-2">
+                      <p className="text-base text-muted-foreground mt-sm">
                         {test.description_en}
                       </p>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 md:gap-3">
-                      <Badge variant="outline" className="gap-1 md:gap-2 text-xs md:text-sm transition-all duration-300 group-hover:border-primary">
-                        <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                    <div className="flex flex-wrap gap-sm">
+                      <Badge variant="outline" className="gap-1 text-sm medium-transition group-hover:border-primary">
+                        <Clock className="h-4 w-4" />
                         {test.duration_minutes} min
                       </Badge>
-                      <Badge variant="outline" className="gap-1 md:gap-2 text-xs md:text-sm transition-all duration-300 group-hover:border-primary">
-                        <FileText className="h-3 w-3 md:h-4 md:w-4" />
+                      <Badge variant="outline" className="gap-1 text-sm medium-transition group-hover:border-primary">
+                        <FileText className="h-4 w-4" />
                         {test.total_questions} questions
                       </Badge>
                     </div>

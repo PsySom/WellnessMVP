@@ -115,14 +115,18 @@ export const ProfileStats = ({ userId, joinDate }: ProfileStatsProps) => {
   ];
 
   return (
-    <Card className="p-6">
-      <h2 className="text-xl font-semibold text-foreground mb-4">{t('profile.stats.title')}</h2>
+    <Card className="p-lg animate-fade-in-scale">
+      <h2 className="text-xl font-semibold text-foreground mb-md">{t('profile.stats.title')}</h2>
       
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-md">
         {statItems.map((stat, index) => (
-          <div key={index} className="text-center">
-            <div className="flex justify-center mb-2">
-              <div className="p-3 bg-muted rounded-lg">
+          <div 
+            key={index} 
+            className="text-center animate-scale-in medium-transition hover:scale-105 cursor-pointer"
+            style={{ animationDelay: `calc(${index} * var(--animation-delay-xs))` }}
+          >
+            <div className="flex justify-center mb-sm">
+              <div className="p-sm bg-muted rounded-lg medium-transition spring-smooth hover:scale-110">
                 <stat.icon className={`h-6 w-6 ${stat.color}`} />
               </div>
             </div>

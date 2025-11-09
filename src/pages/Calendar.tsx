@@ -37,7 +37,7 @@ const Calendar = () => {
               >
                 <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
-              <h1 className="text-lg md:text-xl lg:text-2xl font-semibold min-w-[140px] md:min-w-[180px] text-center">
+              <h1 className="text-2xl font-semibold min-w-[140px] text-center animate-fade-in">
                 {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
               </h1>
               <Button

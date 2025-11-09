@@ -91,31 +91,31 @@ const Exercises = () => {
       <div className="space-y-6 lg:space-y-8 animate-fade-in">
         {/* Header */}
         <div>
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">Exercises & Practices</h1>
-          <p className="text-sm md:text-base text-muted-foreground mt-2">
+          <h1 className="text-3xl font-bold text-foreground animate-slide-up">Exercises & Practices</h1>
+          <p className="text-base text-muted-foreground mt-sm">
             Guided exercises for mental wellness
           </p>
         </div>
 
         {/* Search */}
         <div className="relative max-w-2xl">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 md:h-5 md:w-5 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search exercises..."
-            className="pl-10 md:pl-12 h-10 md:h-12 text-sm md:text-base"
+            className="pl-10 h-12 text-base"
           />
         </div>
 
         {/* Category Tabs */}
         <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
           <TabsList className="w-full justify-start overflow-x-auto">
-            <TabsTrigger value="all" className="text-xs md:text-sm">All</TabsTrigger>
-            <TabsTrigger value="grounding" className="text-xs md:text-sm">Grounding</TabsTrigger>
-            <TabsTrigger value="stress" className="text-xs md:text-sm">Stress Relief</TabsTrigger>
-            <TabsTrigger value="anxiety" className="text-xs md:text-sm">Anxiety</TabsTrigger>
-            <TabsTrigger value="cognitive" className="text-xs md:text-sm">Cognitive</TabsTrigger>
+            <TabsTrigger value="all" className="text-sm">All</TabsTrigger>
+            <TabsTrigger value="grounding" className="text-sm">Grounding</TabsTrigger>
+            <TabsTrigger value="stress" className="text-sm">Stress Relief</TabsTrigger>
+            <TabsTrigger value="anxiety" className="text-sm">Anxiety</TabsTrigger>
+            <TabsTrigger value="cognitive" className="text-sm">Cognitive</TabsTrigger>
           </TabsList>
         </Tabs>
 

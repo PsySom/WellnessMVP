@@ -157,8 +157,8 @@ const Insights = () => {
         <div className="space-y-md lg:space-y-lg">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-md">
             <div>
-              <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{t('insights.title')}</h1>
-              <p className="text-muted-foreground text-sm md:text-base mt-1">{getPeriodLabel()}</p>
+          <h1 className="text-3xl font-bold text-foreground animate-slide-up">{t('insights.title')}</h1>
+          <p className="text-base text-muted-foreground mt-1">{getPeriodLabel()}</p>
             </div>
             <Button 
               onClick={handleExport} 

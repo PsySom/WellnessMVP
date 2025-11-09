@@ -28,7 +28,7 @@ const DashboardHeader = () => {
         <div className="p-sm bg-primary/10 rounded-xl medium-transition spring-smooth hover:scale-110 hover:rotate-6">
           <Brain className="h-5 w-5 md:h-6 md:w-6 text-primary" />
         </div>
-        <span className="font-semibold text-base md:text-lg lg:text-xl">{t('app.name')}</span>
+        <span className="font-semibold text-base">{t('app.name')}</span>
       </div>
 
       {/* Date */}

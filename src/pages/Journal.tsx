@@ -243,7 +243,7 @@ const Journal = () => {
       <div className="flex flex-col h-[calc(100vh-8rem)]">
         {/* Header */}
         <div className="flex items-center justify-between p-4 md:p-6 lg:p-8 border-b border-border bg-card animate-fade-in">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">{t('journal.title')}</h1>
+          <h1 className="text-3xl font-bold text-foreground animate-slide-up">{t('journal.title')}</h1>
           <div className="flex gap-2 md:gap-3">
             <TooltipProvider>
               <Tooltip>
@@ -286,8 +286,8 @@ const Journal = () => {
                     : 'bg-secondary text-secondary-foreground'
                 )}
               >
-                <p className="text-sm md:text-base whitespace-pre-wrap">{message.content}</p>
-                <span className="text-xs md:text-sm opacity-70 mt-1 block">
+                <p className="text-base whitespace-pre-wrap">{message.content}</p>
+                <span className="text-sm opacity-70 mt-1 block">
                   {new Date(message.created_at).toLocaleTimeString([], { 
                     hour: '2-digit', 
                     minute: '2-digit' 
