@@ -212,8 +212,13 @@
     "week": "Semaine",
     "month": "Mois",
     "list": "Liste",
+    "calendar": "Calendrier",
     "addActivity": "Ajouter une activité",
     "editActivity": "Modifier l'activité",
+    "noActivitiesYet": "Pas encore d'activités",
+    "addOneToStart": "Ajoutez-en une pour commencer!",
+    "completed": "terminé",
+    "greatProgress": "Excellent progrès!",
     "form": {
       "title": "Titre",
       "titleRequired": "Titre *",
@@ -241,23 +246,45 @@
       "createSuccess": "Activité créée"
     },
     "categories": {
-      "exercise": "🏃 Exercice",
-      "health": "💊 Santé",
-      "hobby": "🎨 Loisir créatif",
-      "work": "💼 Travail",
-      "practice": "📚 Pratique",
-      "reflection": "💆 Réflexion",
-      "sleep": "😴 Sommeil",
-      "nutrition": "🍎 Nutrition",
-      "social": "👥 Social",
-      "leisure": "🎮 Loisirs",
-      "hydration": "💧 Hydratation"
+      "exercise": "Exercice",
+      "health": "Santé",
+      "hobby": "Loisir créatif",
+      "work": "Travail",
+      "practice": "Pratique",
+      "reflection": "Réflexion",
+      "sleep": "Sommeil",
+      "nutrition": "Nutrition",
+      "social": "Social",
+      "leisure": "Loisirs",
+      "hydration": "Hydratation"
     },
     "impactTypes": {
       "positive": "Positif",
       "negative": "Négatif",
       "neutral": "Neutre",
       "mixed": "Mixte"
+    },
+    "weekdays": {
+      "short": {
+        "mon": "Lun",
+        "tue": "Mar",
+        "wed": "Mer",
+        "thu": "Jeu",
+        "fri": "Ven",
+        "sat": "Sam",
+        "sun": "Dim"
+      }
+    },
+    "sections": {
+      "morning": "MATIN",
+      "day": "JOURNÉE",
+      "evening": "SOIRÉE",
+      "anytime": "À TOUT MOMENT"
+    },
+    "timeRanges": {
+      "morning": "5:00-11:59",
+      "day": "12:00-17:59",
+      "evening": "18:00-23:59"
     }
   },
   "journal": {
@@ -661,39 +688,6 @@
     "times": "fois",
     "minutes": "minutes",
     "hour": "heure"
-  },
-  "calendar": {
-    "title": "Calendrier",
-    "today": "Aujourd'hui",
-    "addActivity": "Ajouter une activité",
-    "list": "Liste",
-    "calendar": "Calendrier",
-    "noActivitiesYet": "Pas encore d'activités",
-    "addOneToStart": "Ajoutez-en une pour commencer!",
-    "completed": "terminé",
-    "greatProgress": "Excellent progrès!",
-    "weekdays": {
-      "short": {
-        "mon": "Lun",
-        "tue": "Mar",
-        "wed": "Mer",
-        "thu": "Jeu",
-        "fri": "Ven",
-        "sat": "Sam",
-        "sun": "Dim"
-      }
-    },
-    "sections": {
-      "morning": "MATIN",
-      "day": "JOURNÉE",
-      "evening": "SOIRÉE",
-      "anytime": "À TOUT MOMENT"
-    },
-    "timeRanges": {
-      "morning": "5:00-11:59",
-      "day": "12:00-17:59",
-      "evening": "18:00-23:59"
-    }
   },
   "testDetail": {
     "backToTests": "Retour aux tests",

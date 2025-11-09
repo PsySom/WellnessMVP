@@ -212,8 +212,13 @@
     "week": "Week",
     "month": "Month",
     "list": "List",
+    "calendar": "Calendar",
     "addActivity": "Add Activity",
     "editActivity": "Edit Activity",
+    "noActivitiesYet": "No activities yet",
+    "addOneToStart": "Add one to get started!",
+    "completed": "completed",
+    "greatProgress": "Great progress!",
     "form": {
       "title": "Title",
       "titleRequired": "Title *",
@@ -241,23 +246,45 @@
       "createSuccess": "Activity created"
     },
     "categories": {
-      "exercise": "🏃 Exercise",
-      "health": "💊 Health",
-      "hobby": "🎨 Hobby",
-      "work": "💼 Work",
-      "practice": "📚 Practice",
-      "reflection": "💆 Reflection",
-      "sleep": "😴 Sleep",
-      "nutrition": "🍎 Nutrition",
-      "social": "👥 Social",
-      "leisure": "🎮 Leisure",
-      "hydration": "💧 Hydration"
+      "exercise": "Exercise",
+      "health": "Health",
+      "hobby": "Hobby",
+      "work": "Work",
+      "practice": "Practice",
+      "reflection": "Reflection",
+      "sleep": "Sleep",
+      "nutrition": "Nutrition",
+      "social": "Social",
+      "leisure": "Leisure",
+      "hydration": "Hydration"
     },
     "impactTypes": {
       "positive": "Positive",
       "negative": "Negative",
       "neutral": "Neutral",
       "mixed": "Mixed"
+    },
+    "weekdays": {
+      "short": {
+        "mon": "Mon",
+        "tue": "Tue",
+        "wed": "Wed",
+        "thu": "Thu",
+        "fri": "Fri",
+        "sat": "Sat",
+        "sun": "Sun"
+      }
+    },
+    "sections": {
+      "morning": "MORNING",
+      "day": "DAY",
+      "evening": "EVENING",
+      "anytime": "ANYTIME"
+    },
+    "timeRanges": {
+      "morning": "5:00-11:59",
+      "day": "12:00-17:59",
+      "evening": "18:00-23:59"
     }
   },
   "journal": {
@@ -661,39 +688,6 @@
     "times": "times",
     "minutes": "minutes",
     "hour": "hour"
-  },
-  "calendar": {
-    "title": "Calendar",
-    "today": "Today",
-    "addActivity": "Add Activity",
-    "list": "List",
-    "calendar": "Calendar",
-    "noActivitiesYet": "No activities yet",
-    "addOneToStart": "Add one to get started!",
-    "completed": "completed",
-    "greatProgress": "Great progress!",
-    "weekdays": {
-      "short": {
-        "mon": "Mon",
-        "tue": "Tue",
-        "wed": "Wed",
-        "thu": "Thu",
-        "fri": "Fri",
-        "sat": "Sat",
-        "sun": "Sun"
-      }
-    },
-    "sections": {
-      "morning": "MORNING",
-      "day": "DAY",
-      "evening": "EVENING",
-      "anytime": "ANYTIME"
-    },
-    "timeRanges": {
-      "morning": "5:00-11:59",
-      "day": "12:00-17:59",
-      "evening": "18:00-23:59"
-    }
   },
   "testDetail": {
     "backToTests": "Back to Tests",
