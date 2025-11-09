@@ -1,11 +1,13 @@
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { useTranslation } from 'react-i18next';
 
 interface TopEmotionsProps {
   entries: any[];
 }
 
 const TopEmotions = ({ entries }: TopEmotionsProps) => {
+  const { t } = useTranslation();
   const emotionCounts: { [key: string]: number } = {};
   
   entries.forEach((entry) => {
@@ -40,7 +42,7 @@ const TopEmotions = ({ entries }: TopEmotionsProps) => {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-foreground mb-4">Your Top Emotions</h3>
+      <h3 className="font-semibold text-foreground mb-4">{t('insights.topEmotions')}</h3>
       
       <div className="space-y-4">
         {sortedEmotions.map(([emotion, count], index) => {
@@ -54,7 +56,7 @@ const TopEmotions = ({ entries }: TopEmotionsProps) => {
                   <span className="text-sm font-medium text-foreground capitalize">{emotion}</span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {count} {count === 1 ? 'time' : 'times'}
+                  {count} {count === 1 ? t('insights.time') : t('insights.times')}
                 </span>
               </div>
               <Progress value={percentage} className="h-2" />

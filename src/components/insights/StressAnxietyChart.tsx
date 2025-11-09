@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 interface StressAnxietyChartProps {
   entries: any[];
@@ -11,6 +12,7 @@ interface StressAnxietyChartProps {
 }
 
 const StressAnxietyChart = ({ entries, period }: StressAnxietyChartProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   
   const data = entries
@@ -53,7 +55,7 @@ const StressAnxietyChart = ({ entries, period }: StressAnxietyChartProps) => {
   return (
     <div className="space-y-4">
       <Card className="p-6">
-        <h3 className="font-semibold text-foreground mb-4">Stress & Anxiety Levels</h3>
+        <h3 className="font-semibold text-foreground mb-4">{t('insights.stressAnxiety')}</h3>
         
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data}>
@@ -108,15 +110,15 @@ const StressAnxietyChart = ({ entries, period }: StressAnxietyChartProps) => {
 
         <div className="grid grid-cols-3 gap-4 mt-4 pt-4 border-t border-border text-sm">
           <div className="text-center">
-            <div className="text-muted-foreground mb-1">Normal</div>
+            <div className="text-muted-foreground mb-1">{t('insights.normal')}</div>
             <div className="text-foreground font-medium">0-3</div>
           </div>
           <div className="text-center">
-            <div className="text-muted-foreground mb-1">Elevated</div>
+            <div className="text-muted-foreground mb-1">{t('insights.elevated')}</div>
             <div className="text-foreground font-medium">4-7</div>
           </div>
           <div className="text-center">
-            <div className="text-muted-foreground mb-1">High</div>
+            <div className="text-muted-foreground mb-1">{t('insights.high')}</div>
             <div className="text-foreground font-medium">8-10</div>
           </div>
         </div>
@@ -127,18 +129,16 @@ const StressAnxietyChart = ({ entries, period }: StressAnxietyChartProps) => {
           <div className="flex gap-3">
             <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
             <div className="flex-1 space-y-2">
-              <p className="font-semibold text-foreground">High levels detected</p>
+              <p className="font-semibold text-foreground">{t('insights.highLevelsDetected')}</p>
               <p className="text-sm text-muted-foreground">
-                {highStressCount > 0 && `High stress detected ${highStressCount} times. `}
-                {highAnxietyCount > 0 && `High anxiety detected ${highAnxietyCount} times. `}
-                Consider trying relaxation exercises.
+                {t('insights.highStressAnxiety', { stress: highStressCount, anxiety: highAnxietyCount })}
               </p>
               <Button 
                 size="sm" 
                 onClick={() => navigate('/exercises')}
                 className="mt-2"
               >
-                View Exercises
+                {t('insights.viewExercises')}
               </Button>
             </div>
           </div>

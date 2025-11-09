@@ -1,12 +1,14 @@
 import { Card } from '@/components/ui/card';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface EmotionBalanceProps {
   entries: any[];
 }
 
 const EmotionBalance = ({ entries }: EmotionBalanceProps) => {
+  const { t } = useTranslation();
   let negative = 0;
   let neutral = 0;
   let positive = 0;
@@ -34,9 +36,9 @@ const EmotionBalance = ({ entries }: EmotionBalanceProps) => {
 
   const positiveRatio = (positive / total) * 100;
   const getTrend = () => {
-    if (positiveRatio >= 60) return { icon: TrendingUp, text: 'Improving', color: 'text-accent' };
-    if (positiveRatio <= 40) return { icon: TrendingDown, text: 'Needs attention', color: 'text-destructive' };
-    return { icon: Minus, text: 'Stable', color: 'text-muted-foreground' };
+    if (positiveRatio >= 60) return { icon: TrendingUp, text: t('insights.improving'), color: 'text-accent' };
+    if (positiveRatio <= 40) return { icon: TrendingDown, text: t('insights.needsAttention'), color: 'text-destructive' };
+    return { icon: Minus, text: t('insights.stable'), color: 'text-muted-foreground' };
   };
 
   const trend = getTrend();
@@ -44,7 +46,7 @@ const EmotionBalance = ({ entries }: EmotionBalanceProps) => {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-foreground mb-4">Emotion Balance</h3>
+      <h3 className="font-semibold text-foreground mb-4">{t('insights.emotionBalance')}</h3>
       
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>

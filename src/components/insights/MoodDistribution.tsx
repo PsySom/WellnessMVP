@@ -1,11 +1,13 @@
 import { Card } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface MoodDistributionProps {
   entries: any[];
 }
 
 const MoodDistribution = ({ entries }: MoodDistributionProps) => {
+  const { t } = useTranslation();
   const moodEntries = entries.filter((e) => e.mood_score !== null);
   
   const distribution = {
@@ -37,7 +39,7 @@ const MoodDistribution = ({ entries }: MoodDistributionProps) => {
 
   return (
     <Card className="p-6">
-      <h3 className="font-semibold text-foreground mb-4">Mood Distribution</h3>
+      <h3 className="font-semibold text-foreground mb-4">{t('insights.moodDistribution')}</h3>
       
       <ResponsiveContainer width="100%" height={250}>
         <BarChart data={data} layout="vertical">

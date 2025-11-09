@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -44,6 +45,7 @@ const IMPACT_TYPES = [
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }: ActivityFormModalProps) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -106,14 +108,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
 
     if (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to save activity',
+        title: t('common.error'),
+        description: t('calendar.form.saveError'),
         variant: 'destructive'
       });
     } else {
       toast({
-        title: 'Success',
-        description: activity ? 'Activity updated' : 'Activity created'
+        title: t('common.success'),
+        description: activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess')
       });
       onOpenChange(false);
     }
@@ -125,37 +127,37 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
         <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl md:text-2xl">{activity ? 'Edit Activity' : 'Add Activity'}</DialogTitle>
+          <DialogTitle className="text-xl md:text-2xl">{activity ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
           <div>
-            <Label htmlFor="title" className="text-sm md:text-base">Title *</Label>
+            <Label htmlFor="title" className="text-sm md:text-base">{t('calendar.form.titleRequired')}</Label>
             <Input
               id="title"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
               className="h-10 md:h-11 text-sm md:text-base"
-              placeholder="Enter activity title"
+              placeholder={t('calendar.form.titlePlaceholder')}
             />
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-sm md:text-base">Description</Label>
+            <Label htmlFor="description" className="text-sm md:text-base">{t('calendar.form.description')}</Label>
             <Textarea
               id="description"
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
               rows={3}
               className="text-sm md:text-base resize-none"
-              placeholder="Add details about this activity..."
+              placeholder={t('calendar.form.descriptionPlaceholder')}
             />
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 md:gap-6">
             <div>
-              <Label className="text-sm md:text-base">Category</Label>
+              <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
               <Select 
                 value={formData.category} 
                 onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
@@ -166,7 +168,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                 <SelectContent>
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base">
-                      {cat.label}
+                      {t(`calendar.categories.${cat.value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -174,7 +176,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
             </div>
 
             <div>
-              <Label className="text-sm md:text-base">Date</Label>
+              <Label className="text-sm md:text-base">{t('calendar.form.date')}</Label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start h-10 md:h-11 text-sm md:text-base">
@@ -195,7 +197,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           </div>
 
           <div>
-            <Label className="text-sm md:text-base mb-3 block">Impact Type</Label>
+            <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.impactType')}</Label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
               {IMPACT_TYPES.map(type => (
                 <Button
@@ -206,14 +208,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                   className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
                 >
                   <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full ${type.color} mr-2`} />
-                  {type.label}
+                  {t(`calendar.impactTypes.${type.value}`)}
                 </Button>
               ))}
             </div>
           </div>
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="all-day" className="text-sm md:text-base cursor-pointer">All Day Event</Label>
+            <Label htmlFor="all-day" className="text-sm md:text-base cursor-pointer">{t('calendar.form.allDay')}</Label>
             <Switch
               id="all-day"
               checked={formData.all_day}
@@ -224,7 +226,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           {!formData.all_day && (
             <div className="grid grid-cols-2 gap-4 md:gap-6 animate-fade-in">
               <div>
-                <Label htmlFor="start-time" className="text-sm md:text-base">Start Time</Label>
+                <Label htmlFor="start-time" className="text-sm md:text-base">{t('calendar.form.startTime')}</Label>
                 <Input
                   id="start-time"
                   type="time"
@@ -234,7 +236,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                 />
               </div>
               <div>
-                <Label htmlFor="duration" className="text-sm md:text-base">Duration (min)</Label>
+                <Label htmlFor="duration" className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
                 <Input
                   id="duration"
                   type="number"
@@ -249,7 +251,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
           )}
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">Enable Reminder</Label>
+            <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">{t('calendar.form.reminder')}</Label>
             <Switch
               id="reminder"
               checked={formData.reminder_enabled}
@@ -259,7 +261,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
 
           {formData.reminder_enabled && (
             <div className="animate-fade-in">
-              <Label className="text-sm md:text-base">Remind me before</Label>
+              <Label className="text-sm md:text-base">{t('calendar.form.remindBefore')}</Label>
               <Select
                 value={formData.reminder_minutes_before.toString()}
                 onValueChange={(v) => setFormData({ ...formData, reminder_minutes_before: parseInt(v) })}
@@ -268,11 +270,11 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="5" className="text-sm md:text-base">5 minutes</SelectItem>
-                  <SelectItem value="10" className="text-sm md:text-base">10 minutes</SelectItem>
-                  <SelectItem value="15" className="text-sm md:text-base">15 minutes</SelectItem>
-                  <SelectItem value="30" className="text-sm md:text-base">30 minutes</SelectItem>
-                  <SelectItem value="60" className="text-sm md:text-base">1 hour</SelectItem>
+                  <SelectItem value="5" className="text-sm md:text-base">{t('calendar.form.5min')}</SelectItem>
+                  <SelectItem value="10" className="text-sm md:text-base">{t('calendar.form.10min')}</SelectItem>
+                  <SelectItem value="15" className="text-sm md:text-base">{t('calendar.form.15min')}</SelectItem>
+                  <SelectItem value="30" className="text-sm md:text-base">{t('calendar.form.30min')}</SelectItem>
+                  <SelectItem value="60" className="text-sm md:text-base">{t('calendar.form.1hour')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -285,14 +287,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity }:
               onClick={() => onOpenChange(false)} 
               className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
             >
-              Cancel
+              {t('calendar.form.cancel')}
             </Button>
             <Button 
               type="submit" 
               disabled={loading} 
               className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
             >
-              {loading ? 'Saving...' : 'Save Activity'}
+              {loading ? t('calendar.form.saving') : t('calendar.form.save')}
             </Button>
           </div>
         </form>

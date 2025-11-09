@@ -3,6 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useTranslation } from 'react-i18next';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,6 +29,7 @@ export const DataPrivacySettings = ({
   profile,
   onUpdate,
 }: DataPrivacySettingsProps) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -68,10 +70,10 @@ export const DataPrivacySettings = ({
       a.click();
       URL.revokeObjectURL(url);
 
-      toast.success('Data exported successfully');
+      toast.success(t('settings.dataManagement.export.success'));
     } catch (error) {
       console.error('Error exporting data:', error);
-      toast.error('Failed to export data');
+      toast.error(t('settings.dataManagement.export.error'));
     } finally {
       setExporting(false);
     }
@@ -95,11 +97,11 @@ export const DataPrivacySettings = ({
       // Sign out
       await supabase.auth.signOut();
 
-      toast.success('Account deleted successfully');
+      toast.success(t('settings.dangerZone.deleteAccount.success'));
       navigate('/login');
     } catch (error) {
       console.error('Error deleting account:', error);
-      toast.error('Failed to delete account');
+      toast.error(t('settings.dangerZone.deleteAccount.error'));
     } finally {
       setDeleting(false);
     }
@@ -109,30 +111,30 @@ export const DataPrivacySettings = ({
     <div className="space-y-6">
       <Card className="p-6">
         <h3 className="text-lg font-semibold text-foreground mb-4">
-          Data Management
+          {t('settings.dataManagement.title')}
         </h3>
         <div className="space-y-4">
           <div>
-            <Label className="mb-2 block">Export Your Data</Label>
+            <Label className="mb-2 block">{t('settings.dataManagement.export.title')}</Label>
             <p className="text-sm text-muted-foreground mb-4">
-              Download all your data in JSON format
+              {t('settings.dataManagement.export.description')}
             </p>
             <Button onClick={handleExportData} disabled={exporting} variant="outline">
               <Download className="h-4 w-4 mr-2" />
-              {exporting ? 'Exporting...' : 'Export Data'}
+              {exporting ? t('settings.dataManagement.export.exporting') : t('settings.dataManagement.export.button')}
             </Button>
           </div>
         </div>
       </Card>
 
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-foreground mb-4">Privacy</h3>
+        <h3 className="text-lg font-semibold text-foreground mb-4">{t('settings.privacy.title')}</h3>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <Label>Anonymous analytics</Label>
+              <Label>{t('settings.privacy.analytics')}</Label>
               <p className="text-sm text-muted-foreground">
-                Help improve the app with usage statistics
+                {t('settings.privacy.analyticsDescription')}
               </p>
             </div>
             <Switch
@@ -147,47 +149,45 @@ export const DataPrivacySettings = ({
 
       <Card className="p-6 border-destructive/50">
         <h3 className="text-lg font-semibold text-destructive mb-4">
-          Danger Zone
+          {t('settings.dangerZone.title')}
         </h3>
         <div className="space-y-4">
           <div>
-            <Label className="mb-2 block">Delete Account</Label>
+            <Label className="mb-2 block">{t('settings.dangerZone.deleteAccount.title')}</Label>
             <p className="text-sm text-muted-foreground mb-4">
-              Permanently delete your account and all associated data. This action
-              cannot be undone.
+              {t('settings.dangerZone.deleteAccount.description')}
             </p>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={deleting}>
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Account
+                  {t('settings.dangerZone.deleteAccount.button')}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-destructive" />
-                    Are you absolutely sure?
+                    {t('settings.dangerZone.deleteAccount.confirmTitle')}
                   </AlertDialogTitle>
                   <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete your
-                    account and remove all your data from our servers including:
+                    {t('settings.dangerZone.deleteAccount.confirmDescription')}
                     <ul className="list-disc list-inside mt-2 space-y-1">
-                      <li>All tracker entries</li>
-                      <li>All activities</li>
-                      <li>All journal entries</li>
-                      <li>All test results</li>
-                      <li>Your profile and settings</li>
+                      <li>{t('settings.dangerZone.deleteAccount.listTrackers')}</li>
+                      <li>{t('settings.dangerZone.deleteAccount.listActivities')}</li>
+                      <li>{t('settings.dangerZone.deleteAccount.listJournals')}</li>
+                      <li>{t('settings.dangerZone.deleteAccount.listTests')}</li>
+                      <li>{t('settings.dangerZone.deleteAccount.listProfile')}</li>
                     </ul>
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>{t('settings.dangerZone.deleteAccount.cancel')}</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDeleteAccount}
                     className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                   >
-                    {deleting ? 'Deleting...' : 'Delete Account'}
+                    {deleting ? t('settings.dangerZone.deleteAccount.deleting') : t('settings.dangerZone.deleteAccount.button')}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
