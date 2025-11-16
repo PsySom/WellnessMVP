@@ -31,15 +31,15 @@ interface TemplateDetailModalProps {
 
 const getImpactInfo = (impactType: string) => {
   switch (impactType) {
-    case 'restorative':
+    case 'restoring':
       return {
-        label: 'Restorative',
+        label: 'Restoring',
         description: 'Helps you recover energy',
         color: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
       };
-    case 'draining':
+    case 'depleting':
       return {
-        label: 'Draining',
+        label: 'Depleting',
         description: 'Requires energy',
         color: 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20',
       };

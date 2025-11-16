@@ -48,7 +48,7 @@ const Exercises = () => {
     return {
       title: getLocalizedField(selectedExercise, 'name'),
       duration_minutes: selectedExercise.duration_minutes,
-      impact_type: 'restorative',
+      impact_type: 'restoring',
       category: 'practice',
       description: getLocalizedField(selectedExercise, 'description') || '',
       date: new Date(),

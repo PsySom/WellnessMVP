@@ -45,8 +45,8 @@ const ActivityBreakdown = ({ activities }: ActivityBreakdownProps) => {
   });
 
   const impactColors: { [key: string]: string } = {
-    restorative: 'hsl(var(--accent))',
-    draining: 'hsl(var(--destructive))',
+    restoring: 'hsl(var(--accent))',
+    depleting: 'hsl(var(--destructive))',
     neutral: 'hsl(var(--muted-foreground))',
     mixed: 'hsl(31 88% 68%)',
   };
