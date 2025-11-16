@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { format, startOfWeek, addDays, isSameDay } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { DaySection } from './DaySection';
+import { TimeSlotSection } from './TimeSlotSection';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
+import { TIME_SLOTS, filterActivitiesBySlot } from '@/utils/timeSlots';
 
 interface ListViewProps {
   currentDate: Date;
@@ -119,42 +120,27 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
             </div>
           ) : (
             <>
-              <DaySection
-                title={`🌅 ${t('calendar.sections.morning')}`}
-                timeRange={t('calendar.timeRanges.morning')}
-                activities={selectedDayActivities.filter(a => {
-                  if (!a.start_time) return false;
-                  const hour = parseInt(a.start_time.split(':')[0]);
-                  return hour >= 5 && hour < 12;
-                })}
-                onUpdate={fetchActivities}
-              />
+              {TIME_SLOTS.map((slot) => {
+                const slotActivities = filterActivitiesBySlot(selectedDayActivities, slot.key);
+                return (
+                  <TimeSlotSection
+                    key={slot.key}
+                    title={t(`calendar.sections.${slot.key}`)}
+                    timeRange={t(`calendar.timeRanges.${slot.key}`)}
+                    emoji={slot.emoji}
+                    slot={slot.key}
+                    activities={slotActivities}
+                    onUpdate={fetchActivities}
+                  />
+                );
+              })}
               
-              <DaySection
-                title={`☀️ ${t('calendar.sections.day')}`}
-                timeRange={t('calendar.timeRanges.day')}
-                activities={selectedDayActivities.filter(a => {
-                  if (!a.start_time) return false;
-                  const hour = parseInt(a.start_time.split(':')[0]);
-                  return hour >= 12 && hour < 18;
-                })}
-                onUpdate={fetchActivities}
-              />
-              
-              <DaySection
-                title={`🌙 ${t('calendar.sections.evening')}`}
-                timeRange={t('calendar.timeRanges.evening')}
-                activities={selectedDayActivities.filter(a => {
-                  if (!a.start_time) return false;
-                  const hour = parseInt(a.start_time.split(':')[0]);
-                  return hour >= 18 || hour < 5;
-                })}
-                onUpdate={fetchActivities}
-              />
-              
-              <DaySection
-                title={`📌 ${t('calendar.sections.anytime')}`}
-                activities={selectedDayActivities.filter(a => !a.start_time)}
+              {/* Anytime section */}
+              <TimeSlotSection
+                title={t('calendar.sections.anytime')}
+                emoji="📌"
+                slot="anytime"
+                activities={filterActivitiesBySlot(selectedDayActivities, 'anytime')}
                 onUpdate={fetchActivities}
               />
             </>
