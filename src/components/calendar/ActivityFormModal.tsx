@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
+import { getCategoriesByType, getAllCategories, getCategoryConfig, type ImpactType } from '@/config/categoryConfig';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -39,37 +40,23 @@ const activitySchema = z.object({
     .max(1440, { message: 'Duration cannot exceed 24 hours' }),
 });
 
-const CATEGORIES = [
-  { value: 'exercise' as const, emoji: '🏃' },
-  { value: 'health' as const, emoji: '💊' },
-  { value: 'hobby' as const, emoji: '🎨' },
-  { value: 'work' as const, emoji: '💼' },
-  { value: 'practice' as const, emoji: '📚' },
-  { value: 'reflection' as const, emoji: '💆' },
-  { value: 'sleep' as const, emoji: '😴' },
-  { value: 'nutrition' as const, emoji: '🍎' },
-  { value: 'social' as const, emoji: '👥' },
-  { value: 'leisure' as const, emoji: '🎮' },
-  { value: 'hydration' as const, emoji: '💧' }
-];
-
 const IMPACT_TYPES = [
-  { value: 'restorative', label: 'Restorative', color: 'bg-green-500' },
-  { value: 'draining', label: 'Draining', color: 'bg-red-500' },
-  { value: 'neutral', label: 'Neutral', color: 'bg-orange-500' },
-  { value: 'mixed', label: 'Mixed', color: 'bg-blue-500' }
+  { value: 'restoring' as const, icon: '🌿', color: 'bg-green-500' },
+  { value: 'depleting' as const, icon: '⚡', color: 'bg-red-500' },
+  { value: 'mixed' as const, icon: '🔄', color: 'bg-blue-500' },
+  { value: 'neutral' as const, icon: '⚪', color: 'bg-gray-500' }
 ];
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isEditing = Boolean(activity?.id);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'leisure' as const,
-    impact_type: 'neutral' as const,
+    category: 'other' as const,
+    impact_type: 'neutral' as ImpactType,
     date: defaultDate || new Date(),
     anytime: true,
     start_time: '09:00',
@@ -79,6 +66,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     reminder_enabled: false,
     reminder_minutes_before: 15
   });
+
+  // Filtered categories based on selected impact type
+  const availableCategories = useMemo(() => {
+    const recommended = getCategoriesByType(formData.impact_type);
+    const all = getAllCategories();
+    // Show recommended first, then separator, then all others
+    return { recommended, all };
+  }, [formData.impact_type]);
 
   useEffect(() => {
     if (activity && activity.id) {
@@ -273,10 +268,10 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                   key={type.value}
                   type="button"
                   variant={formData.impact_type === type.value ? 'default' : 'outline'}
-                  onClick={() => setFormData({ ...formData, impact_type: type.value as typeof formData.impact_type })}
+                  onClick={() => setFormData({ ...formData, impact_type: type.value })}
                   className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
                 >
-                  <div className={`w-3 h-3 md:w-3.5 md:h-3.5 rounded-full ${type.color} mr-2 shrink-0 ring-2 ring-border`} />
+                  <span className="mr-2 text-base">{type.icon}</span>
                   {t(`calendar.activityTypes.${type.value}`)}
                 </Button>
               ))}
@@ -290,12 +285,36 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
               onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
             >
               <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                <SelectValue />
+                <SelectValue>
+                  {formData.category && getCategoryConfig(formData.category) && (
+                    <>
+                      {getCategoryConfig(formData.category)?.emoji} {getCategoryConfig(formData.category)?.label[i18n.language as 'en' | 'ru' | 'fr'] || getCategoryConfig(formData.category)?.label.en}
+                    </>
+                  )}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map(cat => (
+              <SelectContent className="max-h-[300px]">
+                {/* Recommended categories for selected type */}
+                {availableCategories.recommended.length > 0 && (
+                  <>
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                      {t('calendar.form.recommended')}
+                    </div>
+                    {availableCategories.recommended.map(cat => (
+                      <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
+                        {cat.emoji} {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
+                      </SelectItem>
+                    ))}
+                    <div className="my-1 border-t" />
+                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                      {t('calendar.form.allCategories')}
+                    </div>
+                  </>
+                )}
+                {/* All categories */}
+                {availableCategories.all.map(cat => (
                   <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
-                    {cat.emoji} {t(`calendar.categories.${cat.value}`)}
+                    {cat.emoji} {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
                   </SelectItem>
                 ))}
               </SelectContent>
