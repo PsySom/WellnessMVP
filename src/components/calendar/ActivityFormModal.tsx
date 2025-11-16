@@ -6,16 +6,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
+import { categoryConfig } from '@/config/categoryConfig';
+import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { z } from 'zod';
-import { getCategoriesByType, getAllCategories, getCategoryConfig, type ImpactType } from '@/config/categoryConfig';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -27,17 +28,9 @@ interface ActivityFormModalProps {
 }
 
 const activitySchema = z.object({
-  title: z.string()
-    .trim()
-    .min(1, { message: 'Title is required' })
-    .max(200, { message: 'Title must be less than 200 characters' }),
-  description: z.string()
-    .max(1000, { message: 'Description must be less than 1000 characters' })
-    .optional(),
-  duration_minutes: z.coerce.number()
-    .int()
-    .min(5, { message: 'Duration must be at least 5 minutes' })
-    .max(1440, { message: 'Duration cannot exceed 24 hours' }),
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().optional(),
+  duration_minutes: z.number().min(5).max(1440),
 });
 
 const IMPACT_TYPES = [
@@ -49,112 +42,112 @@ const IMPACT_TYPES = [
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isEditing = Boolean(activity?.id);
+  
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    category: 'other' as const,
-    impact_type: 'neutral' as ImpactType,
     date: defaultDate || new Date(),
-    anytime: true,
-    start_time: '09:00',
+    start_time: '',
     duration_minutes: 60,
+    impact_type: 'neutral' as 'restoring' | 'depleting' | 'mixed' | 'neutral',
+    category: 'other' as any,
     is_recurring: false,
-    recurrence_pattern: { type: 'none' as 'none' | 'daily' | 'weekly' | 'times_per_day_1' | 'times_per_day_2' | 'times_per_day_3' },
+    recurrence_pattern: 'daily',
     reminder_enabled: false,
-    reminder_minutes_before: 15
+    reminder_minutes_before: 15,
+    timeSlot: 'anytime' as TimeSlot | 'exact_time' | 'anytime',
   });
 
-  // Filtered categories based on selected impact type
   const availableCategories = useMemo(() => {
-    const recommended = getCategoriesByType(formData.impact_type);
-    const all = getAllCategories();
-    // Show recommended first, then separator, then all others
-    return { recommended, all };
+    const allCats = Object.keys(categoryConfig);
+    const recommended = allCats.filter(cat => 
+      categoryConfig[cat as keyof typeof categoryConfig]?.includes(formData.impact_type)
+    );
+    return { recommended, all: allCats };
   }, [formData.impact_type]);
 
   useEffect(() => {
-    if (activity && activity.id) {
-      setFormData({
-        title: activity.title || '',
-        description: activity.description || '',
-        category: activity.category || 'leisure',
-        impact_type: activity.impact_type || 'neutral',
-        date: new Date(activity.date),
-        anytime: !activity.start_time,
-        start_time: activity.start_time || '09:00',
-        duration_minutes: activity.duration_minutes || 60,
-        is_recurring: activity.is_recurring || false,
-        recurrence_pattern: activity.recurrence_pattern || { type: 'none' },
-        reminder_enabled: activity.reminder_enabled || false,
-        reminder_minutes_before: activity.reminder_minutes_before || 15
-      });
-    } else if (initialValues) {
-      setFormData(prev => ({ ...prev, ...initialValues }));
-    } else if (defaultDate) {
-      setFormData(prev => ({ ...prev, date: defaultDate }));
+    if (open) {
+      if (activity) {
+        setFormData({
+          title: activity.title || '',
+          description: activity.description || '',
+          date: new Date(activity.date),
+          start_time: activity.start_time || '',
+          duration_minutes: activity.duration_minutes || 60,
+          impact_type: activity.impact_type || 'neutral',
+          category: activity.category || 'other',
+          is_recurring: activity.is_recurring || false,
+          recurrence_pattern: activity.recurrence_pattern || 'daily',
+          reminder_enabled: activity.reminder_enabled || false,
+          reminder_minutes_before: activity.reminder_minutes_before || 15,
+          timeSlot: activity.start_time ? 'exact_time' : 'anytime'
+        });
+      } else if (initialValues) {
+        setFormData(prev => ({
+          ...prev,
+          ...initialValues,
+          timeSlot: initialValues.start_time ? 'exact_time' : 'anytime'
+        }));
+      } else if (defaultDate) {
+        setFormData(prev => ({ ...prev, date: defaultDate }));
+      }
     }
-  }, [activity, initialValues, defaultDate, open]);
+  }, [open, activity, initialValues, defaultDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
-    // Validate form data
-    const safeDuration = Number.isFinite(Number(formData.duration_minutes)) ? Number(formData.duration_minutes) : 60;
     try {
       activitySchema.parse({
         title: formData.title,
         description: formData.description,
-        duration_minutes: safeDuration,
+        duration_minutes: formData.duration_minutes,
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast({
-          title: t('common.error'),
-          description: error.errors[0].message,
-          variant: 'destructive'
-        });
+        toast.error(error.errors[0].message);
         return;
       }
     }
 
     setLoading(true);
 
-    const baseData = {
-      user_id: user.id,
-      title: formData.title.trim(),
-      description: formData.description?.trim() || null,
-      category: formData.category,
-      impact_type: formData.impact_type,
+    let startTime = null;
+    if (formData.timeSlot === 'exact_time') {
+      startTime = formData.start_time || null;
+    } else if (formData.timeSlot !== 'anytime') {
+      startTime = getDefaultTimeForSlot(formData.timeSlot as TimeSlot);
+    }
+
+    const activityData = {
+      title: formData.title,
+      description: formData.description || null,
       date: format(formData.date, 'yyyy-MM-dd'),
-      start_time: formData.anytime ? null : formData.start_time,
-      end_time: null,
-      duration_minutes: safeDuration,
+      start_time: startTime,
+      duration_minutes: formData.duration_minutes,
+      impact_type: formData.impact_type,
+      category: formData.category,
       is_recurring: formData.is_recurring,
       recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
-      status: 'planned' as const
+      user_id: user!.id,
+      exercise_id: exerciseId || null
     };
 
     const { error } = isEditing
-      ? await supabase.from('activities').update(baseData as any).eq('id', activity.id)
-      : await supabase.from('activities').insert({ ...baseData, exercise_id: exerciseId ?? null } as any);
+      ? await supabase.from('activities').update(activityData as any).eq('id', activity.id)
+      : await supabase.from('activities').insert(activityData as any);
 
     if (error) {
-      toast({
-        title: t('common.error'),
-        description: t('calendar.form.saveError'),
-        variant: 'destructive'
-      });
+      toast.error(t('calendar.form.saveError'));
     } else {
-      toast({
-        title: t('common.success'),
-        description: activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess')
-      });
+      toast.success(activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess'));
       onOpenChange(false);
     }
 
@@ -163,114 +156,78 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md md:max-w-xl lg:max-w-2xl max-h-[90vh] overflow-y-auto animate-scale-in">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="text-xl md:text-2xl">{isEditing ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isEditing ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label htmlFor="title" className="text-sm md:text-base">{t('calendar.form.titleRequired')}</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              required
-              maxLength={200}
-              className="h-10 md:h-11 text-sm md:text-base"
-              placeholder={t('calendar.form.titlePlaceholder')}
-            />
+            <Label>{t('calendar.form.titleRequired')}</Label>
+            <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
           </div>
 
           <div>
-            <Label htmlFor="description" className="text-sm md:text-base">{t('calendar.form.description')}</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              maxLength={1000}
-              className="text-sm md:text-base resize-none"
-              placeholder={t('calendar.form.descriptionPlaceholder')}
-            />
+            <Label>{t('calendar.form.description')}</Label>
+            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
           </div>
 
           <div>
-            <Label className="text-sm md:text-base">{t('calendar.form.date')}</Label>
+            <Label>{t('calendar.form.date')}</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className="w-full justify-start h-10 md:h-11 text-sm md:text-base">
-                  <CalendarIcon className="mr-2 h-4 w-4 md:h-5 md:w-5" />
+                <Button variant="outline" className="w-full justify-start">
+                  <CalendarIcon className="mr-2 h-4 w-4" />
                   {format(formData.date, 'PPP')}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={formData.date}
-                  onSelect={(date) => date && setFormData({ ...formData, date })}
-                  className="pointer-events-auto"
-                />
+              <PopoverContent className="w-auto p-0">
+                <Calendar mode="single" selected={formData.date} onSelect={(date) => date && setFormData({ ...formData, date })} />
               </PopoverContent>
             </Popover>
           </div>
 
-          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="anytime" className="text-sm md:text-base cursor-pointer">{t('calendar.form.anytime')}</Label>
-            <Switch
-              id="anytime"
-              checked={formData.anytime}
-              onCheckedChange={(checked) => setFormData({ ...formData, anytime: checked })}
-            />
+          <div className="space-y-2">
+            <Label>{t('calendar.form.time')}</Label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {TIME_SLOTS.map((slot) => (
+                <Button key={slot.key} type="button" variant={formData.timeSlot === slot.key ? 'default' : 'outline'} onClick={() => setFormData({ ...formData, timeSlot: slot.key })} className="justify-start h-9 text-xs">
+                  <span className="mr-1.5">{slot.emoji}</span>
+                  {t(`calendar.timeSlots.${slot.key}`)}
+                </Button>
+              ))}
+              <Button type="button" variant={formData.timeSlot === 'anytime' ? 'default' : 'outline'} onClick={() => setFormData({ ...formData, timeSlot: 'anytime' })} className="justify-start h-9 text-xs">
+                <span className="mr-1.5">📌</span>
+                {t('calendar.timeSlots.anytime')}
+              </Button>
+              <Button type="button" variant={formData.timeSlot === 'exact_time' ? 'default' : 'outline'} onClick={() => setFormData({ ...formData, timeSlot: 'exact_time' })} className="justify-start h-9 text-xs">
+                <span className="mr-1.5">⏰</span>
+                {t('calendar.timeSlots.exact_time')}
+              </Button>
+            </div>
+            {formData.timeSlot === 'exact_time' && (
+              <Input type="time" value={formData.start_time} onChange={(e) => setFormData({ ...formData, start_time: e.target.value })} className="mt-2" />
+            )}
           </div>
 
-          {!formData.anytime && (
-            <div className="animate-fade-in">
-              <Label htmlFor="start-time" className="text-sm md:text-base">{t('calendar.form.startTime')}</Label>
-              <Input
-                id="start-time"
-                type="time"
-                value={formData.start_time}
-                onChange={(e) => setFormData({ ...formData, start_time: e.target.value })}
-                className="h-10 md:h-11 text-sm md:text-base"
-              />
-            </div>
-          )}
-
           <div>
-            <Label className="text-sm md:text-base">{t('calendar.form.duration')}</Label>
-            <Select
-              value={formData.duration_minutes.toString()}
-              onValueChange={(v) => setFormData({ ...formData, duration_minutes: parseInt(v) })}
-            >
-              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                <SelectValue />
-              </SelectTrigger>
+            <Label>{t('calendar.form.duration')}</Label>
+            <Select value={formData.duration_minutes.toString()} onValueChange={(v) => setFormData({ ...formData, duration_minutes: parseInt(v) })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="10" className="text-sm md:text-base">10 {t('calendar.form.minutes')}</SelectItem>
-                <SelectItem value="15" className="text-sm md:text-base">15 {t('calendar.form.minutes')}</SelectItem>
-                <SelectItem value="30" className="text-sm md:text-base">30 {t('calendar.form.minutes')}</SelectItem>
-                <SelectItem value="45" className="text-sm md:text-base">45 {t('calendar.form.minutes')}</SelectItem>
-                <SelectItem value="60" className="text-sm md:text-base">1 {t('calendar.form.hour')}</SelectItem>
-                <SelectItem value="120" className="text-sm md:text-base">2 {t('calendar.form.hours')}</SelectItem>
-                <SelectItem value="180" className="text-sm md:text-base">3 {t('calendar.form.hours')}</SelectItem>
-                <SelectItem value="240" className="text-sm md:text-base">4 {t('calendar.form.hours')}</SelectItem>
-                <SelectItem value="300" className="text-sm md:text-base">{t('calendar.form.more')}</SelectItem>
+                <SelectItem value="15">15 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="30">30 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="60">1 {t('calendar.form.hour')}</SelectItem>
+                <SelectItem value="120">2 {t('calendar.form.hours')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           <div>
-            <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.activityType')}</Label>
-            <div className="grid grid-cols-2 gap-2 md:gap-3">
+            <Label>{t('calendar.form.activityType')}</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
               {IMPACT_TYPES.map(type => (
-                <Button
-                  key={type.value}
-                  type="button"
-                  variant={formData.impact_type === type.value ? 'default' : 'outline'}
-                  onClick={() => setFormData({ ...formData, impact_type: type.value })}
-                  className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
-                >
+                <Button key={type.value} type="button" variant={formData.impact_type === type.value ? 'default' : 'outline'} onClick={() => setFormData({ ...formData, impact_type: type.value })} className="justify-start">
                   <span className={`inline-block w-3 h-3 rounded-full mr-2 ${type.color}`}></span>
                   {t(`calendar.activityTypes.${type.value}`)}
                 </Button>
@@ -279,124 +236,29 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           </div>
 
           <div>
-            <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
-            <Select 
-              value={formData.category} 
-              onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
-            >
-              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                <SelectValue>
-                  {formData.category && getCategoryConfig(formData.category) && (
-                    <>
-                      {getCategoryConfig(formData.category)?.emoji} {getCategoryConfig(formData.category)?.label[i18n.language as 'en' | 'ru' | 'fr'] || getCategoryConfig(formData.category)?.label.en}
-                    </>
-                  )}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="max-h-[300px]">
-                {/* Recommended categories for selected type */}
+            <Label>{t('calendar.form.category')}</Label>
+            <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
                 {availableCategories.recommended.length > 0 && (
                   <>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      {t('calendar.form.recommended')}
-                    </div>
+                    <SelectItem value="" disabled>{t('calendar.form.recommended')}</SelectItem>
                     {availableCategories.recommended.map(cat => (
-                      <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
-                        {cat.emoji} {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
-                      </SelectItem>
+                      <SelectItem key={cat} value={cat}>{t(`calendar.categories.${cat}`)}</SelectItem>
                     ))}
-                    <div className="my-1 border-t" />
-                    <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                      {t('calendar.form.allCategories')}
-                    </div>
                   </>
                 )}
-                {/* All categories */}
+                <SelectItem value="" disabled>{t('calendar.form.allCategories')}</SelectItem>
                 {availableCategories.all.map(cat => (
-                  <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
-                    {cat.emoji} {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
-                  </SelectItem>
+                  <SelectItem key={cat} value={cat}>{t(`calendar.categories.${cat}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="recurring" className="text-sm md:text-base cursor-pointer">{t('calendar.form.recurring')}</Label>
-            <Switch
-              id="recurring"
-              checked={formData.is_recurring}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_recurring: checked, recurrence_pattern: { type: checked ? 'daily' : 'none' } })}
-            />
-          </div>
-
-          {formData.is_recurring && (
-            <div className="animate-fade-in">
-              <Label className="text-sm md:text-base">{t('calendar.form.recurrenceType')}</Label>
-              <Select
-                value={formData.recurrence_pattern.type}
-                onValueChange={(v) => setFormData({ ...formData, recurrence_pattern: { type: v as any } })}
-              >
-                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="times_per_day_1" className="text-sm md:text-base">{t('calendar.form.oncePerDay')}</SelectItem>
-                  <SelectItem value="times_per_day_2" className="text-sm md:text-base">{t('calendar.form.twicePerDay')}</SelectItem>
-                  <SelectItem value="times_per_day_3" className="text-sm md:text-base">{t('calendar.form.thricePerDay')}</SelectItem>
-                  <SelectItem value="daily" className="text-sm md:text-base">{t('calendar.form.everyDay')}</SelectItem>
-                  <SelectItem value="weekly" className="text-sm md:text-base">{t('calendar.form.everyWeek')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
-            <Label htmlFor="reminder" className="text-sm md:text-base cursor-pointer">{t('calendar.form.reminder')}</Label>
-            <Switch
-              id="reminder"
-              checked={formData.reminder_enabled}
-              onCheckedChange={(checked) => setFormData({ ...formData, reminder_enabled: checked })}
-            />
-          </div>
-
-          {formData.reminder_enabled && (
-            <div className="animate-fade-in">
-              <Label className="text-sm md:text-base">{t('calendar.form.remindBefore')}</Label>
-              <Select
-                value={formData.reminder_minutes_before.toString()}
-                onValueChange={(v) => setFormData({ ...formData, reminder_minutes_before: parseInt(v) })}
-              >
-                <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="5" className="text-sm md:text-base">{t('calendar.form.5min')}</SelectItem>
-                  <SelectItem value="10" className="text-sm md:text-base">{t('calendar.form.10min')}</SelectItem>
-                  <SelectItem value="15" className="text-sm md:text-base">{t('calendar.form.15min')}</SelectItem>
-                  <SelectItem value="30" className="text-sm md:text-base">{t('calendar.form.30min')}</SelectItem>
-                  <SelectItem value="60" className="text-sm md:text-base">{t('calendar.form.1hour')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          <div className="flex gap-3 md:gap-4 pt-6">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)} 
-              className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
-            >
-              {t('calendar.form.cancel')}
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={loading} 
-              className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
-            >
-              {loading ? t('calendar.form.saving') : t('calendar.form.save')}
-            </Button>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{t('calendar.form.cancel')}</Button>
+            <Button type="submit" disabled={loading}>{loading ? t('calendar.form.saving') : t('calendar.form.save')}</Button>
           </div>
         </form>
       </DialogContent>

@@ -318,15 +318,31 @@
       }
     },
     "sections": {
-      "morning": "MATIN",
-      "day": "JOURNÉE",
-      "evening": "SOIRÉE",
-      "anytime": "À TOUT MOMENT"
+      "early_morning": "Matin",
+      "late_morning": "Fin de matinée",
+      "midday": "Milieu de journée",
+      "afternoon": "Après-midi",
+      "evening": "Soirée",
+      "night": "Nuit",
+      "anytime": "À tout moment"
     },
     "timeRanges": {
-      "morning": "5:00-11:59",
-      "day": "12:00-17:59",
-      "evening": "18:00-23:59"
+      "early_morning": "5:00 - 9:00",
+      "late_morning": "9:00 - 12:00",
+      "midday": "12:00 - 15:00",
+      "afternoon": "15:00 - 18:00",
+      "evening": "18:00 - 22:00",
+      "night": "22:00 - 5:00"
+    },
+    "timeSlots": {
+      "early_morning": "Matin",
+      "late_morning": "Fin de matinée",
+      "midday": "Milieu de journée",
+      "afternoon": "Après-midi",
+      "evening": "Soirée",
+      "night": "Nuit",
+      "exact_time": "Heure exacte",
+      "anytime": "À tout moment"
     }
   },
   "journal": {
