@@ -201,25 +201,6 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           </div>
 
           <div>
-            <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
-            <Select 
-              value={formData.category} 
-              onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
-            >
-              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map(cat => (
-                  <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
-                    {cat.emoji} {t(`calendar.categories.${cat.value}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
             <Label className="text-sm md:text-base">{t('calendar.form.date')}</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -286,7 +267,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
           <div>
             <Label className="text-sm md:text-base mb-3 block">{t('calendar.form.activityType')}</Label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div className="grid grid-cols-2 gap-2 md:gap-3">
               {IMPACT_TYPES.map(type => (
                 <Button
                   key={type.value}
@@ -300,6 +281,25 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                 </Button>
               ))}
             </div>
+          </div>
+
+          <div>
+            <Label className="text-sm md:text-base">{t('calendar.form.category')}</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(v) => setFormData({ ...formData, category: v as typeof formData.category })}
+            >
+              <SelectTrigger className="h-10 md:h-11 text-sm md:text-base">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map(cat => (
+                  <SelectItem key={cat.value} value={cat.value} className="text-sm md:text-base cursor-pointer">
+                    {cat.emoji} {t(`calendar.categories.${cat.value}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex items-center justify-between p-3 md:p-4 rounded-lg bg-muted/50">
