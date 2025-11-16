@@ -686,6 +686,45 @@ export type Database = {
         | "practice"
         | "health"
         | "reflection"
+        | "rest"
+        | "psychological_exercises"
+        | "light_exercise"
+        | "close_socializing"
+        | "walks"
+        | "games"
+        | "creative"
+        | "entertainment"
+        | "self_care"
+        | "meditation"
+        | "nature"
+        | "study"
+        | "commute"
+        | "intense_exercise"
+        | "household_chores"
+        | "tasks"
+        | "finances"
+        | "health_appointments"
+        | "caregiving"
+        | "deadlines"
+        | "learning"
+        | "problem_solving"
+        | "social_obligations"
+        | "multitasking"
+        | "emotional_labor"
+        | "moderate_exercise"
+        | "cooking"
+        | "projects"
+        | "shopping"
+        | "cleaning"
+        | "planning"
+        | "reading"
+        | "volunteering"
+        | "spiritual"
+        | "hygiene"
+        | "routine"
+        | "waiting"
+        | "testing"
+        | "other"
       activity_impact: "restorative" | "draining" | "neutral" | "mixed"
       activity_status: "planned" | "in_progress" | "completed" | "cancelled"
     }
@@ -827,6 +866,45 @@ export const Constants = {
         "practice",
         "health",
         "reflection",
+        "rest",
+        "psychological_exercises",
+        "light_exercise",
+        "close_socializing",
+        "walks",
+        "games",
+        "creative",
+        "entertainment",
+        "self_care",
+        "meditation",
+        "nature",
+        "study",
+        "commute",
+        "intense_exercise",
+        "household_chores",
+        "tasks",
+        "finances",
+        "health_appointments",
+        "caregiving",
+        "deadlines",
+        "learning",
+        "problem_solving",
+        "social_obligations",
+        "multitasking",
+        "emotional_labor",
+        "moderate_exercise",
+        "cooking",
+        "projects",
+        "shopping",
+        "cleaning",
+        "planning",
+        "reading",
+        "volunteering",
+        "spiritual",
+        "hygiene",
+        "routine",
+        "waiting",
+        "testing",
+        "other",
       ],
       activity_impact: ["restorative", "draining", "neutral", "mixed"],
       activity_status: ["planned", "in_progress", "completed", "cancelled"],
