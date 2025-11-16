@@ -251,6 +251,8 @@
       "duration": "Durée (min)",
       "reminder": "Activer le rappel",
       "remindBefore": "Me rappeler avant",
+      "recommended": "Recommandées",
+      "allCategories": "Toutes les catégories",
       "5min": "5 minutes",
       "10min": "10 minutes",
       "15min": "15 minutes",
@@ -277,8 +279,8 @@
       "hydration": "Hydratation"
     },
     "activityTypes": {
-      "restorative": "Réparatrice",
-      "draining": "Épuisante",
+      "restoring": "Réparatrice",
+      "depleting": "Épuisante",
       "neutral": "Neutre",
       "mixed": "Mixte"
     },
