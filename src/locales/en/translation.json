@@ -251,6 +251,8 @@
       "duration": "Duration (min)",
       "reminder": "Enable Reminder",
       "remindBefore": "Remind me before",
+      "recommended": "Recommended",
+      "allCategories": "All Categories",
       "5min": "5 minutes",
       "10min": "10 minutes",
       "15min": "15 minutes",
@@ -277,8 +279,8 @@
       "hydration": "Hydration"
     },
     "activityTypes": {
-      "restorative": "Restorative",
-      "draining": "Depleting",
+      "restoring": "Restoring",
+      "depleting": "Depleting",
       "neutral": "Neutral",
       "mixed": "Mixed"
     },

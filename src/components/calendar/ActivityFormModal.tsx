@@ -41,10 +41,10 @@ const activitySchema = z.object({
 });
 
 const IMPACT_TYPES = [
-  { value: 'restoring' as const, icon: '🌿', color: 'bg-green-500' },
-  { value: 'depleting' as const, icon: '⚡', color: 'bg-red-500' },
-  { value: 'mixed' as const, icon: '🔄', color: 'bg-blue-500' },
-  { value: 'neutral' as const, icon: '⚪', color: 'bg-gray-500' }
+  { value: 'restoring' as const, color: 'bg-green-500' },
+  { value: 'depleting' as const, color: 'bg-red-500' },
+  { value: 'mixed' as const, color: 'bg-orange-500' },
+  { value: 'neutral' as const, color: 'bg-blue-500' }
 ];
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
@@ -271,7 +271,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                   onClick={() => setFormData({ ...formData, impact_type: type.value })}
                   className="justify-start h-10 md:h-11 text-sm md:text-base transition-all hover-scale"
                 >
-                  <span className="mr-2 text-base">{type.icon}</span>
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${type.color}`}></span>
                   {t(`calendar.activityTypes.${type.value}`)}
                 </Button>
               ))}
