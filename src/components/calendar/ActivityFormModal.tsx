@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { categoryConfig } from '@/config/categoryConfig';
+import { getCategoriesByType, getAllCategories } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -62,11 +62,9 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   });
 
   const availableCategories = useMemo(() => {
-    const allCats = Object.keys(categoryConfig);
-    const recommended = allCats.filter(cat => 
-      categoryConfig[cat as keyof typeof categoryConfig]?.includes(formData.impact_type)
-    );
-    return { recommended, all: allCats };
+    const recommended = getCategoriesByType(formData.impact_type);
+    const all = getAllCategories();
+    return { recommended, all };
   }, [formData.impact_type]);
 
   useEffect(() => {
@@ -244,13 +242,13 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                   <>
                     <SelectItem value="" disabled>{t('calendar.form.recommended')}</SelectItem>
                     {availableCategories.recommended.map(cat => (
-                      <SelectItem key={cat} value={cat}>{t(`calendar.categories.${cat}`)}</SelectItem>
+                      <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
                     ))}
                   </>
                 )}
                 <SelectItem value="" disabled>{t('calendar.form.allCategories')}</SelectItem>
                 {availableCategories.all.map(cat => (
-                  <SelectItem key={cat} value={cat}>{t(`calendar.categories.${cat}`)}</SelectItem>
+                  <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
