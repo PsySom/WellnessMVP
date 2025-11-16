@@ -32,8 +32,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 };
 
 const IMPACT_COLORS: Record<string, string> = {
-  restorative: 'bg-green-500',
-  draining: 'bg-red-500',
+  restoring: 'bg-green-500',
+  depleting: 'bg-red-500',
   neutral: 'bg-orange-500',
   mixed: 'bg-blue-500'
 };

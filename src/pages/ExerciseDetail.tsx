@@ -71,7 +71,7 @@ const ExerciseDetail = () => {
         prefill: {
           title: exercise ? getLocalizedField(exercise, 'name') : '',
           category: 'practice',
-          impact_type: 'restorative',
+          impact_type: 'restoring',
           duration_minutes: exercise?.duration_minutes
         }
       }

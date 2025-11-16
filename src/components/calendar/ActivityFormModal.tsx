@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectLabel } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -237,16 +237,16 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
             <Label>{t('calendar.form.category')}</Label>
             <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background border shadow-lg z-50">
                 {availableCategories.recommended.length > 0 && (
                   <>
-                    <SelectItem value="" disabled>{t('calendar.form.recommended')}</SelectItem>
+                    <SelectLabel>{t('calendar.form.recommended')}</SelectLabel>
                     {availableCategories.recommended.map(cat => (
                       <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
                     ))}
                   </>
                 )}
-                <SelectItem value="" disabled>{t('calendar.form.allCategories')}</SelectItem>
+                <SelectLabel>{t('calendar.form.allCategories')}</SelectLabel>
                 {availableCategories.all.map(cat => (
                   <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
                 ))}

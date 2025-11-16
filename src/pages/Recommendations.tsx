@@ -168,8 +168,8 @@ const Recommendations = () => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
-      case 'restorative': return 'text-green-600 dark:text-green-400';
-      case 'draining': return 'text-red-600 dark:text-red-400';
+      case 'restoring': return 'text-green-600 dark:text-green-400';
+      case 'depleting': return 'text-red-600 dark:text-red-400';
       case 'neutral': return 'text-orange-600 dark:text-orange-400';
       case 'mixed': return 'text-blue-600 dark:text-blue-400';
       default: return 'text-muted-foreground';
