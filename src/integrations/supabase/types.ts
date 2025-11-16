@@ -725,7 +725,7 @@ export type Database = {
         | "waiting"
         | "testing"
         | "other"
-      activity_impact: "restorative" | "draining" | "neutral" | "mixed"
+      activity_impact: "restoring" | "depleting" | "mixed" | "neutral"
       activity_status: "planned" | "in_progress" | "completed" | "cancelled"
     }
     CompositeTypes: {
@@ -906,7 +906,7 @@ export const Constants = {
         "testing",
         "other",
       ],
-      activity_impact: ["restorative", "draining", "neutral", "mixed"],
+      activity_impact: ["restoring", "depleting", "mixed", "neutral"],
       activity_status: ["planned", "in_progress", "completed", "cancelled"],
     },
   },

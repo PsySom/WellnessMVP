@@ -141,8 +141,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     };
 
     const { error } = isEditing
-      ? await supabase.from('activities').update(baseData).eq('id', activity.id)
-      : await supabase.from('activities').insert({ ...baseData, exercise_id: exerciseId ?? null });
+      ? await supabase.from('activities').update(baseData as any).eq('id', activity.id)
+      : await supabase.from('activities').insert({ ...baseData, exercise_id: exerciseId ?? null } as any);
 
     if (error) {
       toast({
