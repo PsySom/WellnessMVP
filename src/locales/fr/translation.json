@@ -85,6 +85,7 @@
     "todayActivitiesCard": {
       "title": "Activités d'aujourd'hui",
       "add": "Ajouter",
+      "addActivity": "Ajouter une activité",
       "noActivities": "Aucune activité prévue pour aujourd'hui",
       "planYourDay": "Planifiez votre journée",
       "viewAll": "Voir toutes les activités",
@@ -118,6 +119,7 @@
     "processSatisfaction": "Satisfaction du processus",
     "resultSatisfaction": "Satisfaction du résultat",
     "save": "Enregistrer l'entrée",
+    "saveEntry": "Enregistrer l'entrée",
     "saving": "Enregistrement...",
     "history": "Historique du suivi",
     "selectEmotions": "Sélectionnez les émotions que vous ressentez",
@@ -724,6 +726,7 @@
   },
   "common": {
     "save": "Enregistrer",
+    "saving": "Enregistrement...",
     "cancel": "Annuler",
     "delete": "Supprimer",
     "edit": "Modifier",
