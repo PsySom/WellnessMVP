@@ -28,7 +28,9 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const { t } = useTranslation();
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSavingMood, setIsSavingMood] = useState(false);
+  const [isSavingState, setIsSavingState] = useState(false);
+  const [isSavingSatisfaction, setIsSavingSatisfaction] = useState(false);
 
   const [trackerData, setTrackerData] = useState<TrackerData>({
     moodScore: 0,
@@ -44,16 +46,15 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
     setTrackerData((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleSaveEntry = async () => {
+  const handleSaveMoodAndEmotions = async () => {
     if (!user) return;
 
-    setIsSaving(true);
+    setIsSavingMood(true);
     try {
       const now = new Date();
       const entryDate = now.toISOString().split('T')[0];
       const entryTime = now.toTimeString().split(' ')[0];
 
-      // Insert tracker entry
       const { data: entry, error: entryError } = await supabase
         .from('tracker_entries')
         .insert({
@@ -61,18 +62,12 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
           entry_date: entryDate,
           entry_time: entryTime,
           mood_score: trackerData.moodScore,
-          stress_level: trackerData.stressLevel,
-          anxiety_level: trackerData.anxietyLevel,
-          energy_level: trackerData.energyLevel,
-          process_satisfaction: trackerData.processSatisfaction,
-          result_satisfaction: trackerData.resultSatisfaction,
         })
         .select()
         .single();
 
       if (entryError) throw entryError;
 
-      // Insert emotions if any selected
       if (trackerData.selectedEmotions.length > 0 && entry) {
         const emotions = trackerData.selectedEmotions.map((emotion) => ({
           tracker_entry_id: entry.id,
@@ -93,16 +88,11 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
         description: t('trackers.toasts.savedDescription'),
       });
 
-      // Reset form
-      setTrackerData({
+      setTrackerData((prev) => ({
+        ...prev,
         moodScore: 0,
         selectedEmotions: [],
-        stressLevel: 5,
-        anxietyLevel: 5,
-        energyLevel: 0,
-        processSatisfaction: 5,
-        resultSatisfaction: 5,
-      });
+      }));
 
       onEntrySaved();
     } catch (error: any) {
@@ -112,7 +102,97 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
         description: error.message,
       });
     } finally {
-      setIsSaving(false);
+      setIsSavingMood(false);
+    }
+  };
+
+  const handleSaveState = async () => {
+    if (!user) return;
+
+    setIsSavingState(true);
+    try {
+      const now = new Date();
+      const entryDate = now.toISOString().split('T')[0];
+      const entryTime = now.toTimeString().split(' ')[0];
+
+      const { error: entryError } = await supabase
+        .from('tracker_entries')
+        .insert({
+          user_id: user.id,
+          entry_date: entryDate,
+          entry_time: entryTime,
+          stress_level: trackerData.stressLevel,
+          anxiety_level: trackerData.anxietyLevel,
+          energy_level: trackerData.energyLevel,
+        });
+
+      if (entryError) throw entryError;
+
+      toast({
+        title: t('trackers.toasts.saved'),
+        description: t('trackers.toasts.savedDescription'),
+      });
+
+      setTrackerData((prev) => ({
+        ...prev,
+        stressLevel: 5,
+        anxietyLevel: 5,
+        energyLevel: 0,
+      }));
+
+      onEntrySaved();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: t('trackers.toasts.errorSaving'),
+        description: error.message,
+      });
+    } finally {
+      setIsSavingState(false);
+    }
+  };
+
+  const handleSaveSatisfaction = async () => {
+    if (!user) return;
+
+    setIsSavingSatisfaction(true);
+    try {
+      const now = new Date();
+      const entryDate = now.toISOString().split('T')[0];
+      const entryTime = now.toTimeString().split(' ')[0];
+
+      const { error: entryError } = await supabase
+        .from('tracker_entries')
+        .insert({
+          user_id: user.id,
+          entry_date: entryDate,
+          entry_time: entryTime,
+          process_satisfaction: trackerData.processSatisfaction,
+          result_satisfaction: trackerData.resultSatisfaction,
+        });
+
+      if (entryError) throw entryError;
+
+      toast({
+        title: t('trackers.toasts.saved'),
+        description: t('trackers.toasts.savedDescription'),
+      });
+
+      setTrackerData((prev) => ({
+        ...prev,
+        processSatisfaction: 5,
+        resultSatisfaction: 5,
+      }));
+
+      onEntrySaved();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: t('trackers.toasts.errorSaving'),
+        description: error.message,
+      });
+    } finally {
+      setIsSavingSatisfaction(false);
     }
   };
 
@@ -136,6 +216,21 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
                 selectedEmotions={trackerData.selectedEmotions}
                 onChange={(emotions) => updateTrackerData({ selectedEmotions: emotions })}
               />
+              
+              <Button 
+                onClick={handleSaveMoodAndEmotions} 
+                disabled={isSavingMood}
+                className="w-full mt-6"
+              >
+                {isSavingMood ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('common.saving')}
+                  </>
+                ) : (
+                  t('trackers.saveEntry')
+                )}
+              </Button>
             </AccordionContent>
           </AccordionItem>
 
@@ -157,6 +252,21 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
                 value={trackerData.energyLevel} 
                 onChange={(value) => updateTrackerData({ energyLevel: value })} 
               />
+              
+              <Button 
+                onClick={handleSaveState} 
+                disabled={isSavingState}
+                className="w-full mt-6"
+              >
+                {isSavingState ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('common.saving')}
+                  </>
+                ) : (
+                  t('trackers.saveEntry')
+                )}
+              </Button>
             </AccordionContent>
           </AccordionItem>
 
@@ -172,25 +282,24 @@ const QuickTrackerCard = ({ onEntrySaved }: QuickTrackerCardProps) => {
                 onProcessChange={(value) => updateTrackerData({ processSatisfaction: value })}
                 onResultChange={(value) => updateTrackerData({ resultSatisfaction: value })}
               />
+              
+              <Button 
+                onClick={handleSaveSatisfaction} 
+                disabled={isSavingSatisfaction}
+                className="w-full mt-6"
+              >
+                {isSavingSatisfaction ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {t('common.saving')}
+                  </>
+                ) : (
+                  t('trackers.saveEntry')
+                )}
+              </Button>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
-
-        <Button 
-          onClick={handleSaveEntry} 
-          className="w-full mt-6 medium-transition spring-bounce hover:scale-[1.02]" 
-          size="lg"
-          disabled={isSaving}
-        >
-          {isSaving ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('trackers.saving')}
-            </>
-          ) : (
-            t('trackers.save')
-          )}
-        </Button>
       </div>
     </Card>
   );
