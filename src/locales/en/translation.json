@@ -85,6 +85,7 @@
     "todayActivitiesCard": {
       "title": "Today's Activities",
       "add": "Add",
+      "addActivity": "Add Activity",
       "noActivities": "No activities planned for today",
       "planYourDay": "Plan Your Day",
       "viewAll": "View all activities",
@@ -118,6 +119,7 @@
     "processSatisfaction": "Process satisfaction",
     "resultSatisfaction": "Result satisfaction",
     "save": "Save Entry",
+    "saveEntry": "Save Entry",
     "saving": "Saving...",
     "history": "Tracker History",
     "selectEmotions": "Select emotions you're feeling",
@@ -727,6 +729,7 @@
   },
   "common": {
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
