@@ -6,12 +6,46 @@ export interface CategoryConfig {
   emoji: string;
   recommendedType: ImpactType;
   defaultDuration?: number; // in minutes
+  group?: string; // Group identifier for visual separation
   label: {
     en: string;
     ru: string;
     fr: string;
   };
 }
+
+export interface CategoryGroup {
+  id: string;
+  label: {
+    en: string;
+    ru: string;
+    fr: string;
+  };
+}
+
+// Group definitions for RESTORING categories
+export const RESTORING_GROUPS: CategoryGroup[] = [
+  {
+    id: 'sleep',
+    label: { en: 'Sleep', ru: 'Сон', fr: 'Sommeil' }
+  },
+  {
+    id: 'nutrition',
+    label: { en: 'Nutrition', ru: 'Питание', fr: 'Nutrition' }
+  },
+  {
+    id: 'hydration',
+    label: { en: 'Hydration', ru: 'Гидратация', fr: 'Hydratation' }
+  },
+  {
+    id: 'rest_practices',
+    label: { en: 'Rest & Practices', ru: 'Отдых и практики', fr: 'Repos et pratiques' }
+  },
+  {
+    id: 'social_hobbies',
+    label: { en: 'Social & Entertainment', ru: 'Общение и развлечения', fr: 'Social et divertissement' }
+  }
+];
 
 const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
   // 1. RESTORING (Восстанавливающие)
@@ -21,6 +55,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '😴',
     recommendedType: 'restoring',
     defaultDuration: 480,
+    group: 'sleep',
     label: {
       en: 'Sleep 8 hours',
       ru: 'Сон 8 часов',
@@ -32,6 +67,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '😴',
     recommendedType: 'restoring',
     defaultDuration: 60,
+    group: 'sleep',
     label: {
       en: 'Nap (30 min - 2 hours)',
       ru: 'Короткий дневной сон',
@@ -42,6 +78,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'sleep_quiet_rest',
     emoji: '🛋️',
     recommendedType: 'restoring',
+    group: 'sleep',
     label: {
       en: 'Quiet Rest',
       ru: 'Спокойный отдых',
@@ -54,6 +91,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_breakfast',
     emoji: '🍳',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'Breakfast',
       ru: 'Завтрак',
@@ -64,6 +102,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_brunch',
     emoji: '🥐',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'Brunch',
       ru: 'Бранч (поздний завтрак)',
@@ -74,6 +113,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_lunch',
     emoji: '🍽️',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'Lunch',
       ru: 'Обед',
@@ -84,6 +124,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_coffee',
     emoji: '☕',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'Coffee',
       ru: 'Кофе',
@@ -94,6 +135,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_dinner',
     emoji: '🍲',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'Dinner',
       ru: 'Ужин',
@@ -104,6 +146,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'nutrition_after_dinner',
     emoji: '🍪',
     recommendedType: 'restoring',
+    group: 'nutrition',
     label: {
       en: 'After Dinner',
       ru: 'Еда после ужина',
@@ -116,6 +159,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'hydration',
     emoji: '💧',
     recommendedType: 'restoring',
+    group: 'hydration',
     label: {
       en: 'Hydration',
       ru: 'Гидратация',
@@ -128,6 +172,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest',
     emoji: '🛋️',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Rest',
       ru: 'Отдых',
@@ -138,6 +183,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_relaxation',
     emoji: '😌',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Relaxation',
       ru: 'Расслабление',
@@ -148,6 +194,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_water_procedures',
     emoji: '🛁',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Water Procedures',
       ru: 'Водные процедуры',
@@ -158,6 +205,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_hygiene',
     emoji: '🚿',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Hygiene',
       ru: 'Гигиена',
@@ -168,6 +216,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_self_care',
     emoji: '💆',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Self Care Procedures',
       ru: 'Процедуры ухода за собой',
@@ -179,6 +228,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '🧘‍♂️',
     recommendedType: 'restoring',
     defaultDuration: 10,
+    group: 'rest_practices',
     label: {
       en: 'Meditation',
       ru: 'Медитация',
@@ -189,6 +239,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_psychological_exercises',
     emoji: '🧠',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Psychological Exercises',
       ru: 'Психологические упражнения',
@@ -199,6 +250,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_walks',
     emoji: '🚶',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Walks',
       ru: 'Прогулки',
@@ -209,6 +261,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_light_exercise',
     emoji: '🧘',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Light Exercise',
       ru: 'Легкий спорт',
@@ -220,6 +273,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '🤸',
     recommendedType: 'restoring',
     defaultDuration: 10,
+    group: 'rest_practices',
     label: {
       en: 'Morning Exercise',
       ru: 'Утренняя зарядка',
@@ -230,6 +284,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_reading',
     emoji: '📖',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Reading',
       ru: 'Чтение',
@@ -240,6 +295,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_doing_nothing',
     emoji: '🪑',
     recommendedType: 'restoring',
+    group: 'rest_practices',
     label: {
       en: 'Doing Nothing',
       ru: 'Бездействие',
@@ -251,6 +307,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '🌬️',
     recommendedType: 'restoring',
     defaultDuration: 5,
+    group: 'rest_practices',
     label: {
       en: 'Breathing Exercise',
       ru: 'Дыхательное упражнение',
@@ -262,6 +319,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     emoji: '🌍',
     recommendedType: 'restoring',
     defaultDuration: 10,
+    group: 'rest_practices',
     label: {
       en: 'Grounding Exercise',
       ru: 'Упражнение на заземление',
@@ -274,6 +332,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'close_socializing',
     emoji: '💝',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Close Socializing',
       ru: 'Общение с близкими',
@@ -284,6 +343,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'hobby',
     emoji: '🎨',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Hobby',
       ru: 'Хобби',
@@ -294,6 +354,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'games',
     emoji: '🎮',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Games',
       ru: 'Игры',
@@ -304,6 +365,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'creative',
     emoji: '🎭',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Creative',
       ru: 'Творчество',
@@ -314,6 +376,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'entertainment',
     emoji: '🎬',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Entertainment',
       ru: 'Развлечения',
@@ -324,6 +387,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'self_care',
     emoji: '💆',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Self Care',
       ru: 'Забота о себе',
@@ -334,6 +398,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'entertainment_music',
     emoji: '🎵',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Listen to Music',
       ru: 'Послушать музыку',
@@ -344,6 +409,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'entertainment_social_media',
     emoji: '📱',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Social Media',
       ru: 'Соцсети',
@@ -354,6 +420,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'entertainment_movies',
     emoji: '🎬',
     recommendedType: 'restoring',
+    group: 'social_hobbies',
     label: {
       en: 'Watch Movies',
       ru: 'Просмотр фильмов',
@@ -729,4 +796,11 @@ export const getAllCategories = (): CategoryConfig[] => {
 
 export const getCategoryConfig = (categoryKey: string): CategoryConfig | undefined => {
   return CATEGORY_CONFIG.find(cat => cat.value === categoryKey);
+};
+
+export const getGroupsForType = (type: ImpactType): CategoryGroup[] => {
+  if (type === 'restoring') {
+    return RESTORING_GROUPS;
+  }
+  return [];
 };

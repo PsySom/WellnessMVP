@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { getCategoriesByType } from '@/config/categoryConfig';
+import { getCategoriesByType, getGroupsForType, RESTORING_GROUPS } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 import { CalendarIcon, Star } from 'lucide-react';
@@ -267,12 +267,42 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
             <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-background border shadow-lg z-50 max-h-[400px] overflow-y-auto">
-                {availableCategories.map(cat => (
-                  <SelectItem key={cat.value} value={cat.value}>
-                    <span className="mr-2">{cat.emoji}</span>
-                    {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
-                  </SelectItem>
-                ))}
+                {(() => {
+                  const groups = getGroupsForType(formData.impact_type);
+                  
+                  if (groups.length > 0) {
+                    // Render with groups
+                    return groups.map((group, groupIndex) => {
+                      const groupCategories = availableCategories.filter(cat => cat.group === group.id);
+                      if (groupCategories.length === 0) return null;
+                      
+                      return (
+                        <React.Fragment key={group.id}>
+                          {groupIndex > 0 && (
+                            <div className="h-px bg-border my-2 mx-2" />
+                          )}
+                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                            {group.label[i18n.language as 'en' | 'ru' | 'fr'] || group.label.en}
+                          </div>
+                          {groupCategories.map(cat => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              <span className="mr-2">{cat.emoji}</span>
+                              {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
+                            </SelectItem>
+                          ))}
+                        </React.Fragment>
+                      );
+                    });
+                  }
+                  
+                  // Render without groups
+                  return availableCategories.map(cat => (
+                    <SelectItem key={cat.value} value={cat.value}>
+                      <span className="mr-2">{cat.emoji}</span>
+                      {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
+                    </SelectItem>
+                  ));
+                })()}
               </SelectContent>
             </Select>
           </div>
