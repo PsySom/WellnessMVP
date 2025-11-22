@@ -1,6 +1,6 @@
+import { Constants, Enums } from '@/integrations/supabase/types';
 export type ImpactType = 'restoring' | 'depleting' | 'mixed' | 'neutral';
-export type CategoryKey = string;
-
+export type CategoryKey = Enums<'activity_category'>;
 export interface CategoryConfig {
   value: CategoryKey;
   emoji: string;
@@ -12,7 +12,7 @@ export interface CategoryConfig {
   };
 }
 
-export const CATEGORY_CONFIG: CategoryConfig[] = [
+const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
   // RESTORING (Восстанавливающие) - 15 категорий
   {
     value: 'sleep',
@@ -520,7 +520,31 @@ export const CATEGORY_CONFIG: CategoryConfig[] = [
       fr: 'Autre'
     }
   }
-];
+]; 
+
+const DB_CATEGORIES = Constants.public.Enums.activity_category as readonly CategoryKey[];
+
+export const CATEGORY_CONFIG: CategoryConfig[] = DB_CATEGORIES.map((key) => {
+  const base = BASE_CATEGORY_CONFIG.find((cat) => cat.value === key);
+
+  if (base) return base;
+
+  const pretty = key
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
+  return {
+    value: key,
+    emoji: '📌',
+    recommendedType: 'neutral',
+    label: {
+      en: pretty,
+      ru: pretty,
+      fr: pretty,
+    },
+  };
+});
 
 export const getCategoriesByType = (type: ImpactType): CategoryConfig[] => {
   return CATEGORY_CONFIG.filter(cat => cat.recommendedType === type);
