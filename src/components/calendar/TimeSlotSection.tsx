@@ -3,6 +3,7 @@ import { ActivityItem } from './ActivityItem';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TimeSlot, getDefaultTimeForSlot } from '@/utils/timeSlots';
+import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface TimeSlotSectionProps {
   title: string;
@@ -105,6 +106,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     }
 
     onUpdate();
+    triggerActivityUpdate();
   };
 
   const minHeight = isEmpty ? 'min-h-[60px]' : 'min-h-0';

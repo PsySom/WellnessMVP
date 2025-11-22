@@ -8,6 +8,7 @@ import { format } from 'date-fns';
 import { Edit, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { ActivityFormModal } from './ActivityFormModal';
+import { triggerActivityUpdate } from '@/utils/activitySync';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,6 +72,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
       });
       onOpenChange(false);
       onUpdate();
+      triggerActivityUpdate();
     }
   };
 

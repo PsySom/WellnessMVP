@@ -17,6 +17,7 @@ import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 import { CalendarIcon, Star } from 'lucide-react';
 import { z } from 'zod';
+import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -185,11 +186,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       console.log('Activity saved successfully:', activityData);
       toast.success(activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess'));
       onOpenChange(false);
-      
-      // Принудительно обновляем все подписанные компоненты
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('activity-updated'));
-      }, 100);
+      triggerActivityUpdate();
     }
   };
 
