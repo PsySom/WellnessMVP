@@ -713,11 +713,11 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
 
 // Dynamically get categories from database enum
 const DB_CATEGORIES = Constants.public.Enums.activity_category;
+const DB_CATEGORIES_SET = new Set(DB_CATEGORIES);
 
-// Map database categories to config, keeping only those with definitions
-export const CATEGORY_CONFIG: CategoryConfig[] = DB_CATEGORIES
-  .map(key => BASE_CATEGORY_CONFIG.find(config => config.value === key))
-  .filter((config): config is CategoryConfig => config !== undefined);
+// Keep only categories that exist in DB, but preserve BASE_CATEGORY_CONFIG order
+export const CATEGORY_CONFIG: CategoryConfig[] = BASE_CATEGORY_CONFIG
+  .filter(config => DB_CATEGORIES_SET.has(config.value));
 
 export const getCategoriesByType = (type: ImpactType): CategoryConfig[] => {
   return CATEGORY_CONFIG.filter(cat => cat.recommendedType === type);
