@@ -95,12 +95,11 @@
       "errorLoading": "Échec du chargement des activités",
       "errorUpdating": "Échec de la mise à jour de l'activité"
     },
-    "quickStats": {
-      "mood": "Humeur",
-      "moodValue": "Bonne",
-      "activities": "Activités",
-      "streak": "Série",
-      "days": "jours"
+    "impactCards": {
+      "restoring": "Réparatrices",
+      "depleting": "Tâches",
+      "neutral": "Neutres",
+      "mixed": "Mixtes"
     },
     "insightsPreview": {
       "recommendation": "recommandation",
