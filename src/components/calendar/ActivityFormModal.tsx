@@ -66,6 +66,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     return getCategoriesByType(formData.impact_type);
   }, [formData.impact_type]);
 
+  // Auto-fill duration when category with default duration is selected
+  useEffect(() => {
+    const categoryConfig = availableCategories.find(cat => cat.value === formData.category);
+    if (categoryConfig?.defaultDuration && !activity) {
+      setFormData(prev => ({ ...prev, duration_minutes: categoryConfig.defaultDuration! }));
+    }
+  }, [formData.category, availableCategories, activity]);
+
   // Auto-update category when impact type changes
   useEffect(() => {
     const categories = getCategoriesByType(formData.impact_type);

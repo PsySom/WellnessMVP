@@ -5,6 +5,7 @@ export interface CategoryConfig {
   value: CategoryKey;
   emoji: string;
   recommendedType: ImpactType;
+  defaultDuration?: number; // in minutes
   label: {
     en: string;
     ru: string;
@@ -13,12 +14,13 @@ export interface CategoryConfig {
 }
 
 const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
-  // RESTORING (Восстанавливающие) - с подтипами
+  // 1. RESTORING (Восстанавливающие)
   // 1.1 Сон
   {
     value: 'sleep_8hours',
     emoji: '😴',
     recommendedType: 'restoring',
+    defaultDuration: 480,
     label: {
       en: 'Sleep 8 hours',
       ru: 'Сон 8 часов',
@@ -29,8 +31,9 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'sleep_nap',
     emoji: '😴',
     recommendedType: 'restoring',
+    defaultDuration: 60,
     label: {
-      en: 'Nap',
+      en: 'Nap (30 min - 2 hours)',
       ru: 'Короткий дневной сон',
       fr: 'Sieste'
     }
@@ -63,7 +66,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     recommendedType: 'restoring',
     label: {
       en: 'Brunch',
-      ru: 'Бранч',
+      ru: 'Бранч (поздний завтрак)',
       fr: 'Brunch'
     }
   },
@@ -175,6 +178,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_meditation_10min',
     emoji: '🧘‍♂️',
     recommendedType: 'restoring',
+    defaultDuration: 10,
     label: {
       en: 'Meditation',
       ru: 'Медитация',
@@ -215,6 +219,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_morning_exercise',
     emoji: '🤸',
     recommendedType: 'restoring',
+    defaultDuration: 10,
     label: {
       en: 'Morning Exercise',
       ru: 'Утренняя зарядка',
@@ -245,6 +250,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_breathing_5min',
     emoji: '🌬️',
     recommendedType: 'restoring',
+    defaultDuration: 5,
     label: {
       en: 'Breathing Exercise',
       ru: 'Дыхательное упражнение',
@@ -255,6 +261,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'rest_grounding_10min',
     emoji: '🌍',
     recommendedType: 'restoring',
+    defaultDuration: 10,
     label: {
       en: 'Grounding Exercise',
       ru: 'Упражнение на заземление',
@@ -262,7 +269,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   
-  // Общение и хобби
+  // 1.5-1.13 Общение, хобби и развлечения
   {
     value: 'close_socializing',
     emoji: '💝',
@@ -314,6 +321,16 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
+    value: 'self_care',
+    emoji: '💆',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Self Care',
+      ru: 'Забота о себе',
+      fr: 'Soin de soi'
+    }
+  },
+  {
     value: 'entertainment_music',
     emoji: '🎵',
     recommendedType: 'restoring',
@@ -343,18 +360,8 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       fr: 'Regarder des films'
     }
   },
-  {
-    value: 'self_care',
-    emoji: '💆',
-    recommendedType: 'restoring',
-    label: {
-      en: 'Self Care',
-      ru: 'Забота о себе',
-      fr: 'Soin de soi'
-    }
-  },
 
-  // DEPLETING (Истощающие)
+  // 2. DEPLETING (Истощающие)
   {
     value: 'work',
     emoji: '💼',
@@ -476,7 +483,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
 
-  // MIXED (Смешанные)
+  // 3. MIXED (Смешанные)
   {
     value: 'exercise',
     emoji: '🏃',
@@ -588,7 +595,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
 
-  // NEUTRAL (Нейтральные)
+  // 4. NEUTRAL (Нейтральные)
   {
     value: 'hygiene',
     emoji: '🚿',
@@ -663,6 +670,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'reflection_trackers_5min',
     emoji: '📊',
     recommendedType: 'neutral',
+    defaultDuration: 5,
     label: {
       en: 'Fill Trackers',
       ru: 'Заполнить трекеры',
@@ -673,6 +681,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'reflection_evening_10min',
     emoji: '🌙',
     recommendedType: 'neutral',
+    defaultDuration: 10,
     label: {
       en: 'Evening Reflection',
       ru: 'Вечерняя рефлексия',
@@ -683,6 +692,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     value: 'reflection_morning_10min',
     emoji: '🌅',
     recommendedType: 'neutral',
+    defaultDuration: 10,
     label: {
       en: 'Morning Reflection',
       ru: 'Утренняя рефлексия',
