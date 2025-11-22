@@ -34,16 +34,16 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
     { 
       key: 'neutral' as const, 
       label: t('dashboard.impactCards.neutral'),
-      activeColor: 'hsl(var(--warning))',
+      activeColor: 'hsl(var(--secondary))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--warning) / 0.3)'
+      lightColor: 'hsl(var(--secondary) / 0.3)'
     },
     { 
       key: 'mixed' as const, 
       label: t('dashboard.impactCards.mixed'),
-      activeColor: 'hsl(var(--secondary))',
+      activeColor: 'hsl(var(--warning))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--secondary) / 0.3)'
+      lightColor: 'hsl(var(--warning) / 0.3)'
     },
   ];
 
