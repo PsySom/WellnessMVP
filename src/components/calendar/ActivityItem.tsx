@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { ActivityDetailModal } from './ActivityDetailModal';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown, Play } from 'lucide-react';
+import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface ActivityItemProps {
   activity: any;
@@ -60,7 +61,6 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
   };
 
   const handleToggleComplete = async () => {
-    
     const newStatus = isCompleted ? 'planned' : 'completed';
     
     const { error } = await supabase
@@ -86,6 +86,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     }
 
     onUpdate();
+    triggerActivityUpdate();
   };
 
   const emoji = CATEGORY_EMOJIS[activity.category] || '📌';
