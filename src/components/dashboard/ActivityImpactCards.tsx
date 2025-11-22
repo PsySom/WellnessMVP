@@ -20,30 +20,30 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
     { 
       key: 'restoring' as const, 
       label: t('dashboard.impactCards.restoring'),
-      activeColor: 'hsl(var(--chart-1))',
+      activeColor: 'hsl(var(--accent))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--chart-1) / 0.3)'
+      lightColor: 'hsl(var(--accent) / 0.3)'
     },
     { 
       key: 'depleting' as const, 
       label: t('dashboard.impactCards.depleting'),
-      activeColor: 'hsl(var(--chart-2))',
+      activeColor: 'hsl(var(--destructive))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--chart-2) / 0.3)'
+      lightColor: 'hsl(var(--destructive) / 0.3)'
     },
     { 
       key: 'neutral' as const, 
       label: t('dashboard.impactCards.neutral'),
-      activeColor: 'hsl(var(--chart-3))',
+      activeColor: 'hsl(var(--warning))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--chart-3) / 0.3)'
+      lightColor: 'hsl(var(--warning) / 0.3)'
     },
     { 
       key: 'mixed' as const, 
       label: t('dashboard.impactCards.mixed'),
-      activeColor: 'hsl(var(--chart-4))',
+      activeColor: 'hsl(var(--secondary))',
       inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--chart-4) / 0.3)'
+      lightColor: 'hsl(var(--secondary) / 0.3)'
     },
   ];
 
