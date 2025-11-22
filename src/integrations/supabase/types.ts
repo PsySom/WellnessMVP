@@ -26,6 +26,7 @@ export type Database = {
           id: string
           impact_type: Database["public"]["Enums"]["activity_impact"]
           is_recurring: boolean | null
+          priority: number | null
           recurrence_pattern: Json | null
           reminder_enabled: boolean | null
           reminder_minutes_before: number | null
@@ -48,6 +49,7 @@ export type Database = {
           id?: string
           impact_type: Database["public"]["Enums"]["activity_impact"]
           is_recurring?: boolean | null
+          priority?: number | null
           recurrence_pattern?: Json | null
           reminder_enabled?: boolean | null
           reminder_minutes_before?: number | null
@@ -70,6 +72,7 @@ export type Database = {
           id?: string
           impact_type?: Database["public"]["Enums"]["activity_impact"]
           is_recurring?: boolean | null
+          priority?: number | null
           recurrence_pattern?: Json | null
           reminder_enabled?: boolean | null
           reminder_minutes_before?: number | null
