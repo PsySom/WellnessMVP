@@ -13,12 +13,16 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { useLocale } from '@/hooks/useLocale';
+import { getCategoryConfig } from '@/config/categoryConfig';
 
 interface TemplateDetailModalProps {
   template: {
     id: string;
     name: string;
     name_en: string;
+    name_ru?: string;
+    name_fr?: string;
     description: string | null;
     category: string;
     impact_type: string;
@@ -64,25 +68,24 @@ const getImpactInfo = (impactType: string) => {
   }
 };
 
-const getCategoryLabel = (category: string) => {
-  const labels: Record<string, string> = {
-    sleep: 'Sleep & Rest',
-    nutrition: 'Nutrition',
-    hydration: 'Hydration',
-    exercise: 'Exercise',
-    hobby: 'Hobby',
-    work: 'Work',
-    social: 'Social',
-    practice: 'Practice',
-    health: 'Health',
-    reflection: 'Reflection',
-    leisure: 'Leisure',
-  };
-  return labels[category] || category;
-};
-
 const TemplateDetailModal = ({ template, open, onClose }: TemplateDetailModalProps) => {
   const { user } = useAuth();
+  const { locale } = useLocale();
+  
+  const getLocalizedName = () => {
+    if (!template) return '';
+    if (locale === 'ru' && template.name_ru) return template.name_ru;
+    if (locale === 'fr' && template.name_fr) return template.name_fr;
+    return template.name_en;
+  };
+  
+  const getCategoryLabel = (category: string) => {
+    const categoryConfig = getCategoryConfig(category);
+    if (categoryConfig) {
+      return categoryConfig.label[locale as 'en' | 'ru' | 'fr'] || categoryConfig.label.en;
+    }
+    return category;
+  };
 
   const handleAddToToday = async () => {
     if (!template || !user) return;
@@ -93,7 +96,7 @@ const TemplateDetailModal = ({ template, open, onClose }: TemplateDetailModalPro
 
     try {
       const { error } = await supabase.from('activities').insert({
-        title: template.name_en,
+        title: getLocalizedName(),
         category: template.category as any,
         impact_type: template.impact_type as any,
         duration_minutes: template.default_duration_minutes,
@@ -125,7 +128,7 @@ const TemplateDetailModal = ({ template, open, onClose }: TemplateDetailModalPro
           <div className="flex items-center gap-4 md:gap-5">
             <span className="text-5xl md:text-6xl transition-transform hover:scale-110">{template.emoji}</span>
             <div className="flex-1">
-              <DialogTitle className="text-xl md:text-2xl">{template.name_en}</DialogTitle>
+              <DialogTitle className="text-xl md:text-2xl">{getLocalizedName()}</DialogTitle>
             </div>
           </div>
           {template.description && (

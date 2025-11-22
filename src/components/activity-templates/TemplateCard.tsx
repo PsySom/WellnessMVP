@@ -3,11 +3,15 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocale } from '@/hooks/useLocale';
+import { getCategoryConfig } from '@/config/categoryConfig';
 
 interface TemplateCardProps {
   template: {
     id: string;
     name_en: string;
+    name_ru?: string;
+    name_fr?: string;
     emoji: string;
     category: string;
     impact_type: string;
@@ -31,24 +35,22 @@ const getImpactColor = (impactType: string) => {
   }
 };
 
-const getCategoryLabel = (category: string) => {
-  const labels: Record<string, string> = {
-    sleep: 'Sleep',
-    nutrition: 'Nutrition',
-    hydration: 'Hydration',
-    exercise: 'Exercise',
-    hobby: 'Hobby',
-    work: 'Work',
-    social: 'Social',
-    practice: 'Practice',
-    health: 'Health',
-    reflection: 'Reflection',
-    leisure: 'Leisure',
-  };
-  return labels[category] || category;
-};
-
 const TemplateCard = ({ template, onClick }: TemplateCardProps) => {
+  const { getLocalizedField, locale } = useLocale();
+  
+  const getLocalizedName = () => {
+    if (locale === 'ru' && template.name_ru) return template.name_ru;
+    if (locale === 'fr' && template.name_fr) return template.name_fr;
+    return template.name_en;
+  };
+  
+  const getCategoryLabel = (category: string) => {
+    const categoryConfig = getCategoryConfig(category);
+    if (categoryConfig) {
+      return categoryConfig.label[locale as 'en' | 'ru' | 'fr'] || categoryConfig.label.en;
+    }
+    return category;
+  };
   return (
     <Card 
       className="p-4 hover:shadow-lg transition-shadow cursor-pointer group"
@@ -59,7 +61,7 @@ const TemplateCard = ({ template, onClick }: TemplateCardProps) => {
         
         <div className="flex-1 min-w-0">
           <h3 className="font-semibold text-foreground mb-2 line-clamp-1">
-            {template.name_en}
+            {getLocalizedName()}
           </h3>
           
           <div className="flex flex-wrap gap-2 mb-2">
