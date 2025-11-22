@@ -34,10 +34,10 @@ const activitySchema = z.object({
 });
 
 const IMPACT_TYPES = [
-  { value: 'restoring' as const, color: 'bg-green-500' },
-  { value: 'depleting' as const, color: 'bg-red-500' },
-  { value: 'mixed' as const, color: 'bg-orange-500' },
-  { value: 'neutral' as const, color: 'bg-blue-500' }
+  { value: 'restoring' as const, color: 'bg-accent' },
+  { value: 'depleting' as const, color: 'bg-destructive' },
+  { value: 'mixed' as const, color: 'bg-warning' },
+  { value: 'neutral' as const, color: 'bg-secondary' }
 ];
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
@@ -64,6 +64,16 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   const availableCategories = useMemo(() => {
     return getCategoriesByType(formData.impact_type);
   }, [formData.impact_type]);
+
+  // Auto-update category when impact type changes
+  useEffect(() => {
+    if (availableCategories.length > 0) {
+      const currentCategoryExists = availableCategories.some(cat => cat.value === formData.category);
+      if (!currentCategoryExists) {
+        setFormData(prev => ({ ...prev, category: availableCategories[0].value }));
+      }
+    }
+  }, [formData.impact_type, availableCategories]);
 
   useEffect(() => {
     if (open) {
