@@ -104,6 +104,7 @@ export type Database = {
           created_at: string | null
           default_duration_minutes: number | null
           description: string | null
+          description_ru: string | null
           emoji: string
           id: string
           impact_type: Database["public"]["Enums"]["activity_impact"]
@@ -111,12 +112,14 @@ export type Database = {
           name: string
           name_en: string
           name_fr: string
+          name_ru: string | null
         }
         Insert: {
           category: Database["public"]["Enums"]["activity_category"]
           created_at?: string | null
           default_duration_minutes?: number | null
           description?: string | null
+          description_ru?: string | null
           emoji: string
           id?: string
           impact_type: Database["public"]["Enums"]["activity_impact"]
@@ -124,12 +127,14 @@ export type Database = {
           name: string
           name_en: string
           name_fr: string
+          name_ru?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["activity_category"]
           created_at?: string | null
           default_duration_minutes?: number | null
           description?: string | null
+          description_ru?: string | null
           emoji?: string
           id?: string
           impact_type?: Database["public"]["Enums"]["activity_impact"]
@@ -137,6 +142,7 @@ export type Database = {
           name?: string
           name_en?: string
           name_fr?: string
+          name_ru?: string | null
         }
         Relationships: []
       }
