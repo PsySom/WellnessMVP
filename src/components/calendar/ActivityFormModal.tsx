@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectLabel, SelectGroup } from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { getCategoriesByType, getAllCategories } from '@/config/categoryConfig';
+import { getCategoriesByType } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 import { CalendarIcon } from 'lucide-react';
@@ -42,7 +42,7 @@ const IMPACT_TYPES = [
 
 export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isEditing = Boolean(activity?.id);
   
@@ -62,9 +62,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   });
 
   const availableCategories = useMemo(() => {
-    const recommended = getCategoriesByType(formData.impact_type);
-    const all = getAllCategories();
-    return { recommended, all };
+    return getCategoriesByType(formData.impact_type);
   }, [formData.impact_type]);
 
   useEffect(() => {
@@ -238,20 +236,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
             <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent className="bg-background border shadow-lg z-50">
-                {availableCategories.recommended.length > 0 && (
-                  <SelectGroup>
-                    <SelectLabel>{t('calendar.form.recommended')}</SelectLabel>
-                    {availableCategories.recommended.map(cat => (
-                      <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
-                    ))}
-                  </SelectGroup>
-                )}
-                <SelectGroup>
-                  <SelectLabel>{t('calendar.form.allCategories')}</SelectLabel>
-                  {availableCategories.all.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>{t(`calendar.categories.${cat.value}`)}</SelectItem>
-                  ))}
-                </SelectGroup>
+                {availableCategories.map(cat => (
+                  <SelectItem key={cat.value} value={cat.value}>
+                    <span className="mr-2">{cat.emoji}</span>
+                    {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
