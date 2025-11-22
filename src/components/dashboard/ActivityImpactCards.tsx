@@ -12,38 +12,41 @@ interface ActivityImpactCardsProps {
   activities: Activity[];
 }
 
+const getHslColor = (variableName: string, alpha = 1) => {
+  if (typeof window === 'undefined') return undefined;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue(variableName)
+    .trim();
+
+  if (!raw) return undefined;
+
+  return alpha === 1 ? `hsl(${raw})` : `hsl(${raw} / ${alpha})`;
+};
+
 const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
   const { t } = useTranslation();
   const [animatedData, setAnimatedData] = useState<Record<string, { total: number; completed: number; percentage: number }>>({});
 
   const impactTypes = [
-    { 
-      key: 'restoring' as const, 
+    {
+      key: 'restoring' as const,
       label: t('dashboard.impactCards.restoring'),
-      activeColor: 'hsl(var(--accent))',
-      inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--accent) / 0.3)'
+      colorVar: '--accent',
     },
-    { 
-      key: 'depleting' as const, 
+    {
+      key: 'depleting' as const,
       label: t('dashboard.impactCards.depleting'),
-      activeColor: 'hsl(var(--destructive))',
-      inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--destructive) / 0.3)'
+      colorVar: '--destructive',
     },
-    { 
-      key: 'neutral' as const, 
+    {
+      key: 'neutral' as const,
       label: t('dashboard.impactCards.neutral'),
-      activeColor: 'hsl(var(--secondary))',
-      inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--secondary) / 0.3)'
+      colorVar: '--secondary',
     },
-    { 
-      key: 'mixed' as const, 
+    {
+      key: 'mixed' as const,
       label: t('dashboard.impactCards.mixed'),
-      activeColor: 'hsl(var(--warning))',
-      inactiveColor: 'hsl(var(--muted))',
-      lightColor: 'hsl(var(--warning) / 0.3)'
+      colorVar: '--warning',
     },
   ];
 
@@ -57,13 +60,11 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
   };
 
   useEffect(() => {
-    // Анимация появления данных
     const newData: Record<string, { total: number; completed: number; percentage: number }> = {};
     impactTypes.forEach((type) => {
       newData[type.key] = calculateStats(type.key);
     });
     
-    // Задержка для плавной анимации
     const timer = setTimeout(() => {
       setAnimatedData(newData);
     }, 100);
@@ -77,6 +78,9 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
         const stats = animatedData[type.key] || { total: 0, completed: 0, percentage: 0 };
         const hasActivities = stats.total > 0;
         const hasCompleted = stats.completed > 0;
+
+        const activeColor = getHslColor(type.colorVar) || 'hsl(var(--primary))';
+        const lightColor = getHslColor(type.colorVar, 0.3) || 'hsl(var(--muted))';
         
         const chartData = hasActivities
           ? [
@@ -86,10 +90,10 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
           : [{ name: 'empty', value: 1 }];
 
         const fillColor = !hasActivities 
-          ? type.inactiveColor 
+          ? lightColor 
           : hasCompleted 
-            ? type.activeColor 
-            : type.lightColor;
+            ? activeColor 
+            : lightColor;
 
         return (
           <Card 
@@ -114,11 +118,11 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
                   >
                     {hasActivities ? (
                       <>
-                        <Cell fill={type.activeColor} />
-                        <Cell fill={type.lightColor} />
+                        <Cell fill={activeColor} />
+                        <Cell fill={lightColor} />
                       </>
                     ) : (
-                      <Cell fill={type.activeColor} />
+                      <Cell fill={activeColor} />
                     )}
                   </Pie>
                 </PieChart>
@@ -130,7 +134,7 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
                   <p 
                     className="text-lg font-bold mt-xs transition-all duration-500 ease-out" 
                     style={{ 
-                      color: hasCompleted ? type.activeColor : type.lightColor,
+                      color: hasCompleted ? activeColor : lightColor,
                       transform: `scale(${stats.percentage > 0 ? 1 : 0.8})`,
                       opacity: stats.percentage > 0 ? 1 : 0.6
                     }}
