@@ -47,9 +47,10 @@ const Dashboard = () => {
       
       const { data, error } = await supabase
         .from('activities')
-        .select('*')
+        .select('*, exercises(slug), tests(slug)')
         .eq('user_id', user.id)
-        .eq('date', today);
+        .eq('date', today)
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
       setTodayActivities(data || []);
@@ -122,7 +123,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg md:gap-xl">
           {/* Left Column - Activities and Tracker */}
           <div className="lg:col-span-2 space-y-lg">
-            <TodayActivitiesCard />
+            <TodayActivitiesCard activities={todayActivities} onUpdate={fetchTodayActivities} />
             <QuickTrackerCard onEntrySaved={handleEntrySaved} />
             
             {/* Links to other pages */}

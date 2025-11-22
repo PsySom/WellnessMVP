@@ -1,91 +1,28 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
-import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TimeSlotSection } from '@/components/calendar/TimeSlotSection';
 import { TIME_SLOTS, filterActivitiesBySlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 
-interface Activity {
-  id: string;
-  title: string;
-  start_time: string | null;
-  status: string;
-  impact_type: string;
-  exercise_id: string | null;
-  test_id: string | null;
-  exercises?: {
-    slug: string;
-  };
-  tests?: {
-    slug: string;
-  };
+interface TodayActivitiesCardProps {
+  activities: any[];
+  onUpdate: () => void;
 }
 
-const TodayActivitiesCard = () => {
-  const navigate = useNavigate();
+interface TodayActivitiesCardProps {
+  activities: any[];
+  onUpdate: () => void;
+}
+
+const TodayActivitiesCard = ({ activities, onUpdate }: TodayActivitiesCardProps) => {
   const { t } = useTranslation();
-  const { user } = useAuth();
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      fetchTodayActivities();
-      setupRealtimeSubscription();
-    }
-  }, [user]);
-
-  const fetchTodayActivities = async () => {
-    if (!user) return;
-    
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      
-      const { data, error } = await supabase
-        .from('activities')
-        .select('*, exercises(slug), tests(slug)')
-        .eq('user_id', user.id)
-        .eq('date', today)
-        .order('start_time', { ascending: true });
-
-      if (error) throw error;
-      setActivities(data || []);
-    } catch (error) {
-      console.error('Error fetching activities:', error);
-      toast.error(t('dashboard.todayActivitiesCard.errorLoading'));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const setupRealtimeSubscription = () => {
-    const channel = supabase
-      .channel('activities-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'activities',
-          filter: `user_id=eq.${user?.id}`
-        },
-        () => {
-          fetchTodayActivities();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  };
+  const navigate = useNavigate();
+  const [loading] = useState(false);
 
   const today = format(new Date(), 'EEEE, d MMMM');
 
@@ -152,7 +89,7 @@ const TodayActivitiesCard = () => {
                   emoji={slot.emoji}
                   slot={slot.key}
                   activities={slotActivities}
-                  onUpdate={fetchTodayActivities}
+                  onUpdate={onUpdate}
                 />
               );
             })}
@@ -162,7 +99,7 @@ const TodayActivitiesCard = () => {
               emoji="📌"
               slot="anytime"
               activities={filterActivitiesBySlot(activities, 'anytime')}
-              onUpdate={fetchTodayActivities}
+        onUpdate={onUpdate}
             />
           </div>
 
