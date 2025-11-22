@@ -239,13 +239,30 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
           <div>
             <Label>{t('calendar.form.duration')}</Label>
-            <Select value={formData.duration_minutes.toString()} onValueChange={(v) => setFormData({ ...formData, duration_minutes: parseInt(v) })}>
+            <Select 
+              value={formData.duration_minutes.toString()} 
+              onValueChange={(v) => {
+                const parsed = parseInt(v, 10);
+                if (!isNaN(parsed)) {
+                  setFormData({ ...formData, duration_minutes: parsed });
+                }
+              }}
+            >
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
+                <SelectItem value="5">5 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="10">10 {t('calendar.form.minutes')}</SelectItem>
                 <SelectItem value="15">15 {t('calendar.form.minutes')}</SelectItem>
                 <SelectItem value="30">30 {t('calendar.form.minutes')}</SelectItem>
+                <SelectItem value="45">45 {t('calendar.form.minutes')}</SelectItem>
                 <SelectItem value="60">1 {t('calendar.form.hour')}</SelectItem>
+                <SelectItem value="90">1.5 {t('calendar.form.hours')}</SelectItem>
                 <SelectItem value="120">2 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="180">3 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="240">4 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="300">5 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="360">6 {t('calendar.form.hours')}</SelectItem>
+                <SelectItem value="480">8 {t('calendar.form.hours')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
