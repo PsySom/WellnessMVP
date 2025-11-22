@@ -176,14 +176,21 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       ? await supabase.from('activities').update(activityData as any).eq('id', activity.id)
       : await supabase.from('activities').insert(activityData as any);
 
+    setLoading(false);
+
     if (error) {
+      console.error('Activity save error:', error);
       toast.error(t('calendar.form.saveError'));
     } else {
+      console.log('Activity saved successfully:', activityData);
       toast.success(activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess'));
       onOpenChange(false);
+      
+      // Принудительно обновляем все подписанные компоненты
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('activity-updated'));
+      }, 100);
     }
-
-    setLoading(false);
   };
 
   return (
