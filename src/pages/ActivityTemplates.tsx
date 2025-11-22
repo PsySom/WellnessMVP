@@ -13,6 +13,7 @@ interface ActivityTemplate {
   id: string;
   name: string;
   name_en: string;
+  name_ru: string;
   name_fr: string;
   description: string | null;
   category: string;
@@ -23,7 +24,7 @@ interface ActivityTemplate {
 }
 
 const ActivityTemplates = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedTemplate, setSelectedTemplate] = useState<ActivityTemplate | null>(null);
@@ -43,8 +44,12 @@ const ActivityTemplates = () => {
   });
 
   const filteredTemplates = templates.filter((template) => {
-    const matchesSearch = template.name_en.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         template.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      template.name_en.toLowerCase().includes(searchLower) ||
+      template.name_ru?.toLowerCase().includes(searchLower) ||
+      template.name_fr?.toLowerCase().includes(searchLower) ||
+      template.name.toLowerCase().includes(searchLower);
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
