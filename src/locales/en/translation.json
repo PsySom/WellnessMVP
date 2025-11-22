@@ -95,12 +95,11 @@
       "errorLoading": "Failed to load activities",
       "errorUpdating": "Failed to update activity"
     },
-    "quickStats": {
-      "mood": "Mood",
-      "moodValue": "Good",
-      "activities": "Activities",
-      "streak": "Streak",
-      "days": "days"
+    "impactCards": {
+      "restoring": "Restoring",
+      "depleting": "Tasks",
+      "neutral": "Neutral",
+      "mixed": "Mixed"
     },
     "insightsPreview": {
       "recommendation": "recommendation",

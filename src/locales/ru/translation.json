@@ -95,12 +95,11 @@
       "errorLoading": "Не удалось загрузить активности",
       "errorUpdating": "Не удалось обновить активность"
     },
-    "quickStats": {
-      "mood": "Настроение",
-      "moodValue": "Хорошее",
-      "activities": "Активности",
-      "streak": "Серия",
-      "days": "дней"
+    "impactCards": {
+      "restoring": "Восстанавливающие",
+      "depleting": "Дела",
+      "neutral": "Нейтральные",
+      "mixed": "Смешанные"
     },
     "insightsPreview": {
       "recommendation": "рекомендация",

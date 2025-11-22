@@ -8,7 +8,7 @@ import { Library } from 'lucide-react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import QuickTrackerCard from '@/components/dashboard/QuickTrackerCard';
 import TodayActivitiesCard from '@/components/dashboard/TodayActivitiesCard';
-import QuickStatsCard from '@/components/dashboard/QuickStatsCard';
+import ActivityImpactCards from '@/components/dashboard/ActivityImpactCards';
 import InsightsPreview from '@/components/dashboard/InsightsPreview';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
@@ -129,14 +129,14 @@ const Dashboard = () => {
           
           {/* Right Column - Stats and Insights (Desktop only) */}
           <div className="hidden lg:block space-y-lg">
-            <QuickStatsCard entriesCount={todayEntries.length} />
+            <ActivityImpactCards activities={todayEntries} />
             <InsightsPreview />
           </div>
         </div>
         
         {/* Mobile/Tablet Stats */}
         <div className="lg:hidden">
-          <QuickStatsCard entriesCount={todayEntries.length} />
+          <ActivityImpactCards activities={todayEntries} />
         </div>
       </div>
     </AppLayout>
