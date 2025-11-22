@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 import { getCategoriesByType } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Star } from 'lucide-react';
 import { z } from 'zod';
 
 interface ActivityFormModalProps {
@@ -54,6 +54,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     duration_minutes: 60,
     impact_type: 'neutral' as 'restoring' | 'depleting' | 'mixed' | 'neutral',
     category: 'other' as any,
+    priority: 3,
     is_recurring: false,
     recurrence_pattern: 'daily',
     reminder_enabled: false,
@@ -87,6 +88,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           duration_minutes: activity.duration_minutes || 60,
           impact_type: activity.impact_type || 'neutral',
           category: activity.category || 'other',
+          priority: activity.priority || 3,
           is_recurring: activity.is_recurring || false,
           recurrence_pattern: activity.recurrence_pattern || 'daily',
           reminder_enabled: activity.reminder_enabled || false,
@@ -153,6 +155,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       duration_minutes: formData.duration_minutes,
       impact_type: formData.impact_type,
       category: formData.category,
+      priority: formData.priority,
       is_recurring: formData.is_recurring,
       recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
       reminder_enabled: formData.reminder_enabled,
@@ -189,11 +192,6 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           </div>
 
           <div>
-            <Label>{t('calendar.form.description')}</Label>
-            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
-          </div>
-
-          <div>
             <Label>{t('calendar.form.date')}</Label>
             <Popover>
               <PopoverTrigger asChild>
@@ -209,7 +207,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           </div>
 
           <div className="space-y-2">
-            <Label>{t('calendar.form.time')}</Label>
+            <Label>{t('calendar.form.timeLabel')}</Label>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
               {TIME_SLOTS.map((slot) => (
                 <Button key={slot.key} type="button" variant={formData.timeSlot === slot.key ? 'default' : 'outline'} onClick={() => setFormData({ ...formData, timeSlot: slot.key })} className="justify-start h-9 text-xs">
@@ -269,6 +267,33 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label>{t('calendar.form.priority')}</Label>
+            <div className="flex gap-1 mt-2">
+              {[1, 2, 3, 4, 5].map((level) => (
+                <button
+                  key={level}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, priority: level })}
+                  className="focus:outline-none transition-colors"
+                >
+                  <Star
+                    className={`w-8 h-8 ${
+                      level <= formData.priority
+                        ? 'fill-yellow-400 text-yellow-400'
+                        : 'text-muted-foreground'
+                    }`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>{t('calendar.form.description')}</Label>
+            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
