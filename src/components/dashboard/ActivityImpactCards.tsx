@@ -118,7 +118,7 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
                         <Cell fill={type.lightColor} />
                       </>
                     ) : (
-                      <Cell fill={type.inactiveColor} />
+                      <Cell fill={type.lightColor} />
                     )}
                   </Pie>
                 </PieChart>
