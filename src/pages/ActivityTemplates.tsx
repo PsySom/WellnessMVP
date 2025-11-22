@@ -6,6 +6,7 @@ import { Search } from 'lucide-react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import TemplateCard from '@/components/activity-templates/TemplateCard';
 import CategoryFilter from '@/components/activity-templates/CategoryFilter';
+import ImpactTypeFilter from '@/components/activity-templates/ImpactTypeFilter';
 import TemplateDetailModal from '@/components/activity-templates/TemplateDetailModal';
 import { useTranslation } from 'react-i18next';
 
@@ -27,6 +28,7 @@ const ActivityTemplates = () => {
   const { t, i18n } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [selectedTemplate, setSelectedTemplate] = useState<ActivityTemplate | null>(null);
 
   const { data: templates = [], isLoading } = useQuery({
@@ -51,7 +53,8 @@ const ActivityTemplates = () => {
       template.name_fr?.toLowerCase().includes(searchLower) ||
       template.name.toLowerCase().includes(searchLower);
     const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesImpactType = selectedImpactType === 'all' || template.impact_type === selectedImpactType;
+    return matchesSearch && matchesCategory && matchesImpactType;
   });
 
   return (
@@ -73,6 +76,11 @@ const ActivityTemplates = () => {
           <CategoryFilter
             selectedCategory={selectedCategory}
             onCategoryChange={setSelectedCategory}
+          />
+          
+          <ImpactTypeFilter
+            selectedImpactType={selectedImpactType}
+            onImpactTypeChange={setSelectedImpactType}
           />
         </div>
 
