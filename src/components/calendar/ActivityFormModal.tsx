@@ -67,13 +67,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
   // Auto-update category when impact type changes
   useEffect(() => {
-    if (availableCategories.length > 0) {
-      const currentCategoryExists = availableCategories.some(cat => cat.value === formData.category);
+    const categories = getCategoriesByType(formData.impact_type);
+    if (categories.length > 0) {
+      const currentCategoryExists = categories.some(cat => cat.value === formData.category);
       if (!currentCategoryExists) {
-        setFormData(prev => ({ ...prev, category: availableCategories[0].value }));
+        setFormData(prev => ({ ...prev, category: categories[0].value }));
       }
     }
-  }, [formData.impact_type, availableCategories]);
+  }, [formData.impact_type, formData.category]);
 
   useEffect(() => {
     if (open) {
@@ -93,13 +94,27 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           timeSlot: activity.start_time ? 'exact_time' : 'anytime'
         });
       } else if (initialValues) {
+        const impactType = initialValues.impact_type || 'neutral';
+        const categories = getCategoriesByType(impactType);
+        const defaultCategory = categories.length > 0 ? categories[0].value : 'other';
+        
         setFormData(prev => ({
           ...prev,
           ...initialValues,
+          impact_type: impactType,
+          category: initialValues.category || defaultCategory,
           timeSlot: initialValues.start_time ? 'exact_time' : 'anytime'
         }));
-      } else if (defaultDate) {
-        setFormData(prev => ({ ...prev, date: defaultDate }));
+      } else {
+        // Initialize with first available category for neutral type
+        const categories = getCategoriesByType('neutral');
+        const defaultCategory = categories.length > 0 ? categories[0].value : 'other';
+        
+        setFormData(prev => ({ 
+          ...prev, 
+          date: defaultDate || new Date(),
+          category: defaultCategory 
+        }));
       }
     }
   }, [open, activity, initialValues, defaultDate]);
