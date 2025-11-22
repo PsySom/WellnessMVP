@@ -13,27 +13,102 @@ export interface CategoryConfig {
 }
 
 const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
-  // RESTORING (Восстанавливающие) - 15 категорий
+  // RESTORING (Восстанавливающие) - с подтипами
+  // 1.1 Сон
   {
-    value: 'sleep',
+    value: 'sleep_8hours',
     emoji: '😴',
     recommendedType: 'restoring',
     label: {
-      en: 'Sleep',
-      ru: 'Сон',
-      fr: 'Sommeil'
+      en: 'Sleep 8 hours',
+      ru: 'Сон 8 часов',
+      fr: 'Sommeil 8 heures'
     }
   },
   {
-    value: 'nutrition',
-    emoji: '🍎',
+    value: 'sleep_nap',
+    emoji: '😴',
     recommendedType: 'restoring',
     label: {
-      en: 'Nutrition',
-      ru: 'Питание',
-      fr: 'Nutrition'
+      en: 'Nap',
+      ru: 'Короткий дневной сон',
+      fr: 'Sieste'
     }
   },
+  {
+    value: 'sleep_quiet_rest',
+    emoji: '🛋️',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Quiet Rest',
+      ru: 'Спокойный отдых',
+      fr: 'Repos calme'
+    }
+  },
+  
+  // 1.2 Питание
+  {
+    value: 'nutrition_breakfast',
+    emoji: '🍳',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Breakfast',
+      ru: 'Завтрак',
+      fr: 'Petit déjeuner'
+    }
+  },
+  {
+    value: 'nutrition_brunch',
+    emoji: '🥐',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Brunch',
+      ru: 'Бранч',
+      fr: 'Brunch'
+    }
+  },
+  {
+    value: 'nutrition_lunch',
+    emoji: '🍽️',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Lunch',
+      ru: 'Обед',
+      fr: 'Déjeuner'
+    }
+  },
+  {
+    value: 'nutrition_coffee',
+    emoji: '☕',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Coffee',
+      ru: 'Кофе',
+      fr: 'Café'
+    }
+  },
+  {
+    value: 'nutrition_dinner',
+    emoji: '🍲',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Dinner',
+      ru: 'Ужин',
+      fr: 'Dîner'
+    }
+  },
+  {
+    value: 'nutrition_after_dinner',
+    emoji: '🍪',
+    recommendedType: 'restoring',
+    label: {
+      en: 'After Dinner',
+      ru: 'Еда после ужина',
+      fr: 'Après dîner'
+    }
+  },
+  
+  // 1.3 Гидратация
   {
     value: 'hydration',
     emoji: '💧',
@@ -44,6 +119,8 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       fr: 'Hydratation'
     }
   },
+  
+  // 1.4 Отдых и практики
   {
     value: 'rest',
     emoji: '🛋️',
@@ -55,7 +132,57 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
-    value: 'psychological_exercises',
+    value: 'rest_relaxation',
+    emoji: '😌',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Relaxation',
+      ru: 'Расслабление',
+      fr: 'Relaxation'
+    }
+  },
+  {
+    value: 'rest_water_procedures',
+    emoji: '🛁',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Water Procedures',
+      ru: 'Водные процедуры',
+      fr: 'Procédures aquatiques'
+    }
+  },
+  {
+    value: 'rest_hygiene',
+    emoji: '🚿',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Hygiene',
+      ru: 'Гигиена',
+      fr: 'Hygiène'
+    }
+  },
+  {
+    value: 'rest_self_care',
+    emoji: '💆',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Self Care Procedures',
+      ru: 'Процедуры ухода за собой',
+      fr: 'Soins personnels'
+    }
+  },
+  {
+    value: 'rest_meditation_10min',
+    emoji: '🧘‍♂️',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Meditation',
+      ru: 'Медитация',
+      fr: 'Méditation'
+    }
+  },
+  {
+    value: 'rest_psychological_exercises',
     emoji: '🧠',
     recommendedType: 'restoring',
     label: {
@@ -65,7 +192,17 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
-    value: 'light_exercise',
+    value: 'rest_walks',
+    emoji: '🚶',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Walks',
+      ru: 'Прогулки',
+      fr: 'Promenades'
+    }
+  },
+  {
+    value: 'rest_light_exercise',
     emoji: '🧘',
     recommendedType: 'restoring',
     label: {
@@ -75,6 +212,58 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
+    value: 'rest_morning_exercise',
+    emoji: '🤸',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Morning Exercise',
+      ru: 'Утренняя зарядка',
+      fr: 'Exercice matinal'
+    }
+  },
+  {
+    value: 'rest_reading',
+    emoji: '📖',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Reading',
+      ru: 'Чтение',
+      fr: 'Lecture'
+    }
+  },
+  {
+    value: 'rest_doing_nothing',
+    emoji: '🪑',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Doing Nothing',
+      ru: 'Бездействие',
+      fr: 'Ne rien faire'
+    }
+  },
+  {
+    value: 'rest_breathing_5min',
+    emoji: '🌬️',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Breathing Exercise',
+      ru: 'Дыхательное упражнение',
+      fr: 'Exercice de respiration'
+    }
+  },
+  {
+    value: 'rest_grounding_10min',
+    emoji: '🌍',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Grounding Exercise',
+      ru: 'Упражнение на заземление',
+      fr: 'Exercice d\'ancrage'
+    }
+  },
+  
+  // Общение и хобби
+  {
     value: 'close_socializing',
     emoji: '💝',
     recommendedType: 'restoring',
@@ -82,16 +271,6 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       en: 'Close Socializing',
       ru: 'Общение с близкими',
       fr: 'Socialisation proche'
-    }
-  },
-  {
-    value: 'walks',
-    emoji: '🚶',
-    recommendedType: 'restoring',
-    label: {
-      en: 'Walks',
-      ru: 'Прогулки',
-      fr: 'Promenades'
     }
   },
   {
@@ -135,6 +314,36 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
+    value: 'entertainment_music',
+    emoji: '🎵',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Listen to Music',
+      ru: 'Послушать музыку',
+      fr: 'Écouter de la musique'
+    }
+  },
+  {
+    value: 'entertainment_social_media',
+    emoji: '📱',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Social Media',
+      ru: 'Соцсети',
+      fr: 'Réseaux sociaux'
+    }
+  },
+  {
+    value: 'entertainment_movies',
+    emoji: '🎬',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Watch Movies',
+      ru: 'Просмотр фильмов',
+      fr: 'Regarder des films'
+    }
+  },
+  {
     value: 'self_care',
     emoji: '💆',
     recommendedType: 'restoring',
@@ -144,28 +353,8 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       fr: 'Soin de soi'
     }
   },
-  {
-    value: 'meditation',
-    emoji: '🧘‍♂️',
-    recommendedType: 'restoring',
-    label: {
-      en: 'Meditation',
-      ru: 'Медитация',
-      fr: 'Méditation'
-    }
-  },
-  {
-    value: 'nature',
-    emoji: '🌳',
-    recommendedType: 'restoring',
-    label: {
-      en: 'Nature',
-      ru: 'Природа',
-      fr: 'Nature'
-    }
-  },
 
-  // DEPLETING (Истощающие) - 15 категорий
+  // DEPLETING (Истощающие)
   {
     value: 'work',
     emoji: '💼',
@@ -257,16 +446,6 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
-    value: 'deadlines',
-    emoji: '⏰',
-    recommendedType: 'depleting',
-    label: {
-      en: 'Deadlines',
-      ru: 'Дедлайны',
-      fr: 'Échéances'
-    }
-  },
-  {
     value: 'learning',
     emoji: '📖',
     recommendedType: 'depleting',
@@ -296,28 +475,8 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       fr: 'Obligations sociales'
     }
   },
-  {
-    value: 'multitasking',
-    emoji: '🔄',
-    recommendedType: 'depleting',
-    label: {
-      en: 'Multitasking',
-      ru: 'Многозадачность',
-      fr: 'Multitâche'
-    }
-  },
-  {
-    value: 'emotional_labor',
-    emoji: '😌',
-    recommendedType: 'depleting',
-    label: {
-      en: 'Emotional Labor',
-      ru: 'Эмоциональный труд',
-      fr: 'Travail émotionnel'
-    }
-  },
 
-  // MIXED (Смешанные) - 10 категорий
+  // MIXED (Смешанные)
   {
     value: 'exercise',
     emoji: '🏃',
@@ -330,7 +489,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
   },
   {
     value: 'moderate_exercise',
-    emoji: '🏃',
+    emoji: '🚴',
     recommendedType: 'mixed',
     label: {
       en: 'Moderate Exercise',
@@ -400,7 +559,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
   },
   {
     value: 'reading',
-    emoji: '📖',
+    emoji: '📚',
     recommendedType: 'mixed',
     label: {
       en: 'Reading',
@@ -429,7 +588,7 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
 
-  // NEUTRAL (Нейтральные) - 6 категорий
+  // NEUTRAL (Нейтральные)
   {
     value: 'hygiene',
     emoji: '🚿',
@@ -501,13 +660,33 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
-    value: 'leisure',
-    emoji: '🎮',
+    value: 'reflection_trackers_5min',
+    emoji: '📊',
     recommendedType: 'neutral',
     label: {
-      en: 'Leisure',
-      ru: 'Досуг',
-      fr: 'Loisirs'
+      en: 'Fill Trackers',
+      ru: 'Заполнить трекеры',
+      fr: 'Remplir les trackers'
+    }
+  },
+  {
+    value: 'reflection_evening_10min',
+    emoji: '🌙',
+    recommendedType: 'neutral',
+    label: {
+      en: 'Evening Reflection',
+      ru: 'Вечерняя рефлексия',
+      fr: 'Réflexion du soir'
+    }
+  },
+  {
+    value: 'reflection_morning_10min',
+    emoji: '🌅',
+    recommendedType: 'neutral',
+    label: {
+      en: 'Morning Reflection',
+      ru: 'Утренняя рефлексия',
+      fr: 'Réflexion matinale'
     }
   },
   {
@@ -519,32 +698,128 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
       ru: 'Другое',
       fr: 'Autre'
     }
-  }
-]; 
+  },
 
-const DB_CATEGORIES = Constants.public.Enums.activity_category as readonly CategoryKey[];
-
-export const CATEGORY_CONFIG: CategoryConfig[] = DB_CATEGORIES.map((key) => {
-  const base = BASE_CATEGORY_CONFIG.find((cat) => cat.value === key);
-
-  if (base) return base;
-
-  const pretty = key
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-
-  return {
-    value: key,
-    emoji: '📌',
+  // Keep old categories for backward compatibility
+  {
+    value: 'sleep',
+    emoji: '😴',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Sleep',
+      ru: 'Сон',
+      fr: 'Sommeil'
+    }
+  },
+  {
+    value: 'nutrition',
+    emoji: '🍎',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Nutrition',
+      ru: 'Питание',
+      fr: 'Nutrition'
+    }
+  },
+  {
+    value: 'light_exercise',
+    emoji: '🧘',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Light Exercise',
+      ru: 'Легкий спорт',
+      fr: 'Exercice léger'
+    }
+  },
+  {
+    value: 'walks',
+    emoji: '🚶',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Walks',
+      ru: 'Прогулки',
+      fr: 'Promenades'
+    }
+  },
+  {
+    value: 'meditation',
+    emoji: '🧘‍♂️',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Meditation',
+      ru: 'Медитация',
+      fr: 'Méditation'
+    }
+  },
+  {
+    value: 'nature',
+    emoji: '🌳',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Nature',
+      ru: 'Природа',
+      fr: 'Nature'
+    }
+  },
+  {
+    value: 'psychological_exercises',
+    emoji: '🧠',
+    recommendedType: 'restoring',
+    label: {
+      en: 'Psychological Exercises',
+      ru: 'Психологические упражнения',
+      fr: 'Exercices psychologiques'
+    }
+  },
+  {
+    value: 'leisure',
+    emoji: '🎯',
     recommendedType: 'neutral',
     label: {
-      en: pretty,
-      ru: pretty,
-      fr: pretty,
-    },
-  };
-});
+      en: 'Leisure',
+      ru: 'Досуг',
+      fr: 'Loisir'
+    }
+  },
+  {
+    value: 'deadlines',
+    emoji: '⏰',
+    recommendedType: 'depleting',
+    label: {
+      en: 'Deadlines',
+      ru: 'Дедлайны',
+      fr: 'Échéances'
+    }
+  },
+  {
+    value: 'multitasking',
+    emoji: '🔄',
+    recommendedType: 'depleting',
+    label: {
+      en: 'Multitasking',
+      ru: 'Многозадачность',
+      fr: 'Multitâche'
+    }
+  },
+  {
+    value: 'emotional_labor',
+    emoji: '😌',
+    recommendedType: 'depleting',
+    label: {
+      en: 'Emotional Labor',
+      ru: 'Эмоциональный труд',
+      fr: 'Travail émotionnel'
+    }
+  },
+];
+
+// Dynamically get categories from database enum
+const DB_CATEGORIES = Constants.public.Enums.activity_category;
+
+// Map database categories to config, keeping only those with definitions
+export const CATEGORY_CONFIG: CategoryConfig[] = DB_CATEGORIES
+  .map(key => BASE_CATEGORY_CONFIG.find(config => config.value === key))
+  .filter((config): config is CategoryConfig => config !== undefined);
 
 export const getCategoriesByType = (type: ImpactType): CategoryConfig[] => {
   return CATEGORY_CONFIG.filter(cat => cat.recommendedType === type);

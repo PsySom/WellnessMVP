@@ -734,6 +734,34 @@ export type Database = {
         | "waiting"
         | "testing"
         | "other"
+        | "sleep_8hours"
+        | "sleep_nap"
+        | "sleep_quiet_rest"
+        | "nutrition_breakfast"
+        | "nutrition_brunch"
+        | "nutrition_lunch"
+        | "nutrition_coffee"
+        | "nutrition_dinner"
+        | "nutrition_after_dinner"
+        | "rest_relaxation"
+        | "rest_water_procedures"
+        | "rest_hygiene"
+        | "rest_self_care"
+        | "rest_meditation_10min"
+        | "rest_psychological_exercises"
+        | "rest_walks"
+        | "rest_light_exercise"
+        | "rest_morning_exercise"
+        | "rest_reading"
+        | "rest_doing_nothing"
+        | "rest_breathing_5min"
+        | "rest_grounding_10min"
+        | "entertainment_music"
+        | "entertainment_social_media"
+        | "entertainment_movies"
+        | "reflection_trackers_5min"
+        | "reflection_evening_10min"
+        | "reflection_morning_10min"
       activity_impact: "restoring" | "depleting" | "mixed" | "neutral"
       activity_status: "planned" | "in_progress" | "completed" | "cancelled"
     }
@@ -914,6 +942,34 @@ export const Constants = {
         "waiting",
         "testing",
         "other",
+        "sleep_8hours",
+        "sleep_nap",
+        "sleep_quiet_rest",
+        "nutrition_breakfast",
+        "nutrition_brunch",
+        "nutrition_lunch",
+        "nutrition_coffee",
+        "nutrition_dinner",
+        "nutrition_after_dinner",
+        "rest_relaxation",
+        "rest_water_procedures",
+        "rest_hygiene",
+        "rest_self_care",
+        "rest_meditation_10min",
+        "rest_psychological_exercises",
+        "rest_walks",
+        "rest_light_exercise",
+        "rest_morning_exercise",
+        "rest_reading",
+        "rest_doing_nothing",
+        "rest_breathing_5min",
+        "rest_grounding_10min",
+        "entertainment_music",
+        "entertainment_social_media",
+        "entertainment_movies",
+        "reflection_trackers_5min",
+        "reflection_evening_10min",
+        "reflection_morning_10min",
       ],
       activity_impact: ["restoring", "depleting", "mixed", "neutral"],
       activity_status: ["planned", "in_progress", "completed", "cancelled"],

@@ -258,7 +258,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
             <Label>{t('calendar.form.category')}</Label>
             <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
               <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-background border shadow-lg z-50">
+              <SelectContent className="bg-background border shadow-lg z-50 max-h-[400px] overflow-y-auto">
                 {availableCategories.map(cat => (
                   <SelectItem key={cat.value} value={cat.value}>
                     <span className="mr-2">{cat.emoji}</span>
