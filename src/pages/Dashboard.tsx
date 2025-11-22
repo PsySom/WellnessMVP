@@ -30,42 +30,64 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
-  const [todayEntries, setTodayEntries] = useState<any[]>([]);
+  const [todayActivities, setTodayActivities] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
-      fetchTodayEntries();
+      fetchTodayActivities();
+      setupRealtimeSubscription();
     }
   }, [user]);
 
-  const fetchTodayEntries = async () => {
+  const fetchTodayActivities = async () => {
     if (!user) return;
 
     try {
       const today = new Date().toISOString().split('T')[0];
       
       const { data, error } = await supabase
-        .from('tracker_entries')
+        .from('activities')
         .select('*')
         .eq('user_id', user.id)
-        .eq('entry_date', today)
-        .order('entry_time', { ascending: false });
+        .eq('date', today);
 
       if (error) throw error;
-      setTodayEntries(data || []);
+      setTodayActivities(data || []);
     } catch (error) {
-      console.error('Error fetching entries:', error);
+      console.error('Error fetching activities:', error);
     } finally {
       setLoading(false);
     }
   };
 
+  const setupRealtimeSubscription = () => {
+    const channel = supabase
+      .channel('dashboard-activities-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'activities',
+          filter: `user_id=eq.${user?.id}`
+        },
+        () => {
+          fetchTodayActivities();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  };
+
   const handleEntrySaved = () => {
-    fetchTodayEntries();
+    fetchTodayActivities();
   };
 
   const handleRefresh = async () => {
-    await fetchTodayEntries();
+    await fetchTodayActivities();
   };
 
   const { containerRef, pullDistance, isRefreshing, shouldShowIndicator } = usePullToRefresh({
@@ -129,14 +151,14 @@ const Dashboard = () => {
           
           {/* Right Column - Stats and Insights (Desktop only) */}
           <div className="hidden lg:block space-y-lg">
-            <ActivityImpactCards activities={todayEntries} />
+            <ActivityImpactCards activities={todayActivities} />
             <InsightsPreview />
           </div>
         </div>
         
         {/* Mobile/Tablet Stats */}
         <div className="lg:hidden">
-          <ActivityImpactCards activities={todayEntries} />
+          <ActivityImpactCards activities={todayActivities} />
         </div>
       </div>
     </AppLayout>
