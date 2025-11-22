@@ -42,6 +42,36 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
   useEffect(() => {
     if (user) {
       fetchActivities();
+      
+      const channel = supabase
+        .channel('activities-realtime-calendar')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'activities',
+            filter: `user_id=eq.${user.id}`
+          },
+          (payload) => {
+            console.log('CalendarView realtime update:', payload);
+            fetchActivities();
+          }
+        )
+        .subscribe();
+      
+      // Слушаем пользовательское событие для принудительного обновления
+      const handleActivityUpdate = () => {
+        console.log('Manual CalendarView activity update triggered');
+        fetchActivities();
+      };
+      
+      window.addEventListener('activity-updated', handleActivityUpdate);
+
+      return () => {
+        supabase.removeChannel(channel);
+        window.removeEventListener('activity-updated', handleActivityUpdate);
+      };
     }
   }, [user, currentDate]);
 

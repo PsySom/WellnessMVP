@@ -35,7 +35,20 @@ const Dashboard = () => {
   useEffect(() => {
     if (user) {
       fetchTodayActivities();
-      setupRealtimeSubscription();
+      const cleanup = setupRealtimeSubscription();
+      
+      // Слушаем пользовательское событие для принудительного обновления
+      const handleActivityUpdate = () => {
+        console.log('Manual activity update triggered');
+        fetchTodayActivities();
+      };
+      
+      window.addEventListener('activity-updated', handleActivityUpdate);
+      
+      return () => {
+        cleanup();
+        window.removeEventListener('activity-updated', handleActivityUpdate);
+      };
     }
   }, [user]);
 
@@ -63,7 +76,7 @@ const Dashboard = () => {
 
   const setupRealtimeSubscription = () => {
     const channel = supabase
-      .channel('dashboard-activities-changes')
+      .channel('activities-realtime-dashboard')
       .on(
         'postgres_changes',
         {
@@ -72,7 +85,8 @@ const Dashboard = () => {
           table: 'activities',
           filter: `user_id=eq.${user?.id}`
         },
-        () => {
+        (payload) => {
+          console.log('Dashboard realtime update:', payload);
           fetchTodayActivities();
         }
       )

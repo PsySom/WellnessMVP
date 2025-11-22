@@ -28,7 +28,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
       
       // Subscribe to realtime updates
       const channel = supabase
-        .channel('activities-changes')
+        .channel('activities-realtime-listview')
         .on(
           'postgres_changes',
           {
@@ -37,14 +37,24 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
             table: 'activities',
             filter: `user_id=eq.${user.id}`
           },
-          () => {
+          (payload) => {
+            console.log('ListView realtime update:', payload);
             fetchActivities();
           }
         )
         .subscribe();
+      
+      // Слушаем пользовательское событие для принудительного обновления
+      const handleActivityUpdate = () => {
+        console.log('Manual ListView activity update triggered');
+        fetchActivities();
+      };
+      
+      window.addEventListener('activity-updated', handleActivityUpdate);
 
       return () => {
         supabase.removeChannel(channel);
+        window.removeEventListener('activity-updated', handleActivityUpdate);
       };
     }
   }, [user, currentDate]);
