@@ -114,7 +114,7 @@ const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
                   >
                     {hasActivities ? (
                       <>
-                        <Cell fill={hasCompleted ? type.activeColor : type.lightColor} />
+                        <Cell fill={stats.completed > 0 ? type.activeColor : type.inactiveColor} />
                         <Cell fill={type.inactiveColor} />
                       </>
                     ) : (
