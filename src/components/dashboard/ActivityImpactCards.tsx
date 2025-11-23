@@ -12,33 +12,32 @@ interface ActivityImpactCardsProps {
   activities: Activity[];
 }
 
-// Цвета привязаны к дизайн-системе через CSS‑переменные shadcn.
-// В SVG Recharts они работают как обычные CSS‑строки.
+// Цвета подобраны в соответствии с дизайн-системой.
+// Используем явные HSL-значения, чтобы гарантировать корректное отображение в SVG.
 const IMPACT_COLORS: Record<
   Activity['impact_type'],
   { active: string; light: string }
 > = {
   restoring: {
-    // основной акцентный цвет
-    active: 'hsl(var(--accent))',
-    light: 'hsl(var(--accent) / 0.3)',
+    active: 'hsl(127 40% 62%)',
+    light: 'hsl(127 40% 62% / 0.3)',
   },
   depleting: {
-    active: 'hsl(var(--destructive))',
-    light: 'hsl(var(--destructive) / 0.25)',
+    active: 'hsl(0 72% 60%)',
+    light: 'hsl(0 72% 60% / 0.25)',
   },
   neutral: {
-    active: 'hsl(var(--secondary))',
-    light: 'hsl(var(--secondary) / 0.3)',
+    active: 'hsl(210 40% 60%)',
+    light: 'hsl(210 40% 60% / 0.25)',
   },
   mixed: {
-    active: 'hsl(var(--warning))',
-    light: 'hsl(var(--warning) / 0.3)',
+    active: 'hsl(31 85% 62%)',
+    light: 'hsl(31 85% 62% / 0.25)',
   },
 };
 
-// Серый «пустой» круг для отсутствия активностей типа
-const MUTED_RING = 'hsl(var(--muted-foreground) / 0.18)';
+// Серый «пустой» круг, когда активностей этого типа нет
+const MUTED_RING = 'hsl(215 16% 90%)';
 
 const ActivityImpactCards = ({ activities }: ActivityImpactCardsProps) => {
   const { t } = useTranslation();
