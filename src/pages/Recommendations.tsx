@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getLocalDateString } from '@/utils/dateUtils';
 
 interface Recommendation {
   id: string;
@@ -101,7 +102,7 @@ const Recommendations = () => {
 
   const handleAddToToday = async (rec: Recommendation) => {
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       const now = new Date();
       const startTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
