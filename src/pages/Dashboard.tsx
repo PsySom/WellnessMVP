@@ -14,6 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
 import { PullToRefresh } from '@/components/common/PullToRefresh';
+import { getLocalDateString } from '@/utils/dateUtils';
 
 export interface TrackerData {
   moodScore: number;
@@ -56,7 +57,7 @@ const Dashboard = () => {
     if (!user) return;
 
     try {
-      const today = new Date().toISOString().split('T')[0];
+      const today = getLocalDateString();
       
       const { data, error } = await supabase
         .from('activities')
