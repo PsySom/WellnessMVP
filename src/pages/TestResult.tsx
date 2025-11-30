@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -241,7 +241,7 @@ const TestResult = () => {
             {t('exercises.share')}
           </Button>
           <Button
-            onClick={() => navigate(`/tests/${slug}/history`)}
+            onClick={() => navigate('/exercises-tests', { state: { tab: 'history' } })}
             variant="outline"
           >
             {t('tests.viewHistory')}
