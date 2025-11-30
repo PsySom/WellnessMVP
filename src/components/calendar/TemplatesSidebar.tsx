@@ -290,7 +290,7 @@ export const TemplatesSidebar = () => {
 
         <div className="p-4 border-b border-border">
           <h3 className="text-sm font-semibold text-foreground mb-3">
-            {t('activityTemplates.title')}
+            {t('calendar.presets.recommendedActivities')}
           </h3>
           
           {selectedPreset && (

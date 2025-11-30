@@ -273,6 +273,7 @@
     },
     "presets": {
       "title": "Modèles d'activités",
+      "recommendedActivities": "Activités recommandées",
       "addAll": "Tout ajouter",
       "addCore": "Essentielles",
       "addAdditional": "Supplémentaires",

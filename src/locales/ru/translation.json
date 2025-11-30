@@ -273,6 +273,7 @@
     },
     "presets": {
       "title": "Шаблоны активностей",
+      "recommendedActivities": "Рекомендуемые активности",
       "addAll": "Добавить все",
       "addCore": "Основные",
       "addAdditional": "Дополнительные",

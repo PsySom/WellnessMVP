@@ -273,6 +273,7 @@
     },
     "presets": {
       "title": "Activity Presets",
+      "recommendedActivities": "Recommended Activities",
       "addAll": "Add All",
       "addCore": "Core",
       "addAdditional": "Additional",
