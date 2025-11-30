@@ -95,7 +95,8 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     triggerActivityUpdate();
   };
 
-  const emoji = CATEGORY_EMOJIS[activity.category] || '📌';
+  // Use emoji from activity if available, fallback to category emoji
+  const emoji = activity.emoji || CATEGORY_EMOJIS[activity.category] || '📌';
   const impactColor = IMPACT_COLORS[activity.impact_type] || 'bg-muted';
 
   return (

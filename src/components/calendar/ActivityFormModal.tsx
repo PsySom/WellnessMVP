@@ -62,6 +62,9 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     reminder_enabled: false,
     reminder_minutes_before: 15,
     timeSlot: 'anytime' as TimeSlot | 'exact_time' | 'anytime',
+    emoji: '📌',
+    repetition_frequency: 'daily' as 'daily' | 'weekly' | 'monthly',
+    repetition_count: 1,
   });
 
   const availableCategories = useMemo(() => {
@@ -90,6 +93,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   useEffect(() => {
     if (open) {
       if (activity) {
+        const repetitionConfig = activity.repetition_config || { frequency: 'daily', count: 1 };
         setFormData({
           title: activity.title || '',
           description: activity.description || '',
@@ -103,19 +107,26 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           recurrence_pattern: activity.recurrence_pattern || 'daily',
           reminder_enabled: activity.reminder_enabled || false,
           reminder_minutes_before: activity.reminder_minutes_before || 15,
-          timeSlot: activity.start_time ? 'exact_time' : 'anytime'
+          timeSlot: activity.start_time ? 'exact_time' : 'anytime',
+          emoji: activity.emoji || '📌',
+          repetition_frequency: repetitionConfig.frequency || 'daily',
+          repetition_count: repetitionConfig.count || 1,
         });
       } else if (initialValues) {
         const impactType = initialValues.impact_type || 'neutral';
         const categories = getCategoriesByType(impactType);
         const defaultCategory = categories.length > 0 ? categories[0].value : 'other';
+        const repetitionConfig = initialValues.repetition_config || { frequency: 'daily', count: 1 };
         
         setFormData(prev => ({
           ...prev,
           ...initialValues,
           impact_type: impactType,
           category: initialValues.category || defaultCategory,
-          timeSlot: initialValues.start_time ? 'exact_time' : 'anytime'
+          timeSlot: initialValues.start_time ? 'exact_time' : 'anytime',
+          emoji: initialValues.emoji || '📌',
+          repetition_frequency: repetitionConfig.frequency || 'daily',
+          repetition_count: repetitionConfig.count || 1,
         }));
       } else {
         // Initialize with first available category for neutral type
@@ -172,7 +183,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
       user_id: user!.id,
       exercise_id: exerciseId || null,
-      test_id: testId || null
+      test_id: testId || null,
+      emoji: formData.emoji || '📌',
+      repetition_config: {
+        frequency: formData.repetition_frequency,
+        count: formData.repetition_count
+      }
     };
 
     const { error } = isEditing
@@ -349,6 +365,47 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                   />
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div>
+            <Label>{t('calendar.form.repetitions')}</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <Select 
+                value={formData.repetition_frequency} 
+                onValueChange={(v: any) => setFormData({ ...formData, repetition_frequency: v })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="daily">{t('calendar.form.perDay')}</SelectItem>
+                  <SelectItem value="weekly">{t('calendar.form.perWeek')}</SelectItem>
+                  <SelectItem value="monthly">{t('calendar.form.perMonth')}</SelectItem>
+                </SelectContent>
+              </Select>
+              
+              <Select 
+                value={formData.repetition_count.toString()} 
+                onValueChange={(v) => setFormData({ ...formData, repetition_count: parseInt(v, 10) })}
+              >
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {formData.repetition_frequency === 'daily' && 
+                    [1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
+                    ))
+                  }
+                  {formData.repetition_frequency === 'weekly' && 
+                    [1, 2, 3, 4, 5, 6, 7].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
+                    ))
+                  }
+                  {formData.repetition_frequency === 'monthly' && 
+                    [1, 2, 3, 4].map(num => (
+                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
+                    ))
+                  }
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

@@ -21,6 +21,7 @@ export type Database = {
           date: string
           description: string | null
           duration_minutes: number | null
+          emoji: string | null
           end_time: string | null
           exercise_id: string | null
           id: string
@@ -30,6 +31,7 @@ export type Database = {
           recurrence_pattern: Json | null
           reminder_enabled: boolean | null
           reminder_minutes_before: number | null
+          repetition_config: Json | null
           start_time: string | null
           status: Database["public"]["Enums"]["activity_status"] | null
           template_id: string | null
@@ -44,6 +46,7 @@ export type Database = {
           date: string
           description?: string | null
           duration_minutes?: number | null
+          emoji?: string | null
           end_time?: string | null
           exercise_id?: string | null
           id?: string
@@ -53,6 +56,7 @@ export type Database = {
           recurrence_pattern?: Json | null
           reminder_enabled?: boolean | null
           reminder_minutes_before?: number | null
+          repetition_config?: Json | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["activity_status"] | null
           template_id?: string | null
@@ -67,6 +71,7 @@ export type Database = {
           date?: string
           description?: string | null
           duration_minutes?: number | null
+          emoji?: string | null
           end_time?: string | null
           exercise_id?: string | null
           id?: string
@@ -76,6 +81,7 @@ export type Database = {
           recurrence_pattern?: Json | null
           reminder_enabled?: boolean | null
           reminder_minutes_before?: number | null
+          repetition_config?: Json | null
           start_time?: string | null
           status?: Database["public"]["Enums"]["activity_status"] | null
           template_id?: string | null
