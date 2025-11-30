@@ -82,6 +82,8 @@
     "recommendations": "Recommandations",
     "viewTrackerHistory": "Voir l'historique du suivi",
     "activityTemplates": "Modèles d'activités",
+    "exercisesTests": "Exercices et tests",
+    "exercisesTestsSubtitle": "Accès rapide aux exercices et tests psychologiques",
     "todayActivitiesCard": {
       "title": "Activités d'aujourd'hui",
       "add": "Ajouter",
@@ -464,7 +466,12 @@
       "step2": "Suivez vos activités quotidiennes et leur impact sur votre bien-être",
       "step3": "Refaites ce test périodiquement pour surveiller vos progrès"
     },
-    "noTests": "Aucun test disponible"
+    "noTests": "Aucun test disponible",
+    "lastTaken": "Dernière fois",
+    "completedOn": "Terminé le",
+    "results": "Résultats",
+    "lastScore": "Dernier score",
+    "viewAll": "Voir tous les tests"
   },
   "exercises": {
     "title": "Exercices et pratiques",
@@ -495,6 +502,7 @@
     "addToCalendar": "Ajouter au calendrier",
     "share": "Partager",
     "findQuietSpace": "Trouvez un espace calme et confortable. Cet exercice fonctionne mieux lorsque vous pouvez vous concentrer sans distractions.",
+    "viewAll": "Voir tous les exercices",
     "linkCopied": "Lien copié dans le presse-papiers",
     "step": "Étape",
     "takeAbout": "Prend environ",
@@ -744,6 +752,11 @@
     "noData": "Aucune donnée disponible",
     "tryAgain": "Réessayer",
     "refresh": "Actualiser",
+    "start": "Commencer",
+    "min": "min",
+    "noResults": "Aucun résultat trouvé",
+    "all": "Tout",
+    "search": "Rechercher",
     "pageNotFound": "Page non trouvée",
     "pageNotFoundDescription": "La page que vous recherchez n'existe pas ou a été déplacée.",
     "backToDashboard": "Retour au tableau de bord",

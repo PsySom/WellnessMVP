@@ -82,6 +82,8 @@
     "recommendations": "Recommendations",
     "viewTrackerHistory": "View Tracker History",
     "activityTemplates": "Activity Templates",
+    "exercisesTests": "Exercises & Tests",
+    "exercisesTestsSubtitle": "Quick access to exercises and psychological tests",
     "todayActivitiesCard": {
       "title": "Today's Activities",
       "add": "Add",
@@ -467,7 +469,9 @@
     "noTests": "No tests available",
     "lastTaken": "Last taken",
     "completedOn": "Completed on",
-    "results": "Results"
+    "results": "Results",
+    "lastScore": "Last score",
+    "viewAll": "View All Tests"
   },
   "exercises": {
     "title": "Exercises & Practices",
@@ -498,6 +502,7 @@
     "addToCalendar": "Add to Calendar",
     "share": "Share",
     "findQuietSpace": "Find a quiet, comfortable space. This exercise works best when you can focus without distractions.",
+    "viewAll": "View All Exercises",
     "linkCopied": "Link copied to clipboard",
     "step": "Step",
     "takeAbout": "Take about",
@@ -747,6 +752,11 @@
     "noData": "No data available",
     "tryAgain": "Try Again",
     "refresh": "Refresh",
+    "start": "Start",
+    "min": "min",
+    "noResults": "No results found",
+    "all": "All",
+    "search": "Search",
     "pageNotFound": "Page not found",
     "pageNotFoundDescription": "The page you're looking for doesn't exist or has been moved.",
     "backToDashboard": "Back to Dashboard",
