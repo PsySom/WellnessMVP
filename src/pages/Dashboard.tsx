@@ -10,7 +10,6 @@ import QuickTrackerCard from '@/components/dashboard/QuickTrackerCard';
 import TodayActivitiesCard from '@/components/dashboard/TodayActivitiesCard';
 import ActivityImpactCards from '@/components/dashboard/ActivityImpactCards';
 import InsightsPreview from '@/components/dashboard/InsightsPreview';
-import ExercisesTestsSection from '@/components/dashboard/ExercisesTestsSection';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from 'react-i18next';
 import { usePullToRefresh } from '@/hooks/usePullToRefresh';
@@ -160,9 +159,6 @@ const Dashboard = () => {
                 {t('dashboard.activityTemplates')}
               </Button>
             </div>
-
-            {/* Exercises and Tests Section */}
-            <ExercisesTestsSection />
             
             <div className="lg:hidden">
               <InsightsPreview />

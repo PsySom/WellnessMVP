@@ -1,4 +1,4 @@
-import { Home, Calendar, BookOpen, BarChart3, User, Brain } from 'lucide-react';
+import { Home, Calendar, BookOpen, BarChart3, User, Brain, Dumbbell } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -36,6 +36,12 @@ const navItems = [
     url: '/journal', 
     icon: BookOpen,
     ariaLabel: 'Navigate to Journal' 
+  },
+  { 
+    title: 'nav.exercisesTests', 
+    url: '/exercises-tests', 
+    icon: Dumbbell,
+    ariaLabel: 'Navigate to Exercises & Tests' 
   },
   { 
     title: 'nav.insights', 
