@@ -168,7 +168,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       startTime = getDefaultTimeForSlot(formData.timeSlot as TimeSlot);
     }
 
-    const activityData = {
+    const baseActivityData = {
       title: formData.title,
       description: formData.description || null,
       date: format(formData.date, 'yyyy-MM-dd'),
@@ -191,20 +191,75 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       }
     };
 
-    const { error } = isEditing
-      ? await supabase.from('activities').update(activityData as any).eq('id', activity.id)
-      : await supabase.from('activities').insert(activityData as any);
+    if (isEditing) {
+      // For editing, update single activity
+      const { error } = await supabase.from('activities').update(baseActivityData as any).eq('id', activity.id);
+      
+      setLoading(false);
 
-    setLoading(false);
-
-    if (error) {
-      console.error('Activity save error:', error);
-      toast.error(t('calendar.form.saveError'));
+      if (error) {
+        console.error('Activity save error:', error);
+        toast.error(t('calendar.form.saveError'));
+      } else {
+        toast.success(t('calendar.form.updateSuccess'));
+        onOpenChange(false);
+        triggerActivityUpdate();
+      }
     } else {
-      console.log('Activity saved successfully:', activityData);
-      toast.success(activity ? t('calendar.form.updateSuccess') : t('calendar.form.createSuccess'));
-      onOpenChange(false);
-      triggerActivityUpdate();
+      // For new activities, create multiple based on repetition
+      const activitiesToCreate = [];
+      const count = formData.repetition_count;
+      
+      if (formData.repetition_frequency === 'daily' && count > 1) {
+        // Create multiple activities in the same day with different time slots
+        const timeSlots = ['morning', 'afternoon', 'evening'];
+        for (let i = 0; i < count; i++) {
+          const slotIndex = i % timeSlots.length;
+          const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
+          activitiesToCreate.push({
+            ...baseActivityData,
+            start_time: formData.timeSlot === 'exact_time' ? startTime : slotTime,
+          });
+        }
+      } else if (formData.repetition_frequency === 'weekly' && count > 1) {
+        // Create activities spread across the week
+        const daysToSpread = Math.floor(7 / count);
+        for (let i = 0; i < count; i++) {
+          const newDate = new Date(formData.date);
+          newDate.setDate(newDate.getDate() + (i * daysToSpread));
+          activitiesToCreate.push({
+            ...baseActivityData,
+            date: format(newDate, 'yyyy-MM-dd'),
+          });
+        }
+      } else if (formData.repetition_frequency === 'monthly' && count > 1) {
+        // Create activities spread across weeks in the month
+        const weeksToSpread = Math.floor(4 / count);
+        for (let i = 0; i < count; i++) {
+          const newDate = new Date(formData.date);
+          newDate.setDate(newDate.getDate() + (i * weeksToSpread * 7));
+          activitiesToCreate.push({
+            ...baseActivityData,
+            date: format(newDate, 'yyyy-MM-dd'),
+          });
+        }
+      } else {
+        // Single activity
+        activitiesToCreate.push(baseActivityData);
+      }
+
+      const { error } = await supabase.from('activities').insert(activitiesToCreate as any);
+
+      setLoading(false);
+
+      if (error) {
+        console.error('Activity save error:', error);
+        toast.error(t('calendar.form.saveError'));
+      } else {
+        toast.success(t('calendar.form.createSuccess'));
+        onOpenChange(false);
+        triggerActivityUpdate();
+      }
     }
   };
 

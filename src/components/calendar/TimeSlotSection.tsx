@@ -98,21 +98,65 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
       if (!user) return;
 
       const activityDate = date || new Date().toISOString().split('T')[0];
+      
+      const repetitionConfig = templateData.repetition_config || { frequency: 'daily', count: 1 };
+      const count = repetitionConfig.count;
 
-      const { error } = await supabase
-        .from('activities')
-        .insert({
-          user_id: user.id,
-          title: templateData.name,
-          category: templateData.category,
-          impact_type: templateData.impact_type,
-          duration_minutes: templateData.duration_minutes,
-          start_time: newTime,
+      const baseActivity = {
+        user_id: user.id,
+        title: templateData.name,
+        category: templateData.category,
+        impact_type: templateData.impact_type,
+        duration_minutes: templateData.duration_minutes,
+        status: 'planned' as const,
+        emoji: templateData.emoji || '📌',
+        repetition_config: repetitionConfig
+      };
+
+      const activitiesToCreate = [];
+
+      if (repetitionConfig.frequency === 'daily' && count > 1) {
+        const timeSlots = ['morning', 'afternoon', 'evening'];
+        for (let i = 0; i < count; i++) {
+          const slotIndex = i % timeSlots.length;
+          const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
+          activitiesToCreate.push({
+            ...baseActivity,
+            date: activityDate,
+            start_time: slotTime,
+          });
+        }
+      } else if (repetitionConfig.frequency === 'weekly' && count > 1) {
+        const daysToSpread = Math.floor(7 / count);
+        for (let i = 0; i < count; i++) {
+          const newDate = new Date(activityDate);
+          newDate.setDate(newDate.getDate() + (i * daysToSpread));
+          activitiesToCreate.push({
+            ...baseActivity,
+            date: newDate.toISOString().split('T')[0],
+            start_time: newTime,
+          });
+        }
+      } else if (repetitionConfig.frequency === 'monthly' && count > 1) {
+        const weeksToSpread = Math.floor(4 / count);
+        for (let i = 0; i < count; i++) {
+          const newDate = new Date(activityDate);
+          newDate.setDate(newDate.getDate() + (i * weeksToSpread * 7));
+          activitiesToCreate.push({
+            ...baseActivity,
+            date: newDate.toISOString().split('T')[0],
+            start_time: newTime,
+          });
+        }
+      } else {
+        activitiesToCreate.push({
+          ...baseActivity,
           date: activityDate,
-          status: 'planned',
-          emoji: templateData.emoji || '📌',
-          repetition_config: { frequency: 'daily', count: 1 }
+          start_time: newTime,
         });
+      }
+
+      const { error } = await supabase.from('activities').insert(activitiesToCreate);
 
       if (error) {
         toast({
