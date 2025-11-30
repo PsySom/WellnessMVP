@@ -282,7 +282,8 @@
       "nutrition": "Nutrition",
       "social": "Social",
       "leisure": "Leisure",
-      "hydration": "Hydration"
+      "hydration": "Hydration",
+      "testing": "Testing"
     },
     "activityTypes": {
       "restoring": "Restoring",

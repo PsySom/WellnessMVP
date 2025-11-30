@@ -153,7 +153,7 @@ const TestDetail = () => {
                 key={index}
                 className="flex items-center justify-between p-3 rounded-lg bg-muted/50"
               >
-                <span className="font-medium">{getLocalizedField(range, 'label')}</span>
+                <span className="font-medium">{range.label}</span>
                 <Badge variant="outline">
                   {range.min}-{range.max} {t('testDetail.points')}
                 </Badge>
