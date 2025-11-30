@@ -95,17 +95,22 @@ const TemplateDetailModal = ({ template, open, onClose }: TemplateDetailModalPro
     const currentTime = format(now, 'HH:mm:ss');
 
     try {
-      const { error } = await supabase.from('activities').insert({
+      const baseActivity = {
         title: getLocalizedName(),
         category: template.category as any,
         impact_type: template.impact_type as any,
         duration_minutes: template.default_duration_minutes,
         date: today,
-        start_time: currentTime,
         status: 'planned' as any,
         template_id: template.id,
         user_id: user.id,
-      });
+        emoji: template.emoji || '📌',
+        repetition_config: { frequency: 'daily', count: 1 }
+      };
+
+      const activitiesToCreate = [{ ...baseActivity, start_time: currentTime }];
+
+      const { error } = await supabase.from('activities').insert(activitiesToCreate);
 
       if (error) throw error;
 

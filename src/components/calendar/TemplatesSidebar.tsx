@@ -153,21 +153,65 @@ export const TemplatesSidebar = () => {
           : null;
 
         const repetitionConfig = activity.repetitionConfig || { frequency: 'daily', count: 1 };
+        const count = repetitionConfig.count;
         
-        const activityData = {
+        const baseActivity = {
           user_id: user.id,
           title: getLocalizedName(template),
           category: activity.category,
           impact_type: template.impact_type,
-          date: today,
-          start_time: startTime,
           duration_minutes: activity.recommendedDuration || template.default_duration_minutes || 60,
           status: 'planned' as const,
           emoji: template.emoji,
           repetition_config: repetitionConfig,
         };
 
-        await addActivityMutation.mutateAsync(activityData);
+        const activitiesToCreate = [];
+
+        if (repetitionConfig.frequency === 'daily' && count > 1) {
+          const timeSlots = ['morning', 'afternoon', 'evening'];
+          for (let i = 0; i < count; i++) {
+            const slotIndex = i % timeSlots.length;
+            const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as any);
+            activitiesToCreate.push({
+              ...baseActivity,
+              date: today,
+              start_time: slotTime,
+            });
+          }
+        } else if (repetitionConfig.frequency === 'weekly' && count > 1) {
+          const daysToSpread = Math.floor(7 / count);
+          for (let i = 0; i < count; i++) {
+            const newDate = new Date();
+            newDate.setDate(newDate.getDate() + (i * daysToSpread));
+            activitiesToCreate.push({
+              ...baseActivity,
+              date: format(newDate, 'yyyy-MM-dd'),
+              start_time: startTime,
+            });
+          }
+        } else if (repetitionConfig.frequency === 'monthly' && count > 1) {
+          const weeksToSpread = Math.floor(4 / count);
+          for (let i = 0; i < count; i++) {
+            const newDate = new Date();
+            newDate.setDate(newDate.getDate() + (i * weeksToSpread * 7));
+            activitiesToCreate.push({
+              ...baseActivity,
+              date: format(newDate, 'yyyy-MM-dd'),
+              start_time: startTime,
+            });
+          }
+        } else {
+          activitiesToCreate.push({
+            ...baseActivity,
+            date: today,
+            start_time: startTime,
+          });
+        }
+
+        for (const activityData of activitiesToCreate) {
+          await addActivityMutation.mutateAsync(activityData);
+        }
       }
 
       const addedCount = filteredActivities.length;
