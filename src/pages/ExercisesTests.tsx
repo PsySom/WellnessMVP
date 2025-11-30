@@ -223,16 +223,16 @@ const ExercisesTests = () => {
                   <TabsTrigger value="all" className="text-xs">
                     {t('exercises.categories.all')}
                   </TabsTrigger>
-                  <TabsTrigger value="grounding" className="text-xs">
+                  <TabsTrigger value="Заземление" className="text-xs">
                     {t('exercises.categories.grounding')}
                   </TabsTrigger>
-                  <TabsTrigger value="stress" className="text-xs">
+                  <TabsTrigger value="Стресс" className="text-xs">
                     {t('exercises.categories.stress')}
                   </TabsTrigger>
-                  <TabsTrigger value="anxiety" className="text-xs">
+                  <TabsTrigger value="Тревожность" className="text-xs">
                     {t('exercises.categories.anxiety')}
                   </TabsTrigger>
-                  <TabsTrigger value="cognitive" className="text-xs">
+                  <TabsTrigger value="Когнитивные" className="text-xs">
                     {t('exercises.categories.cognitive')}
                   </TabsTrigger>
                 </TabsList>
@@ -276,34 +276,34 @@ const ExercisesTests = () => {
                           </div>
                         )}
 
-                        <div>
-                          <h4 className="font-semibold text-base group-hover:text-primary transition-colors">
-                            {getLocalizedField(item, 'name')}
-                          </h4>
-                          <div className="flex items-center gap-2 mt-1">
-                            {isExercise && exercise ? (
-                              <>
-                                <Badge variant="secondary" className="text-xs">
-                                  {t(`exercises.categories.${exercise.category}`)}
-                                </Badge>
-                                <span className="text-xs text-muted-foreground">
-                                  {getDifficultyDots(exercise.difficulty)}
-                                </span>
-                              </>
-                            ) : test ? (
-                              <>
-                                <Badge variant="outline" className="gap-1 text-xs">
-                                  <Clock className="h-3 w-3" />
-                                  {test.duration_minutes} {t('common.min')}
-                                </Badge>
-                                <Badge variant="outline" className="gap-1 text-xs">
-                                  <FileText className="h-3 w-3" />
-                                  {test.total_questions}
-                                </Badge>
-                              </>
-                            ) : null}
+                          <div>
+                            <h4 className="font-semibold text-base group-hover:text-primary transition-colors">
+                              {getLocalizedField(item, 'name')}
+                            </h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              {isExercise && exercise ? (
+                                <>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {exercise.category}
+                                  </Badge>
+                                  <span className="text-xs text-muted-foreground">
+                                    {getDifficultyDots(exercise.difficulty)}
+                                  </span>
+                                </>
+                              ) : test ? (
+                                <>
+                                  <Badge variant="outline" className="gap-1 text-xs">
+                                    <Clock className="h-3 w-3" />
+                                    {test.duration_minutes} {t('common.min')}
+                                  </Badge>
+                                  <Badge variant="outline" className="gap-1 text-xs">
+                                    <FileText className="h-3 w-3" />
+                                    {test.total_questions}
+                                  </Badge>
+                                </>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
 
                         {testResult && (
                           <Badge className={getCategoryColor(testResult.category)}>

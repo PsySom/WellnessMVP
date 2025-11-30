@@ -136,10 +136,10 @@ const Exercises = () => {
         <Tabs value={categoryFilter} onValueChange={setCategoryFilter}>
           <TabsList className="w-full justify-start overflow-x-auto">
             <TabsTrigger value="all" className="text-sm">{t('exercises.categories.all')}</TabsTrigger>
-            <TabsTrigger value="grounding" className="text-sm">{t('exercises.categories.grounding')}</TabsTrigger>
-            <TabsTrigger value="stress" className="text-sm">{t('exercises.categories.stress')}</TabsTrigger>
-            <TabsTrigger value="anxiety" className="text-sm">{t('exercises.categories.anxiety')}</TabsTrigger>
-            <TabsTrigger value="cognitive" className="text-sm">{t('exercises.categories.cognitive')}</TabsTrigger>
+            <TabsTrigger value="Заземление" className="text-sm">{t('exercises.categories.grounding')}</TabsTrigger>
+            <TabsTrigger value="Стресс" className="text-sm">{t('exercises.categories.stress')}</TabsTrigger>
+            <TabsTrigger value="Тревожность" className="text-sm">{t('exercises.categories.anxiety')}</TabsTrigger>
+            <TabsTrigger value="Когнитивные" className="text-sm">{t('exercises.categories.cognitive')}</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -177,7 +177,7 @@ const Exercises = () => {
                     </h3>
                     <div className="flex items-center gap-2 mt-2 md:mt-3">
                       <Badge variant="secondary" className="text-xs md:text-sm">
-                        {t(`exercises.categories.${exercise.category}`)}
+                        {exercise.category}
                       </Badge>
                       <span className="text-sm md:text-base text-muted-foreground">
                         {getDifficultyDots(exercise.difficulty)}

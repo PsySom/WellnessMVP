@@ -282,7 +282,8 @@
       "nutrition": "Питание",
       "social": "Общение",
       "leisure": "Досуг",
-      "hydration": "Гидратация"
+      "hydration": "Гидратация",
+      "testing": "Тестирование"
     },
     "activityTypes": {
       "restoring": "Восстанавливающие",

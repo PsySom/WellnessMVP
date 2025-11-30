@@ -147,7 +147,7 @@ const ExerciseDetail = () => {
               {exercise.duration_minutes} {t('exercises.minutes')}
             </Badge>
             <Badge variant="secondary">
-              {t(`calendar.categories.${exercise.category}`)}
+              {exercise.category}
             </Badge>
             <Badge variant="outline">
               {getDifficultyLabel(exercise.difficulty)}

@@ -193,7 +193,7 @@ const TestResult = () => {
               className={`text-lg px-6 py-2 ${getCategoryColor(result.category)}`}
               variant="outline"
             >
-              {getLocalizedField(categoryDetails, 'label')}
+              {categoryDetails.label}
             </Badge>
           )}
         </Card>
