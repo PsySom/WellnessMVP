@@ -141,6 +141,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
                     slot={slot.key}
                     activities={slotActivities}
                     onUpdate={fetchActivities}
+                    date={format(currentDate, 'yyyy-MM-dd')}
                   />
                 );
               })}
@@ -152,6 +153,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
                 slot="anytime"
                 activities={filterActivitiesBySlot(selectedDayActivities, 'anytime')}
                 onUpdate={fetchActivities}
+                date={format(currentDate, 'yyyy-MM-dd')}
               />
             </>
           )}

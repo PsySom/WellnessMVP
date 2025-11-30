@@ -12,9 +12,10 @@ interface TimeSlotSectionProps {
   slot: TimeSlot;
   activities: any[];
   onUpdate: () => void;
+  date?: string; // ISO date string (YYYY-MM-DD)
 }
 
-export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onUpdate }: TimeSlotSectionProps) => {
+export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onUpdate, date }: TimeSlotSectionProps) => {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   
@@ -79,6 +80,53 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     setIsDragOver(false);
 
     const activityId = e.dataTransfer.getData('activityId');
+    const templateId = e.dataTransfer.getData('templateId');
+    
+    // Если перетаскиваем шаблон - создаем новую активность
+    if (templateId) {
+      const templateData = JSON.parse(e.dataTransfer.getData('templateData'));
+      
+      let newTime: string | null;
+      if (sortedActivities.length === 0 || targetIndex === undefined) {
+        newTime = getDefaultTimeForSlot(slot);
+      } else {
+        const targetActivity = sortedActivities[targetIndex];
+        newTime = calculateNewTime(targetActivity, 'before');
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const activityDate = date || new Date().toISOString().split('T')[0];
+
+      const { error } = await supabase
+        .from('activities')
+        .insert({
+          user_id: user.id,
+          title: templateData.name,
+          category: templateData.category,
+          impact_type: templateData.impact_type,
+          duration_minutes: templateData.duration_minutes,
+          start_time: newTime,
+          date: activityDate,
+          status: 'planned'
+        });
+
+      if (error) {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось создать активность',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      onUpdate();
+      triggerActivityUpdate();
+      return;
+    }
+    
+    // Если перетаскиваем существующую активность
     if (!activityId) return;
 
     let newTime: string | null;

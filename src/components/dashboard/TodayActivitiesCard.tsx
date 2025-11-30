@@ -90,6 +90,7 @@ const TodayActivitiesCard = ({ activities, onUpdate }: TodayActivitiesCardProps)
                   slot={slot.key}
                   activities={slotActivities}
                   onUpdate={onUpdate}
+                  date={format(new Date(), 'yyyy-MM-dd')}
                 />
               );
             })}
@@ -99,7 +100,8 @@ const TodayActivitiesCard = ({ activities, onUpdate }: TodayActivitiesCardProps)
               emoji="📌"
               slot="anytime"
               activities={filterActivitiesBySlot(activities, 'anytime')}
-        onUpdate={onUpdate}
+              onUpdate={onUpdate}
+              date={format(new Date(), 'yyyy-MM-dd')}
             />
           </div>
 
