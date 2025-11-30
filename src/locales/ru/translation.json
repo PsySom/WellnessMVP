@@ -472,7 +472,17 @@
     "completedOn": "Завершено",
     "results": "Результаты",
     "lastScore": "Последний результат",
-    "viewAll": "Посмотреть все тесты"
+    "viewAll": "Посмотреть все тесты",
+    "history": {
+      "title": "История тестов",
+      "exercisesAndTests": "Упражнения и тесты",
+      "noResults": "Результатов тестов пока нет",
+      "completedTimes_one": "Пройдено 1 раз",
+      "completedTimes_few": "Пройдено {{count}} раза",
+      "completedTimes_many": "Пройдено {{count}} раз",
+      "completedTimes_other": "Пройдено {{count}} раз",
+      "score": "Баллы"
+    }
   },
   "exercises": {
     "title": "Упражнения и практики",

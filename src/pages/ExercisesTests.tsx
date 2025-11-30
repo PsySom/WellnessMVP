@@ -5,9 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Clock, Search, ChevronRight, CalendarPlus, FileText } from 'lucide-react';
+import { TestHistory } from '@/components/exercises-tests/TestHistory';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
@@ -59,6 +60,7 @@ const ExercisesTests = () => {
   const [activityModalOpen, setActivityModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<Exercise | Test | null>(null);
   const [selectedType, setSelectedType] = useState<'exercise' | 'test' | null>(null);
+  const [mainTab, setMainTab] = useState<'items' | 'history'>('items');
 
   useEffect(() => {
     loadData();
@@ -188,7 +190,18 @@ const ExercisesTests = () => {
           </p>
         </div>
 
-        <Card>
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as any)}>
+          <TabsList className="w-full max-w-md">
+            <TabsTrigger value="items" className="flex-1">
+              {t('tests.history.exercisesAndTests')}
+            </TabsTrigger>
+            <TabsTrigger value="history" className="flex-1">
+              {t('tests.history.title')}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="items" className="mt-6">
+            <Card>
           <CardContent className="space-y-4 pt-6">
             {/* Search */}
             <div className="relative">
@@ -333,6 +346,12 @@ const ExercisesTests = () => {
             </div>
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="history" className="mt-6">
+            <TestHistory />
+          </TabsContent>
+        </Tabs>
       </div>
 
       <ActivityFormModal
