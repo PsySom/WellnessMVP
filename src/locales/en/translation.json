@@ -286,8 +286,9 @@
       "filterAdditional": "Additional",
       "activitiesAdded": "{{count}} activities added",
       "addedWithSkipped": "Added: {{added}}, skipped: {{skipped}}",
-      "allCoreActivitiesExist": "All core activities already added",
-      "addError": "Error adding activities"
+      "allCoreActivitiesExist": "All core activities already added for today",
+      "addError": "Error adding activities",
+      "addedToday": "Added today"
     },
     "categories": {
       "exercise": "Exercise",

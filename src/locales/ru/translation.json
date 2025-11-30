@@ -286,8 +286,9 @@
       "filterAdditional": "Дополнительные",
       "activitiesAdded": "Добавлено активностей: {{count}}",
       "addedWithSkipped": "Добавлено: {{added}}, пропущено: {{skipped}}",
-      "allCoreActivitiesExist": "Все основные активности уже добавлены",
-      "addError": "Ошибка при добавлении активностей"
+      "allCoreActivitiesExist": "Все основные активности уже добавлены за сегодня",
+      "addError": "Ошибка при добавлении активностей",
+      "addedToday": "Добавлено сегодня"
     },
     "categories": {
       "exercise": "Упражнения",

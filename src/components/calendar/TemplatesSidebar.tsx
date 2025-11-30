@@ -437,14 +437,33 @@ export const TemplatesSidebar = () => {
                   }));
                 };
 
+                // Проверяем, является ли эта активность основной в выбранном пресете
+                const preset = selectedPreset ? ACTIVITY_PRESETS.find(p => p.id === selectedPreset) : null;
+                const presetActivity = preset?.activities.find(a => a.category === template.category);
+                const isCoreActivity = presetActivity?.isCore || false;
+                
+                // Проверяем, добавлена ли уже эта основная активность сегодня
+                const isAlreadyAddedToday = isCoreActivity && existingActivities.some(
+                  activity => activity.category === template.category
+                );
+
                 return (
                   <Card 
                     key={template.id}
                     draggable
                     onDragStart={handleDragStart}
-                    className="p-3 hover:shadow-md transition-all duration-300 cursor-grab active:cursor-grabbing group"
+                    className={`p-3 hover:shadow-md transition-all duration-300 cursor-grab active:cursor-grabbing group relative ${
+                      isAlreadyAddedToday ? 'opacity-60' : ''
+                    }`}
                     onClick={() => setSelectedTemplate(template)}
                   >
+                    {isAlreadyAddedToday && (
+                      <div className="absolute top-2 right-2 z-10">
+                        <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
+                          ✓ {t('calendar.presets.addedToday')}
+                        </Badge>
+                      </div>
+                    )}
                   <div className="flex items-start gap-2">
                     <div className="text-2xl">{template.emoji}</div>
                     
