@@ -188,6 +188,12 @@ const ExercisesTests = () => {
     return 'bg-destructive/10 text-destructive';
   };
 
+  const getTranslatedCategory = (category: string) => {
+    const key = `tests.categories.${category.replace(/ /g, '-').toLowerCase()}`;
+    const translation = t(key);
+    return translation === key ? category : translation;
+  };
+
   return (
     <AppLayout>
       <div className="container max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
@@ -328,7 +334,7 @@ const ExercisesTests = () => {
 
                         {testResult && (
                           <Badge className={getCategoryColor(testResult.category)}>
-                            {t('tests.lastScore')}: {testResult.score}
+                            {getTranslatedCategory(testResult.category)}: {testResult.score}
                           </Badge>
                         )}
 

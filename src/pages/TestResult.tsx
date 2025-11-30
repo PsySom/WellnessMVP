@@ -114,6 +114,12 @@ const TestResult = () => {
     }
   };
 
+  const getTranslatedCategory = (category: string) => {
+    const key = `tests.categories.${category.replace(/ /g, '-').toLowerCase()}`;
+    const translation = t(key);
+    return translation === key ? category : translation;
+  };
+
   const handleRetake = () => {
     navigate(`/tests/${slug}/take`);
   };

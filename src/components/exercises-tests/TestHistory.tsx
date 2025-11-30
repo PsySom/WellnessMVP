@@ -116,6 +116,12 @@ export const TestHistory = () => {
     });
   };
 
+  const getTranslatedCategory = (category: string) => {
+    const key = `tests.categories.${category.replace(/ /g, '-').toLowerCase()}`;
+    const translation = t(key);
+    return translation === key ? category : translation;
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -195,7 +201,7 @@ export const TestHistory = () => {
                       variant="outline"
                       className={`${getCategoryBadgeColor(latestResult.category)}`}
                     >
-                      {latestResult.category} • {latestResult.score}/{latestResult.max_score}
+                      {getTranslatedCategory(latestResult.category)} • {latestResult.score}/{latestResult.max_score}
                     </Badge>
                   </div>
                 </div>
@@ -221,7 +227,7 @@ export const TestHistory = () => {
                         {format(new Date(result.completed_at), 'dd MMM yyyy, HH:mm', { locale: getDateLocale() })}
                       </span>
                       <span className="font-semibold">
-                        {result.category} • {result.score}/{result.max_score}
+                        {getTranslatedCategory(result.category)} • {result.score}/{result.max_score}
                       </span>
                     </Badge>
                   ))}
