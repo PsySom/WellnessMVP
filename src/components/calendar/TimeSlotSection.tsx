@@ -132,9 +132,9 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
         onDragOver={(e) => handleDragOver(e)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e)}
-        className={`space-y-xs rounded-lg transition-all duration-200 ${
+        className={`space-y-xs rounded-lg transition-all duration-300 ease-out ${
           isEmpty ? 'border-2 border-dashed border-border p-2' : ''
-        } ${isDragOver && isEmpty ? 'border-primary bg-primary/5' : ''}`}
+        } ${isDragOver && isEmpty ? 'border-primary bg-primary/10 scale-[1.02] shadow-lg' : ''}`}
       >
         {isEmpty ? (
           <div className="text-center text-xs text-muted-foreground py-2">
@@ -147,7 +147,11 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
               onDragOver={(e) => handleDragOver(e, index)}
               onDragLeave={handleDragLeave}
               onDrop={(e) => handleDrop(e, index)}
-              className={`transition-all ${dragOverIndex === index ? 'border-t-2 border-primary pt-1' : ''}`}
+              className={`transition-all duration-300 ease-out ${
+                dragOverIndex === index 
+                  ? 'border-t-2 border-primary pt-2 mt-2 scale-[1.02]' 
+                  : ''
+              }`}
             >
               <ActivityItem
                 activity={activity}
