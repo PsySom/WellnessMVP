@@ -674,16 +674,6 @@ const BASE_CATEGORY_CONFIG: CategoryConfig[] = [
     }
   },
   {
-    value: 'routine',
-    emoji: '📋',
-    recommendedType: 'neutral',
-    label: {
-      en: 'Routine',
-      ru: 'Рутина',
-      fr: 'Routine'
-    }
-  },
-  {
     value: 'waiting',
     emoji: '⏳',
     recommendedType: 'neutral',

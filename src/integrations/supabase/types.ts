@@ -730,7 +730,6 @@ export type Database = {
         | "volunteering"
         | "spiritual"
         | "hygiene"
-        | "routine"
         | "waiting"
         | "testing"
         | "other"
@@ -938,7 +937,6 @@ export const Constants = {
         "volunteering",
         "spiritual",
         "hygiene",
-        "routine",
         "waiting",
         "testing",
         "other",
