@@ -10,6 +10,7 @@ import { ru, enUS, fr } from 'date-fns/locale';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface TestResult {
   id: string;
@@ -39,6 +40,7 @@ export const TestHistory = () => {
   const [testsWithResults, setTestsWithResults] = useState<TestWithResults[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTestId, setSelectedTestId] = useState<string>('all');
+  const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
@@ -102,6 +104,18 @@ export const TestHistory = () => {
     return 'bg-destructive/10 text-destructive';
   };
 
+  const toggleTestExpanded = (testId: string) => {
+    setExpandedTests(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(testId)) {
+        newSet.delete(testId);
+      } else {
+        newSet.add(testId);
+      }
+      return newSet;
+    });
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -162,84 +176,111 @@ export const TestHistory = () => {
         }));
 
         const latestResult = results[results.length - 1];
+        const isExpanded = expandedTests.has(test.id);
 
         return (
-          <Card key={test.id}>
-            <CardHeader>
-              <CardTitle className="text-xl">{getLocalizedField(test, 'name')}</CardTitle>
+          <Card key={test.id} className="overflow-hidden">
+            <CardHeader 
+              className="cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() => toggleTestExpanded(test.id)}
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardTitle className="text-xl mb-2">{getLocalizedField(test, 'name')}</CardTitle>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <span>
+                      {format(new Date(latestResult.completed_at), 'dd MMM yyyy, HH:mm', { locale: getDateLocale() })}
+                    </span>
+                    <Badge 
+                      variant="outline"
+                      className={`${getCategoryBadgeColor(latestResult.category)}`}
+                    >
+                      {latestResult.category} • {latestResult.score}/{latestResult.max_score}
+                    </Badge>
+                  </div>
+                </div>
+                {isExpanded ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Result badges */}
-              <div className="flex flex-wrap gap-2">
-                {results.map((result) => (
-                  <Badge 
-                    key={result.id} 
-                    variant="outline"
-                    className={`${getCategoryBadgeColor(result.category)} flex flex-col items-start py-2 px-3`}
-                  >
-                    <span className="text-xs font-normal">
-                      {format(new Date(result.completed_at), 'dd MMM yyyy, HH:mm', { locale: getDateLocale() })}
-                    </span>
-                    <span className="font-semibold">
-                      {result.category} • {result.score}/{result.max_score}
-                    </span>
-                  </Badge>
-                ))}
-              </div>
+            
+            {isExpanded && (
+              <CardContent className="space-y-4">
+                {/* Result badges */}
+                <div className="flex flex-wrap gap-2">
+                  {results.map((result) => (
+                    <Badge 
+                      key={result.id} 
+                      variant="outline"
+                      className={`${getCategoryBadgeColor(result.category)} flex flex-col items-start py-2 px-3`}
+                    >
+                      <span className="text-xs font-normal">
+                        {format(new Date(result.completed_at), 'dd MMM yyyy, HH:mm', { locale: getDateLocale() })}
+                      </span>
+                      <span className="font-semibold">
+                        {result.category} • {result.score}/{result.max_score}
+                      </span>
+                    </Badge>
+                  ))}
+                </div>
 
-              {/* Chart */}
-              <div className="h-64 mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis 
-                      dataKey="date" 
-                      stroke="hsl(var(--muted-foreground))"
-                      style={{ fontSize: '12px' }}
-                    />
-                    <YAxis 
-                      stroke="hsl(var(--muted-foreground))"
-                      style={{ fontSize: '12px' }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: 'hsl(var(--popover))',
-                        border: '1px solid hsl(var(--border))',
-                        borderRadius: '8px',
-                        color: 'hsl(var(--popover-foreground))'
-                      }}
-                      formatter={(value: any, name: string, props: any) => {
-                        if (name === 'score') {
-                          return [
-                            `${value} (${props.payload.percentage}%)`,
-                            t('tests.history.score')
-                          ];
-                        }
-                        return [value, name];
-                      }}
-                      labelFormatter={(label, payload) => {
-                        if (payload && payload.length > 0) {
-                          return payload[0].payload.fullDate;
-                        }
-                        return label;
-                      }}
-                    />
-                    <Legend 
-                      formatter={() => t('tests.history.score')}
-                      wrapperStyle={{ fontSize: '14px' }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="score"
-                      stroke={getCategoryColor(latestResult.category)}
-                      strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--background))', strokeWidth: 2, r: 4 }}
-                      activeDot={{ r: 6 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
+                {/* Chart */}
+                <div className="h-64 mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                      <XAxis 
+                        dataKey="date" 
+                        stroke="hsl(var(--muted-foreground))"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <YAxis 
+                        stroke="hsl(var(--muted-foreground))"
+                        style={{ fontSize: '12px' }}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: 'hsl(var(--popover))',
+                          border: '1px solid hsl(var(--border))',
+                          borderRadius: '8px',
+                          color: 'hsl(var(--popover-foreground))'
+                        }}
+                        formatter={(value: any, name: string, props: any) => {
+                          if (name === 'score') {
+                            return [
+                              `${value} (${props.payload.percentage}%)`,
+                              t('tests.history.score')
+                            ];
+                          }
+                          return [value, name];
+                        }}
+                        labelFormatter={(label, payload) => {
+                          if (payload && payload.length > 0) {
+                            return payload[0].payload.fullDate;
+                          }
+                          return label;
+                        }}
+                      />
+                      <Legend 
+                        formatter={() => t('tests.history.score')}
+                        wrapperStyle={{ fontSize: '14px' }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="score"
+                        stroke={getCategoryColor(latestResult.category)}
+                        strokeWidth={2}
+                        dot={{ fill: 'hsl(var(--background))', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6 }}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            )}
           </Card>
         );
       })}
