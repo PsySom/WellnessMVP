@@ -51,30 +51,31 @@ const TodayActivitiesCard = ({ activities, onUpdate }: TodayActivitiesCardProps)
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">{today}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate('/calendar')}
-          className="text-xs hover-scale"
-        >
-          {t('dashboard.todayActivitiesCard.viewAll')}
-        </Button>
-      </div>
-
-      {activities.length === 0 ? (
-        <div className="text-center py-6 space-y-sm">
-          <p className="text-muted-foreground text-sm">
-            {t('dashboard.todayActivitiesCard.noActivities')}
-          </p>
+        <div className="flex items-center gap-2">
           <Button
-            variant="outline"
             size="sm"
             onClick={() => navigate('/calendar')}
             className="gap-xs hover-scale"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-3 w-3" />
             {t('dashboard.todayActivitiesCard.addActivity')}
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/calendar')}
+            className="text-xs hover-scale"
+          >
+            {t('dashboard.todayActivitiesCard.viewAll')}
+          </Button>
+        </div>
+      </div>
+
+      {activities.length === 0 ? (
+        <div className="text-center py-6">
+          <p className="text-muted-foreground text-sm">
+            {t('dashboard.todayActivitiesCard.noActivities')}
+          </p>
         </div>
       ) : (
         <>
@@ -105,19 +106,10 @@ const TodayActivitiesCard = ({ activities, onUpdate }: TodayActivitiesCardProps)
             />
           </div>
 
-          <div className="pt-xs border-t border-border flex justify-between items-center">
+          <div className="pt-xs border-t border-border">
             <span className="text-xs text-muted-foreground">
               {activities.filter(a => a.status === 'completed').length}/{activities.length} {t('dashboard.todayActivitiesCard.completed')}
             </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => navigate('/calendar')}
-              className="gap-xs hover-scale text-xs"
-            >
-              <Plus className="h-3 w-3" />
-              {t('dashboard.todayActivitiesCard.addActivity')}
-            </Button>
           </div>
         </>
       )}
