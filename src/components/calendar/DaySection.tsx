@@ -8,13 +8,13 @@ interface DaySectionProps {
   timeRange?: string;
   activities: any[];
   onUpdate: () => void;
+  date?: string; // ISO date string (YYYY-MM-DD)
 }
 
-export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectionProps) => {
+export const DaySection = ({ title, timeRange, activities, onUpdate, date }: DaySectionProps) => {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
   
-  if (activities.length === 0) return null;
-
   // Sort activities by start_time
   const sortedActivities = [...activities].sort((a, b) => {
     if (!a.start_time && !b.start_time) return 0;
@@ -25,24 +25,42 @@ export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectio
 
   const completedCount = sortedActivities.filter(a => a.status === 'completed').length;
   const totalCount = sortedActivities.length;
+  const isEmpty = sortedActivities.length === 0;
 
-  const handleDragOver = (e: React.DragEvent, index: number) => {
+  const handleDragOver = (e: React.DragEvent, index?: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setDragOverIndex(index);
+    setIsDragOver(true);
+    if (index !== undefined) {
+      setDragOverIndex(index);
+    }
   };
 
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
+      setIsDragOver(false);
+      setDragOverIndex(null);
+    }
   };
 
-  const calculateNewTime = (targetActivity: any) => {
+  const calculateNewTime = (targetActivity: any, position: 'before' | 'after' = 'before') => {
     if (!targetActivity.start_time) return '09:00';
     
     const [hours, minutes] = targetActivity.start_time.split(':').map(Number);
     const targetMinutes = hours * 60 + minutes;
     const duration = parseInt(targetActivity.duration_minutes) || 60;
-    const newMinutes = Math.max(0, targetMinutes - duration);
+    
+    let newMinutes;
+    if (position === 'before') {
+      newMinutes = Math.max(0, targetMinutes - duration);
+    } else {
+      newMinutes = targetMinutes + duration;
+    }
     
     const newHours = Math.floor(newMinutes / 60) % 24;
     const newMins = newMinutes % 60;
@@ -50,17 +68,81 @@ export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectio
     return `${String(newHours).padStart(2, '0')}:${String(newMins).padStart(2, '0')}`;
   };
 
-  const handleDrop = async (e: React.DragEvent, targetIndex: number) => {
+  const handleDrop = async (e: React.DragEvent, targetIndex?: number) => {
     e.preventDefault();
     e.stopPropagation();
     setDragOverIndex(null);
+    setIsDragOver(false);
 
     const activityId = e.dataTransfer.getData('activityId');
-    const targetActivity = sortedActivities[targetIndex];
+    const templateId = e.dataTransfer.getData('templateId');
     
-    if (!activityId || !targetActivity || activityId === targetActivity.id) return;
+    // Если перетаскиваем шаблон - создаем новую активность
+    if (templateId) {
+      const templateData = JSON.parse(e.dataTransfer.getData('templateData'));
+      
+      let newTime: string;
+      if (sortedActivities.length === 0) {
+        // Пустой день - используем 9:00
+        newTime = '09:00';
+      } else if (targetIndex === undefined) {
+        // Перетащили в конец списка - добавляем после последней активности
+        const lastActivity = sortedActivities[sortedActivities.length - 1];
+        newTime = calculateNewTime(lastActivity, 'after');
+      } else {
+        // Перетащили между активностями - вставляем перед целевой
+        const targetActivity = sortedActivities[targetIndex];
+        newTime = calculateNewTime(targetActivity, 'before');
+      }
 
-    const newTime = calculateNewTime(targetActivity);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const activityDate = date || new Date().toISOString().split('T')[0];
+
+      const { error } = await supabase.from('activities').insert({
+        user_id: user.id,
+        title: templateData.name,
+        category: templateData.category,
+        impact_type: templateData.impact_type,
+        duration_minutes: templateData.duration_minutes,
+        status: 'planned' as const,
+        emoji: templateData.emoji || '📌',
+        date: activityDate,
+        start_time: newTime,
+      });
+
+      if (error) {
+        toast({
+          title: 'Ошибка',
+          description: 'Не удалось создать активность',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      onUpdate();
+      return;
+    }
+    
+    // Если перетаскиваем существующую активность
+    if (!activityId) return;
+
+    let newTime: string;
+    
+    if (sortedActivities.length === 0) {
+      // Пустой день - используем 9:00
+      newTime = '09:00';
+    } else if (targetIndex === undefined) {
+      // Перетащили в конец списка - добавляем после последней активности
+      const lastActivity = sortedActivities[sortedActivities.length - 1];
+      newTime = calculateNewTime(lastActivity, 'after');
+    } else {
+      // Перетащили между активностями
+      const targetActivity = sortedActivities[targetIndex];
+      if (activityId === targetActivity.id) return;
+      newTime = calculateNewTime(targetActivity, 'before');
+    }
 
     const { error } = await supabase
       .from('activities')
@@ -80,9 +162,10 @@ export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectio
   };
 
   const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+  const minHeight = isEmpty ? 'min-h-[60px]' : 'min-h-0';
 
   return (
-    <div className="mb-8 animate-fade-in">
+    <div className={`mb-8 animate-fade-in ${minHeight}`}>
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
@@ -95,74 +178,98 @@ export const DaySection = ({ title, timeRange, activities, onUpdate }: DaySectio
           </div>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="text-right">
-            <div className="text-sm md:text-base font-bold text-foreground">
-              {completedCount}<span className="text-muted-foreground">/{totalCount}</span>
+        {totalCount > 0 && (
+          <div className="flex items-center gap-3">
+            <div className="text-right">
+              <div className="text-sm md:text-base font-bold text-foreground">
+                {completedCount}<span className="text-muted-foreground">/{totalCount}</span>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                {Math.round(completionPercentage)}%
+              </div>
             </div>
-            <div className="text-xs text-muted-foreground">
-              {Math.round(completionPercentage)}%
+            
+            {/* Mini progress circle */}
+            <div className="relative w-10 h-10 md:w-12 md:h-12">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.5"
+                  fill="none"
+                  className="stroke-muted"
+                  strokeWidth="2.5"
+                />
+                <circle
+                  cx="18"
+                  cy="18"
+                  r="15.5"
+                  fill="none"
+                  className="stroke-primary transition-all duration-500"
+                  strokeWidth="2.5"
+                  strokeDasharray={`${completionPercentage} 100`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center text-xs font-bold">
+                {completedCount}
+              </div>
             </div>
           </div>
-          
-          {/* Mini progress circle */}
-          <div className="relative w-10 h-10 md:w-12 md:h-12">
-            <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                className="stroke-muted"
-                strokeWidth="2.5"
-              />
-              <circle
-                cx="18"
-                cy="18"
-                r="15.5"
-                fill="none"
-                className="stroke-primary transition-all duration-500"
-                strokeWidth="2.5"
-                strokeDasharray={`${completionPercentage} 100`}
-                strokeLinecap="round"
-              />
-            </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-bold">
-              {completedCount}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Progress bar */}
-      <div className="mb-4 px-1">
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500 ease-out"
-            style={{ width: `${completionPercentage}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="space-y-3 md:space-y-4">
-        {sortedActivities.map((activity, index) => (
-          <div
-            key={activity.id}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
-            className={`transition-all duration-300 ${
-              dragOverIndex === index 
-                ? 'border-t-4 border-primary pt-4 -mt-2 scale-[1.02]' 
-                : ''
-            }`}
-          >
-            <ActivityItem
-              activity={activity}
-              onUpdate={onUpdate}
+      {totalCount > 0 && (
+        <div className="mb-4 px-1">
+          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500 ease-out"
+              style={{ width: `${completionPercentage}%` }}
             />
           </div>
-        ))}
+        </div>
+      )}
+
+      <div
+        onDragOver={(e) => handleDragOver(e)}
+        onDragLeave={handleDragLeave}
+        onDrop={(e) => handleDrop(e)}
+        className={`space-y-3 md:space-y-4 rounded-xl transition-all duration-300 ease-out ${
+          isEmpty ? 'border-3 border-dashed border-border/60 p-4 min-h-[80px] flex items-center justify-center' : ''
+        } ${isDragOver && isEmpty ? 'border-primary bg-primary/5 scale-[1.03] shadow-lg ring-2 ring-primary/20' : ''}`}
+      >
+        {isEmpty ? (
+          <div className="text-center">
+            {isDragOver ? (
+              <div className="flex flex-col items-center gap-2 animate-bounce">
+                <div className="text-3xl">↓</div>
+                <p className="text-sm font-medium text-primary">Переместите сюда</p>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Пусто</p>
+            )}
+          </div>
+        ) : (
+          sortedActivities.map((activity, index) => (
+            <div
+              key={activity.id}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              className={`transition-all duration-300 ${
+                dragOverIndex === index 
+                  ? 'border-t-4 border-primary pt-4 -mt-2 scale-[1.02]' 
+                  : ''
+              }`}
+            >
+              <ActivityItem
+                activity={activity}
+                onUpdate={onUpdate}
+              />
+            </div>
+          ))
+        )}
       </div>
     </div>
   );
