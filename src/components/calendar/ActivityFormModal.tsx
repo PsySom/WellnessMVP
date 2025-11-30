@@ -25,6 +25,7 @@ interface ActivityFormModalProps {
   defaultDate?: Date;
   activity?: any;
   exerciseId?: string;
+  testId?: string;
   initialValues?: any;
 }
 
@@ -41,7 +42,7 @@ const IMPACT_TYPES = [
   { value: 'neutral' as const, color: 'bg-secondary' }
 ];
 
-export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, initialValues }: ActivityFormModalProps) => {
+export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, testId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -170,7 +171,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
       user_id: user!.id,
-      exercise_id: exerciseId || null
+      exercise_id: exerciseId || null,
+      test_id: testId || null
     };
 
     const { error } = isEditing
