@@ -96,12 +96,12 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     <>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <div
-          draggable={!isCompleted && !!activity.start_time}
+          draggable
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-pointer animate-fade-in ${
+          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-grab active:cursor-grabbing animate-fade-in ${
             isCompleted ? 'opacity-60' : ''
-          } ${isDragging ? 'opacity-50' : ''} ${!isCompleted && activity.start_time ? 'cursor-move' : ''}`}
+          } ${isDragging ? 'opacity-50' : ''}`}
           onClick={() => setIsDetailOpen(true)}
         >
           <div className="flex items-start gap-3">
