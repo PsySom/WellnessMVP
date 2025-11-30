@@ -107,12 +107,27 @@ export const TemplatesSidebar = () => {
                 <p className="text-xs text-muted-foreground">{t('activityTemplates.noTemplatesFound')}</p>
               </div>
             ) : (
-              filteredTemplates.map((template) => (
-                <Card 
-                  key={template.id}
-                  className="p-3 hover:shadow-md transition-shadow cursor-pointer group"
-                  onClick={() => setSelectedTemplate(template)}
-                >
+              filteredTemplates.map((template) => {
+                const handleDragStart = (e: React.DragEvent) => {
+                  e.dataTransfer.effectAllowed = 'copy';
+                  e.dataTransfer.setData('templateId', template.id);
+                  e.dataTransfer.setData('templateData', JSON.stringify({
+                    name: getLocalizedName(template),
+                    category: template.category,
+                    impact_type: template.impact_type,
+                    duration_minutes: template.default_duration_minutes || 60,
+                    emoji: template.emoji
+                  }));
+                };
+
+                return (
+                  <Card 
+                    key={template.id}
+                    draggable
+                    onDragStart={handleDragStart}
+                    className="p-3 hover:shadow-md transition-all duration-300 cursor-grab active:cursor-grabbing group"
+                    onClick={() => setSelectedTemplate(template)}
+                  >
                   <div className="flex items-start gap-2">
                     <div className="text-2xl">{template.emoji}</div>
                     
@@ -148,7 +163,8 @@ export const TemplatesSidebar = () => {
                     </Button>
                   </div>
                 </Card>
-              ))
+                );
+              })
             )}
           </div>
         </ScrollArea>
