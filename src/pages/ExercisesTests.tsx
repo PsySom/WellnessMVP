@@ -142,7 +142,7 @@ const ExercisesTests = () => {
       title: getLocalizedField(selectedItem, 'name'),
       duration_minutes: selectedItem.duration_minutes,
       impact_type: selectedType === 'exercise' ? 'restoring' : 'neutral',
-      category: selectedType === 'exercise' ? 'practice' : 'testing',
+      category: selectedType === 'exercise' ? 'psychological_exercises' : 'testing',
       description: '',
       date: new Date(),
       anytime: true,
