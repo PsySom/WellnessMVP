@@ -479,7 +479,9 @@
       "noResults": "Aucun résultat de test pour le moment",
       "completedTimes_one": "Complété 1 fois",
       "completedTimes_other": "Complété {{count}} fois",
-      "score": "Score"
+      "score": "Score",
+      "filterByTest": "Filtrer par test",
+      "allTests": "Tous les tests"
     }
   },
   "exercises": {

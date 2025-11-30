@@ -481,7 +481,9 @@
       "completedTimes_few": "Пройдено {{count}} раза",
       "completedTimes_many": "Пройдено {{count}} раз",
       "completedTimes_other": "Пройдено {{count}} раз",
-      "score": "Баллы"
+      "score": "Баллы",
+      "filterByTest": "Фильтр по тестам",
+      "allTests": "Все тесты"
     }
   },
   "exercises": {

@@ -479,7 +479,9 @@
       "noResults": "No test results yet",
       "completedTimes_one": "Completed 1 time",
       "completedTimes_other": "Completed {{count}} times",
-      "score": "Score"
+      "score": "Score",
+      "filterByTest": "Filter by Test",
+      "allTests": "All Tests"
     }
   },
   "exercises": {
