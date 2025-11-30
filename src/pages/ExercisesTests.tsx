@@ -236,16 +236,16 @@ const ExercisesTests = () => {
                   <TabsTrigger value="all" className="text-xs">
                     {t('exercises.categories.all')}
                   </TabsTrigger>
-                  <TabsTrigger value="Заземление" className="text-xs">
+                  <TabsTrigger value="grounding" className="text-xs">
                     {t('exercises.categories.grounding')}
                   </TabsTrigger>
-                  <TabsTrigger value="Стресс" className="text-xs">
+                  <TabsTrigger value="stress" className="text-xs">
                     {t('exercises.categories.stress')}
                   </TabsTrigger>
-                  <TabsTrigger value="Тревожность" className="text-xs">
+                  <TabsTrigger value="anxiety" className="text-xs">
                     {t('exercises.categories.anxiety')}
                   </TabsTrigger>
-                  <TabsTrigger value="Когнитивные" className="text-xs">
+                  <TabsTrigger value="cognitive" className="text-xs">
                     {t('exercises.categories.cognitive')}
                   </TabsTrigger>
                 </TabsList>
