@@ -6,8 +6,10 @@ import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ListView } from '@/components/calendar/ListView';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { ActivityFormModal } from '@/components/calendar/ActivityFormModal';
+import { TemplatesSidebar } from '@/components/calendar/TemplatesSidebar';
 import { format, startOfWeek, endOfWeek, addWeeks, subWeeks } from 'date-fns';
 import { useTranslation } from 'react-i18next';
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable';
 
 const Calendar = () => {
   const { t } = useTranslation();
@@ -24,70 +26,80 @@ const Calendar = () => {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-full">
-        {/* Header */}
-        <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-card">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-6">
-            <div className="flex items-center gap-2 md:gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={goToPreviousWeek}
-                className="h-8 w-8 md:h-10 md:w-10"
-              >
-                <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
-              <h1 className="text-2xl font-semibold min-w-[140px] text-center animate-fade-in">
-                {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
-              </h1>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={goToNextWeek}
-                className="h-8 w-8 md:h-10 md:w-10"
-              >
-                <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
-              </Button>
+      <ResizablePanelGroup direction="horizontal" className="h-full">
+        <ResizablePanel defaultSize={75} minSize={50}>
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-card">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-6">
+                <div className="flex items-center gap-2 md:gap-4">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={goToPreviousWeek}
+                    className="h-8 w-8 md:h-10 md:w-10"
+                  >
+                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                  </Button>
+                  <h1 className="text-2xl font-semibold min-w-[140px] text-center animate-fade-in">
+                    {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
+                  </h1>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={goToNextWeek}
+                    className="h-8 w-8 md:h-10 md:w-10"
+                  >
+                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+                  </Button>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={goToToday}
+                  className="self-start md:self-auto hover-scale transition-all duration-300"
+                >
+                  {t('calendar.today')}
+                </Button>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
+                  <TabsList className="w-full sm:w-auto">
+                    <TabsTrigger value="list" className="flex-1 sm:flex-none">{t('calendar.list')}</TabsTrigger>
+                    <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{t('calendar.calendar')}</TabsTrigger>
+                  </TabsList>
+                </Tabs>
+
+                <Button 
+                  onClick={() => setIsAddModalOpen(true)} 
+                  size="default" 
+                  className="w-full sm:w-auto hover-scale transition-all duration-300 shadow-md hover:shadow-lg"
+                >
+                  <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                  {t('calendar.addActivity')}
+                </Button>
+              </div>
             </div>
-            
-            <Button
-              variant="outline"
-              size="default"
-              onClick={goToToday}
-              className="self-start md:self-auto hover-scale transition-all duration-300"
-            >
-              {t('calendar.today')}
-            </Button>
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              {view === 'list' ? (
+                <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
+              ) : (
+                <CalendarView currentDate={currentDate} onDateChange={setCurrentDate} />
+              )}
+            </div>
           </div>
+        </ResizablePanel>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
-              <TabsList className="w-full sm:w-auto">
-                <TabsTrigger value="list" className="flex-1 sm:flex-none">{t('calendar.list')}</TabsTrigger>
-                <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{t('calendar.calendar')}</TabsTrigger>
-              </TabsList>
-            </Tabs>
+        <ResizableHandle withHandle />
 
-            <Button 
-              onClick={() => setIsAddModalOpen(true)} 
-              size="default" 
-              className="w-full sm:w-auto hover-scale transition-all duration-300 shadow-md hover:shadow-lg"
-            >
-              <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
-              {t('calendar.addActivity')}
-            </Button>
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto">
-          {view === 'list' ? (
-            <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
-          ) : (
-            <CalendarView currentDate={currentDate} onDateChange={setCurrentDate} />
-          )}
-        </div>
-      </div>
+        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
+          <TemplatesSidebar />
+        </ResizablePanel>
+      </ResizablePanelGroup>
 
       <ActivityFormModal
         open={isAddModalOpen}
