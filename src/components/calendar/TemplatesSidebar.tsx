@@ -152,6 +152,8 @@ export const TemplatesSidebar = () => {
           ? getDefaultTimeForSlot(activity.recommendedTimeSlot as any)
           : null;
 
+        const repetitionConfig = activity.repetitionConfig || { frequency: 'daily', count: 1 };
+        
         const activityData = {
           user_id: user.id,
           title: getLocalizedName(template),
@@ -161,6 +163,8 @@ export const TemplatesSidebar = () => {
           start_time: startTime,
           duration_minutes: activity.recommendedDuration || template.default_duration_minutes || 60,
           status: 'planned' as const,
+          emoji: template.emoji,
+          repetition_config: repetitionConfig,
         };
 
         await addActivityMutation.mutateAsync(activityData);

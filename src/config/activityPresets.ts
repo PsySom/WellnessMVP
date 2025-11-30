@@ -3,6 +3,10 @@ export interface PresetActivity {
   isCore: boolean; // основная или дополнительная
   recommendedTimeSlot?: string;
   recommendedDuration?: number;
+  repetitionConfig?: {
+    frequency: 'daily' | 'weekly' | 'monthly';
+    count: number;
+  };
 }
 
 export interface ActivityPreset {
@@ -31,50 +35,58 @@ export const ACTIVITY_PRESETS: ActivityPreset[] = [
         category: 'sleep_8hours',
         isCore: true,
         recommendedTimeSlot: 'night',
-        recommendedDuration: 480
+        recommendedDuration: 480,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       },
       {
         category: 'nutrition_breakfast',
         isCore: true,
-        recommendedTimeSlot: 'morning',
-        recommendedDuration: 30
+        recommendedTimeSlot: 'early_morning',
+        recommendedDuration: 30,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       },
       {
         category: 'nutrition_lunch',
         isCore: true,
-        recommendedTimeSlot: 'afternoon',
-        recommendedDuration: 45
+        recommendedTimeSlot: 'midday',
+        recommendedDuration: 45,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       },
       {
         category: 'nutrition_dinner',
         isCore: true,
         recommendedTimeSlot: 'evening',
-        recommendedDuration: 45
+        recommendedDuration: 45,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       },
       // Дополнительные
       {
         category: 'hydration',
         isCore: false,
         recommendedTimeSlot: 'anytime',
-        recommendedDuration: 5
+        recommendedDuration: 5,
+        repetitionConfig: { frequency: 'daily', count: 8 }
       },
       {
         category: 'nutrition_coffee',
         isCore: false,
-        recommendedTimeSlot: 'morning',
-        recommendedDuration: 15
+        recommendedTimeSlot: 'late_morning',
+        recommendedDuration: 15,
+        repetitionConfig: { frequency: 'daily', count: 2 }
       },
       {
         category: 'nutrition_brunch',
         isCore: false,
         recommendedTimeSlot: 'late_morning',
-        recommendedDuration: 30
+        recommendedDuration: 30,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       },
       {
         category: 'nutrition_after_dinner',
         isCore: false,
         recommendedTimeSlot: 'evening',
-        recommendedDuration: 15
+        recommendedDuration: 15,
+        repetitionConfig: { frequency: 'daily', count: 1 }
       }
     ]
   },

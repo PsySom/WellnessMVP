@@ -109,7 +109,9 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
           duration_minutes: templateData.duration_minutes,
           start_time: newTime,
           date: activityDate,
-          status: 'planned'
+          status: 'planned',
+          emoji: templateData.emoji || '📌',
+          repetition_config: { frequency: 'daily', count: 1 }
         });
 
       if (error) {
