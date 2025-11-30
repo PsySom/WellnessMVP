@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Plus } from 'lucide-react';
+import { Clock, Plus, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/useLocale';
 import { getCategoryConfig } from '@/config/categoryConfig';
 import ImpactTypeFilter from '@/components/activity-templates/ImpactTypeFilter';
 import TemplateDetailModal from '@/components/activity-templates/TemplateDetailModal';
 import { useTranslation } from 'react-i18next';
+import { ACTIVITY_PRESETS, getCoreActivities, getAdditionalActivities } from '@/config/activityPresets';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
+import { format } from 'date-fns';
+import { getDefaultTimeForSlot } from '@/utils/timeSlots';
+import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface ActivityTemplate {
   id: string;
@@ -44,8 +50,12 @@ const getImpactColor = (impactType: string) => {
 export const TemplatesSidebar = () => {
   const { t } = useTranslation();
   const { locale } = useLocale();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [selectedTemplate, setSelectedTemplate] = useState<ActivityTemplate | null>(null);
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [activityFilter, setActivityFilter] = useState<'all' | 'core' | 'additional'>('all');
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['activity-templates'],
@@ -61,8 +71,120 @@ export const TemplatesSidebar = () => {
     },
   });
 
+  const addActivityMutation = useMutation({
+    mutationFn: async (activityData: any) => {
+      const { error } = await supabase.from('activities').insert(activityData);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      triggerActivityUpdate();
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+    },
+  });
+
+  const { data: existingActivities = [] } = useQuery({
+    queryKey: ['activities', user?.id, format(new Date(), 'yyyy-MM-dd')],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('date', format(new Date(), 'yyyy-MM-dd'));
+      
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!user,
+  });
+
+  const handleAddActivities = async (type: 'all' | 'core' | 'additional') => {
+    if (!user || !selectedPreset) return;
+
+    const preset = ACTIVITY_PRESETS.find(p => p.id === selectedPreset);
+    if (!preset) return;
+
+    let activitiesToAdd = preset.activities;
+    if (type === 'core') {
+      activitiesToAdd = getCoreActivities(selectedPreset);
+    } else if (type === 'additional') {
+      activitiesToAdd = getAdditionalActivities(selectedPreset);
+    }
+
+    // Фильтруем основные активности, которые уже существуют
+    const filteredActivities = activitiesToAdd.filter(activity => {
+      if (!activity.isCore) return true; // Дополнительные всегда можно добавлять
+      
+      // Проверяем, нет ли уже такой основной активности
+      return !existingActivities.some(existing => existing.category === activity.category);
+    });
+
+    if (filteredActivities.length === 0) {
+      toast.info(t('calendar.presets.allCoreActivitiesExist'));
+      return;
+    }
+
+    try {
+      const today = format(new Date(), 'yyyy-MM-dd');
+      
+      for (const activity of filteredActivities) {
+        // Найдем соответствующий шаблон
+        const template = templates.find(t => t.category === activity.category);
+        if (!template) continue;
+
+        const startTime = activity.recommendedTimeSlot && activity.recommendedTimeSlot !== 'anytime'
+          ? getDefaultTimeForSlot(activity.recommendedTimeSlot as any)
+          : null;
+
+        const activityData = {
+          user_id: user.id,
+          title: getLocalizedName(template),
+          category: activity.category,
+          impact_type: template.impact_type,
+          date: today,
+          start_time: startTime,
+          duration_minutes: activity.recommendedDuration || template.default_duration_minutes || 60,
+          status: 'planned' as const,
+        };
+
+        await addActivityMutation.mutateAsync(activityData);
+      }
+
+      const addedCount = filteredActivities.length;
+      const skippedCount = activitiesToAdd.length - filteredActivities.length;
+      
+      if (skippedCount > 0) {
+        toast.success(t('calendar.presets.addedWithSkipped', { added: addedCount, skipped: skippedCount }));
+      } else {
+        toast.success(t('calendar.presets.activitiesAdded', { count: addedCount }));
+      }
+    } catch (error) {
+      console.error('Error adding activities:', error);
+      toast.error(t('calendar.presets.addError'));
+    }
+  };
+
   const filteredTemplates = templates.filter((template) => {
     const matchesImpactType = selectedImpactType === 'all' || template.impact_type === selectedImpactType;
+    
+    // Фильтр по выбранному пресету
+    if (selectedPreset) {
+      const preset = ACTIVITY_PRESETS.find(p => p.id === selectedPreset);
+      if (preset) {
+        const presetCategories = preset.activities.map(a => a.category);
+        const matchesPreset = presetCategories.includes(template.category);
+        
+        // Фильтр по типу активности (основная/дополнительная)
+        if (activityFilter !== 'all') {
+          const activity = preset.activities.find(a => a.category === template.category);
+          const matchesFilter = activityFilter === 'core' ? activity?.isCore : !activity?.isCore;
+          return matchesImpactType && matchesPreset && matchesFilter;
+        }
+        
+        return matchesImpactType && matchesPreset;
+      }
+    }
+    
     return matchesImpactType;
   });
 
@@ -83,10 +205,118 @@ export const TemplatesSidebar = () => {
   return (
     <>
       <div className="h-full flex flex-col border-l border-border bg-card/50">
+        {/* Секция с пресетами */}
+        <div className="p-4 border-b border-border space-y-3">
+          <h3 className="text-sm font-semibold text-foreground">
+            {t('calendar.presets.title')}
+          </h3>
+          
+          <ScrollArea className="h-[200px]">
+            <div className="space-y-2 pr-3">
+              {ACTIVITY_PRESETS.map((preset) => (
+                <Card
+                  key={preset.id}
+                  className={`p-3 cursor-pointer transition-all duration-200 hover:shadow-md ${
+                    selectedPreset === preset.id ? 'ring-2 ring-primary' : ''
+                  }`}
+                  onClick={() => {
+                    setSelectedPreset(preset.id === selectedPreset ? null : preset.id);
+                    setActivityFilter('all');
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">{preset.emoji}</span>
+                      <span className="text-sm font-medium">
+                        {preset.name[locale as 'en' | 'ru' | 'fr']}
+                      </span>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-6 w-6"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Будущая функция настройки
+                      }}
+                    >
+                      <Settings className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+
         <div className="p-4 border-b border-border">
           <h3 className="text-sm font-semibold text-foreground mb-3">
             {t('activityTemplates.title')}
           </h3>
+          
+          {selectedPreset && (
+            <div className="mb-3 space-y-2">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="default"
+                  className="flex-1"
+                  onClick={() => handleAddActivities('all')}
+                  disabled={addActivityMutation.isPending}
+                >
+                  {t('calendar.presets.addAll')}
+                </Button>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleAddActivities('core')}
+                  disabled={addActivityMutation.isPending}
+                >
+                  {t('calendar.presets.addCore')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => handleAddActivities('additional')}
+                  disabled={addActivityMutation.isPending}
+                >
+                  {t('calendar.presets.addAdditional')}
+                </Button>
+              </div>
+              
+              {/* Фильтры основные/дополнительные */}
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant={activityFilter === 'all' ? 'secondary' : 'ghost'}
+                  className="flex-1 text-xs"
+                  onClick={() => setActivityFilter('all')}
+                >
+                  {t('calendar.presets.filterAll')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={activityFilter === 'core' ? 'secondary' : 'ghost'}
+                  className="flex-1 text-xs"
+                  onClick={() => setActivityFilter('core')}
+                >
+                  {t('calendar.presets.filterCore')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant={activityFilter === 'additional' ? 'secondary' : 'ghost'}
+                  className="flex-1 text-xs"
+                  onClick={() => setActivityFilter('additional')}
+                >
+                  {t('calendar.presets.filterAdditional')}
+                </Button>
+              </div>
+            </div>
+          )}
           
           <ImpactTypeFilter
             selectedImpactType={selectedImpactType}
