@@ -112,7 +112,7 @@ const Calendar = () => {
         <ResizableHandle withHandle className="hover:bg-primary/20 transition-colors" />
 
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <TemplatesSidebar />
+          <TemplatesSidebar selectedDate={currentDate} />
         </ResizablePanel>
       </ResizablePanelGroup>
 
