@@ -28,6 +28,7 @@ const TestResult = lazy(() => import("./pages/TestResult"));
 const Exercises = lazy(() => import("./pages/Exercises"));
 const ExerciseDetail = lazy(() => import("./pages/ExerciseDetail"));
 const ExerciseSession = lazy(() => import("./pages/ExerciseSession"));
+const ExercisesTests = lazy(() => import("./pages/ExercisesTests"));
 const Insights = lazy(() => import("./pages/Insights"));
 const Recommendations = lazy(() => import("./pages/Recommendations"));
 const Profile = lazy(() => import("./pages/Profile"));
@@ -171,6 +172,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <ExerciseSession />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/exercises-tests"
+                element={
+                  <ProtectedRoute>
+                    <ExercisesTests />
                   </ProtectedRoute>
                 }
               />

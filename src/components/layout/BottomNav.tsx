@@ -1,4 +1,4 @@
-import { Home, Calendar, BookOpen, BarChart3, User } from 'lucide-react';
+import { Home, Calendar, BookOpen, BarChart3, User, Dumbbell } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +12,8 @@ export const BottomNav = () => {
     { icon: Home, label: t('nav.dashboard'), path: '/dashboard', ariaLabel: 'Navigate to Dashboard', badge: 0 },
     { icon: Calendar, label: t('nav.calendar'), path: '/calendar', ariaLabel: 'Navigate to Calendar', badge: 0 },
     { icon: BookOpen, label: t('nav.journal'), path: '/journal', ariaLabel: 'Navigate to Journal', badge: 0 },
+    { icon: Dumbbell, label: t('nav.exercisesTests'), path: '/exercises-tests', ariaLabel: 'Navigate to Exercises & Tests', badge: 0 },
     { icon: BarChart3, label: t('nav.insights'), path: '/insights', ariaLabel: 'Navigate to Insights', badge: 0 },
-    { icon: User, label: t('nav.profile'), path: '/profile', ariaLabel: 'Navigate to Profile', badge: 0 },
   ];
 
   return (
