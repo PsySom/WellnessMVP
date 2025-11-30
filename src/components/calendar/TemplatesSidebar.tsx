@@ -181,7 +181,7 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
         const activitiesToCreate = [];
 
         if (repetitionConfig.frequency === 'daily' && count > 1) {
-          const timeSlots = ['morning', 'afternoon', 'evening'];
+          const timeSlots = ['early_morning', 'late_morning', 'afternoon', 'evening'];
           for (let i = 0; i < count; i++) {
             const slotIndex = i % timeSlots.length;
             const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as any);

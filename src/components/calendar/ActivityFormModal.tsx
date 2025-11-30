@@ -228,13 +228,15 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         const count = formData.repetition_count;
         
         if (formData.repetition_frequency === 'daily' && count > 1) {
-          // Create activities in consecutive days at the same time
+          // Create multiple activities in the same day with different time slots
+          const timeSlots = ['early_morning', 'late_morning', 'afternoon', 'evening'];
           for (let i = 0; i < count; i++) {
-            const newDate = addDays(formData.date, i);
+            const slotIndex = i % timeSlots.length;
+            const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
             activitiesToCreate.push({
               ...baseActivityData,
-              date: format(newDate, 'yyyy-MM-dd'),
-              start_time: startTime,
+              date: format(formData.date, 'yyyy-MM-dd'),
+              start_time: slotTime,
             });
           }
         } else if (formData.repetition_frequency === 'weekly' && count > 1) {
