@@ -54,6 +54,12 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     e.dataTransfer.setData('activityId', activity.id);
     e.dataTransfer.setData('startTime', activity.start_time || '');
     e.dataTransfer.setData('duration', activity.duration_minutes?.toString() || '60');
+    
+    // Создаем ghost image для drag
+    const dragImage = document.createElement('div');
+    dragImage.style.opacity = '0.8';
+    dragImage.style.transform = 'rotate(2deg)';
+    e.dataTransfer.setDragImage(dragImage, 0, 0);
   };
 
   const handleDragEnd = () => {
@@ -99,9 +105,9 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
           draggable
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-grab active:cursor-grabbing animate-fade-in ${
+          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-grab active:cursor-grabbing animate-fade-in ${
             isCompleted ? 'opacity-60' : ''
-          } ${isDragging ? 'opacity-50' : ''}`}
+          } ${isDragging ? 'opacity-40 scale-95 rotate-2 shadow-2xl' : ''}`}
           onClick={() => setIsDetailOpen(true)}
         >
           <div className="flex items-start gap-3">
