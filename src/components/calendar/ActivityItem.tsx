@@ -106,45 +106,58 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
           draggable
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
-          className={`group relative bg-card border border-border rounded-lg p-3 md:p-4 transition-all duration-300 ease-out hover:shadow-lg hover:scale-[1.02] hover:border-primary/50 cursor-grab active:cursor-grabbing animate-fade-in ${
-            isCompleted ? 'opacity-60' : ''
-          } ${isDragging ? 'opacity-40 scale-95 rotate-2 shadow-2xl' : ''}`}
+          className={`group relative bg-card/80 backdrop-blur-sm border-2 rounded-xl p-4 md:p-5 transition-all duration-300 ease-out cursor-grab active:cursor-grabbing animate-fade-in touch-manipulation ${
+            isCompleted 
+              ? 'opacity-50 border-muted-foreground/20 bg-muted/20' 
+              : 'border-border hover:border-primary/50 hover:shadow-xl hover:scale-[1.03] hover:-translate-y-1'
+          } ${isDragging ? 'opacity-30 scale-95 rotate-3 shadow-2xl ring-4 ring-primary/30' : ''}`}
           onClick={() => setIsDetailOpen(true)}
         >
-          <div className="flex items-start gap-3">
-            <div onClick={(e) => e.stopPropagation()}>
+          {/* Status indicator line */}
+          <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl transition-all duration-300 ${
+            isCompleted ? 'bg-green-500' : 'bg-primary group-hover:w-1.5'
+          }`} />
+          
+          <div className="flex items-start gap-3 md:gap-4">
+            <div onClick={(e) => e.stopPropagation()} className="pt-0.5">
               <Checkbox
                 checked={isCompleted}
                 onCheckedChange={handleToggleComplete}
-                className="mt-1"
+                className="h-5 w-5 md:h-6 md:w-6 transition-all duration-200 hover:scale-110"
               />
             </div>
 
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1 md:mb-2">
-                <span className="text-lg md:text-xl transition-transform duration-300 group-hover:scale-110">{emoji}</span>
-                <h4 className={`font-medium text-sm md:text-base transition-colors duration-300 ${isCompleted ? 'line-through' : ''}`}>
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-2xl md:text-3xl transition-all duration-300 group-hover:scale-125 group-hover:rotate-12">{emoji}</span>
+                <h4 className={`font-semibold text-base md:text-lg transition-all duration-300 ${
+                  isCompleted ? 'line-through text-muted-foreground' : 'text-foreground'
+                }`}>
                   {activity.title}
                 </h4>
-                <div className={`w-2 h-2 md:w-2.5 md:h-2.5 rounded-full ${impactColor} transition-all duration-300 group-hover:scale-125`} />
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex items-center gap-2.5 mb-2 flex-wrap">
                 {activity.start_time && (
-                  <span className="text-xs md:text-sm text-muted-foreground transition-colors duration-300 group-hover:text-foreground">
-                    {format(new Date(`2000-01-01T${activity.start_time}`), 'HH:mm')}
-                  </span>
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-muted/60 transition-all duration-300 group-hover:bg-primary/10">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                    <span className="text-sm font-medium text-foreground">
+                      {format(new Date(`2000-01-01T${activity.start_time}`), 'HH:mm')}
+                    </span>
+                  </div>
                 )}
                 {activity.duration_minutes && (
-                  <Badge variant="outline" className="text-xs md:text-sm transition-all duration-300 group-hover:border-primary">
-                    {activity.duration_minutes}m
+                  <Badge variant="secondary" className="text-sm font-medium px-2.5 py-1 transition-all duration-300 hover:bg-primary hover:text-primary-foreground">
+                    {activity.duration_minutes} мин
                   </Badge>
                 )}
+                <div className={`w-3 h-3 rounded-full ${impactColor} shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl`} 
+                     title={activity.impact_type} />
               </div>
 
               {activity.description && (
                 <CollapsibleContent>
-                  <p className="text-xs text-muted-foreground mt-2">
+                  <p className="text-sm text-muted-foreground mt-3 leading-relaxed border-l-2 border-muted pl-3">
                     {activity.description}
                   </p>
                 </CollapsibleContent>
@@ -153,40 +166,45 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
               {(activity.exercise_id && activity.exercises?.slug) ? (
                 <Button
                   size="sm"
-                  className="mt-2"
+                  className="mt-3 hover-scale"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/exercises/${activity.exercises.slug}/session`);
                   }}
                 >
-                  <Play className="h-3 w-3 mr-1" />
+                  <Play className="h-4 w-4 mr-1.5" />
                   {t('exercises.start')}
                 </Button>
               ) : (activity.test_id && activity.tests?.slug) ? (
                 <Button
                   size="sm"
-                  className="mt-2"
+                  className="mt-3 hover-scale"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate(`/tests/${activity.tests.slug}/take`);
                   }}
                 >
-                  <Play className="h-3 w-3 mr-1" />
+                  <Play className="h-4 w-4 mr-1.5" />
                   {t('exercises.start')}
                 </Button>
               ) : null}
             </div>
 
             {activity.description && (
-              <CollapsibleTrigger onClick={(e) => e.stopPropagation()}>
-                <ChevronDown
-                  className={`h-4 w-4 text-muted-foreground transition-transform ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
-                />
+              <CollapsibleTrigger onClick={(e) => e.stopPropagation()} asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 hover:bg-muted transition-colors">
+                  <ChevronDown
+                    className={`h-5 w-5 text-muted-foreground transition-all duration-300 ${
+                      isOpen ? 'rotate-180 text-foreground' : ''
+                    }`}
+                  />
+                </Button>
               </CollapsibleTrigger>
             )}
           </div>
+          
+          {/* Subtle animation on hover */}
+          <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/0 via-primary/5 to-primary/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
         </div>
       </Collapsible>
 
