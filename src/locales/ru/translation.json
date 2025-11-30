@@ -484,6 +484,16 @@
       "score": "Баллы",
       "filterByTest": "Фильтр по тестам",
       "allTests": "Все тесты"
+    },
+    "categories": {
+      "minimal": "Минимальная",
+      "mild": "Лёгкая",
+      "moderate": "Умеренная",
+      "moderately-severe": "Умеренно-тяжёлая",
+      "severe": "Тяжёлая",
+      "low": "Низкая",
+      "normal": "Норма",
+      "high": "Высокая"
     }
   },
   "exercises": {

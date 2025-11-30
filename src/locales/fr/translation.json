@@ -482,6 +482,16 @@
       "score": "Score",
       "filterByTest": "Filtrer par test",
       "allTests": "Tous les tests"
+    },
+    "categories": {
+      "minimal": "Minime",
+      "mild": "Léger",
+      "moderate": "Modéré",
+      "moderately-severe": "Modérément sévère",
+      "severe": "Sévère",
+      "low": "Faible",
+      "normal": "Normal",
+      "high": "Élevé"
     }
   },
   "exercises": {
