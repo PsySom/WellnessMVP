@@ -9,7 +9,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Clock, Search, ChevronRight, CalendarPlus, FileText } from 'lucide-react';
 import { TestHistory } from '@/components/exercises-tests/TestHistory';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { ActivityFormModal } from '@/components/calendar/ActivityFormModal';
@@ -47,6 +47,7 @@ interface TestResult {
 const ExercisesTests = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { getLocalizedField } = useLocale();
 
@@ -65,6 +66,13 @@ const ExercisesTests = () => {
   useEffect(() => {
     loadData();
   }, [user]);
+
+  useEffect(() => {
+    // Check if navigation state contains tab parameter
+    if (location.state && (location.state as any).tab) {
+      setMainTab((location.state as any).tab);
+    }
+  }, [location]);
 
   const loadData = async () => {
     setIsLoading(true);
