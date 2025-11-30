@@ -87,9 +87,15 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
       const templateData = JSON.parse(e.dataTransfer.getData('templateData'));
       
       let newTime: string | null;
-      if (sortedActivities.length === 0 || targetIndex === undefined) {
+      if (sortedActivities.length === 0) {
+        // Пустой слот - используем начальное время слота
         newTime = getDefaultTimeForSlot(slot);
+      } else if (targetIndex === undefined) {
+        // Перетащили в конец списка - добавляем после последней активности
+        const lastActivity = sortedActivities[sortedActivities.length - 1];
+        newTime = calculateNewTime(lastActivity, 'after');
       } else {
+        // Перетащили между активностями - вставляем перед целевой
         const targetActivity = sortedActivities[targetIndex];
         newTime = calculateNewTime(targetActivity, 'before');
       }
@@ -116,7 +122,8 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
       const activitiesToCreate = [];
 
       if (repetitionConfig.frequency === 'daily' && count > 1) {
-        const timeSlots = ['morning', 'afternoon', 'evening'];
+        // Для нескольких раз в день - распределяем по слотам
+        const timeSlots = ['early_morning', 'late_morning', 'afternoon', 'evening'];
         for (let i = 0; i < count; i++) {
           const slotIndex = i % timeSlots.length;
           const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
@@ -177,9 +184,15 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
 
     let newTime: string | null;
     
-    if (sortedActivities.length === 0 || targetIndex === undefined) {
+    if (sortedActivities.length === 0) {
+      // Пустой слот - используем начальное время слота
       newTime = getDefaultTimeForSlot(slot);
+    } else if (targetIndex === undefined) {
+      // Перетащили в конец списка - добавляем после последней активности
+      const lastActivity = sortedActivities[sortedActivities.length - 1];
+      newTime = calculateNewTime(lastActivity, 'after');
     } else {
+      // Перетащили между активностями
       const targetActivity = sortedActivities[targetIndex];
       if (activityId === targetActivity.id) return;
       newTime = calculateNewTime(targetActivity, 'before');
