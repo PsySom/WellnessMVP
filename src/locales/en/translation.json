@@ -472,7 +472,15 @@
     "completedOn": "Completed on",
     "results": "Results",
     "lastScore": "Last score",
-    "viewAll": "View All Tests"
+    "viewAll": "View All Tests",
+    "history": {
+      "title": "Test History",
+      "exercisesAndTests": "Exercises & Tests",
+      "noResults": "No test results yet",
+      "completedTimes_one": "Completed 1 time",
+      "completedTimes_other": "Completed {{count}} times",
+      "score": "Score"
+    }
   },
   "exercises": {
     "title": "Exercises & Practices",
