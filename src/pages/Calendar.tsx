@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ListView } from '@/components/calendar/ListView';
-import { WeekView } from '@/components/calendar/WeekView';
 import { CalendarView } from '@/components/calendar/CalendarView';
 import { ActivityFormModal } from '@/components/calendar/ActivityFormModal';
 import { TemplatesSidebar } from '@/components/calendar/TemplatesSidebar';
@@ -14,7 +13,7 @@ import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/componen
 
 const Calendar = () => {
   const { t } = useTranslation();
-  const [view, setView] = useState<'list' | 'week' | 'calendar'>('week');
+  const [view, setView] = useState<'list' | 'calendar'>('list');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -66,10 +65,9 @@ const Calendar = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'week' | 'calendar')}>
+                <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
                   <TabsList className="w-full sm:w-auto">
                     <TabsTrigger value="list" className="flex-1 sm:flex-none">{t('calendar.list')}</TabsTrigger>
-                    <TabsTrigger value="week" className="flex-1 sm:flex-none">{t('calendar.week')}</TabsTrigger>
                     <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{t('calendar.calendar')}</TabsTrigger>
                   </TabsList>
                 </Tabs>
@@ -89,8 +87,6 @@ const Calendar = () => {
             <div className="flex-1 overflow-y-auto">
               {view === 'list' ? (
                 <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
-              ) : view === 'week' ? (
-                <WeekView currentDate={currentDate} onDateChange={setCurrentDate} />
               ) : (
                 <CalendarView currentDate={currentDate} onDateChange={setCurrentDate} />
               )}
