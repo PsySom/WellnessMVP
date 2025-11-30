@@ -30,7 +30,7 @@ interface ActivityFormModalProps {
 }
 
 const activitySchema = z.object({
-  title: z.string().min(1, 'Title is required'),
+  title: z.string().optional(),
   description: z.string().optional(),
   duration_minutes: z.number().min(5).max(1440),
 });
@@ -201,8 +201,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>{t('calendar.form.titleRequired')}</Label>
-            <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+            <Label>{t('calendar.form.title')}</Label>
+            <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
           </div>
 
           <div>
