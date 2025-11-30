@@ -286,8 +286,9 @@
       "filterAdditional": "Supplémentaires",
       "activitiesAdded": "{{count}} activités ajoutées",
       "addedWithSkipped": "Ajouté: {{added}}, ignoré: {{skipped}}",
-      "allCoreActivitiesExist": "Toutes les activités essentielles sont déjà ajoutées",
-      "addError": "Erreur lors de l'ajout des activités"
+      "allCoreActivitiesExist": "Toutes les activités essentielles sont déjà ajoutées pour aujourd'hui",
+      "addError": "Erreur lors de l'ajout des activités",
+      "addedToday": "Ajouté aujourd'hui"
     },
     "categories": {
       "exercise": "Exercice",
