@@ -271,6 +271,19 @@
       "updateSuccess": "Activité mise à jour",
       "createSuccess": "Activité créée"
     },
+    "presets": {
+      "title": "Modèles d'activités",
+      "addAll": "Tout ajouter",
+      "addCore": "Essentielles",
+      "addAdditional": "Supplémentaires",
+      "filterAll": "Tout",
+      "filterCore": "Essentielles",
+      "filterAdditional": "Supplémentaires",
+      "activitiesAdded": "{{count}} activités ajoutées",
+      "addedWithSkipped": "Ajouté: {{added}}, ignoré: {{skipped}}",
+      "allCoreActivitiesExist": "Toutes les activités essentielles sont déjà ajoutées",
+      "addError": "Erreur lors de l'ajout des activités"
+    },
     "categories": {
       "exercise": "Exercice",
       "health": "Santé",

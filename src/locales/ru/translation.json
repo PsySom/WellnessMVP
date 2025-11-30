@@ -271,6 +271,19 @@
       "updateSuccess": "Активность обновлена",
       "createSuccess": "Активность создана"
     },
+    "presets": {
+      "title": "Шаблоны активностей",
+      "addAll": "Добавить все",
+      "addCore": "Основные",
+      "addAdditional": "Дополнительные",
+      "filterAll": "Все",
+      "filterCore": "Основные",
+      "filterAdditional": "Дополнительные",
+      "activitiesAdded": "Добавлено активностей: {{count}}",
+      "addedWithSkipped": "Добавлено: {{added}}, пропущено: {{skipped}}",
+      "allCoreActivitiesExist": "Все основные активности уже добавлены",
+      "addError": "Ошибка при добавлении активностей"
+    },
     "categories": {
       "exercise": "Упражнения",
       "health": "Здоровье",
