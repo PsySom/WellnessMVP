@@ -205,34 +205,83 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
 
   const minHeight = isEmpty ? 'min-h-[60px]' : 'min-h-0';
 
+  const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
+
   return (
-    <div className={`mb-md transition-all duration-300 ${minHeight}`}>
-      <div className="flex items-center justify-between mb-xs px-1">
-        <div className="flex items-center gap-xs">
-          <span className="text-base">{emoji}</span>
-          <h3 className="text-xs font-semibold text-foreground">{title}</h3>
-          {timeRange && (
-            <span className="text-xs text-muted-foreground">({timeRange})</span>
-          )}
+    <div className={`mb-6 md:mb-8 transition-all duration-300 animate-fade-in ${minHeight}`}>
+      <div className="flex items-center justify-between mb-3 px-1">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl md:text-2xl transition-transform hover:scale-125 duration-300">{emoji}</span>
+          <div className="flex flex-col">
+            <h3 className="text-sm md:text-base font-bold text-foreground">{title}</h3>
+            {timeRange && (
+              <span className="text-xs text-muted-foreground font-medium">{timeRange}</span>
+            )}
+          </div>
         </div>
         {totalCount > 0 && (
-          <span className="text-xs text-muted-foreground">
-            {completedCount}/{totalCount}
-          </span>
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <div className="text-sm font-bold">
+                {completedCount}<span className="text-muted-foreground">/{totalCount}</span>
+              </div>
+            </div>
+            {/* Mini progress indicator */}
+            <div className="w-8 h-8 relative">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 32 32">
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  fill="none"
+                  className="stroke-muted"
+                  strokeWidth="2"
+                />
+                <circle
+                  cx="16"
+                  cy="16"
+                  r="14"
+                  fill="none"
+                  className="stroke-primary transition-all duration-500"
+                  strokeWidth="2"
+                  strokeDasharray={`${completionPercentage} 100`}
+                  strokeLinecap="round"
+                />
+              </svg>
+            </div>
+          </div>
         )}
       </div>
+
+      {totalCount > 0 && (
+        <div className="mb-3 px-1">
+          <div className="h-1 bg-muted rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+              style={{ width: `${completionPercentage}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       <div
         onDragOver={(e) => handleDragOver(e)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e)}
-        className={`space-y-xs rounded-lg transition-all duration-300 ease-out ${
-          isEmpty ? 'border-2 border-dashed border-border p-2' : ''
-        } ${isDragOver && isEmpty ? 'border-primary bg-primary/10 scale-[1.02] shadow-lg' : ''}`}
+        className={`space-y-3 rounded-xl transition-all duration-300 ease-out ${
+          isEmpty ? 'border-3 border-dashed border-border/60 p-4 min-h-[80px] flex items-center justify-center' : ''
+        } ${isDragOver && isEmpty ? 'border-primary bg-primary/5 scale-[1.03] shadow-lg ring-2 ring-primary/20' : ''}`}
       >
         {isEmpty ? (
-          <div className="text-center text-xs text-muted-foreground py-2">
-            {isDragOver ? '↓ Переместите сюда' : ''}
+          <div className="text-center">
+            {isDragOver ? (
+              <div className="flex flex-col items-center gap-2 animate-bounce">
+                <div className="text-3xl">↓</div>
+                <p className="text-sm font-medium text-primary">Переместите сюда</p>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">Пусто</p>
+            )}
           </div>
         ) : (
           sortedActivities.map((activity, index) => (
@@ -243,7 +292,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
               onDrop={(e) => handleDrop(e, index)}
               className={`transition-all duration-300 ease-out ${
                 dragOverIndex === index 
-                  ? 'border-t-2 border-primary pt-2 mt-2 scale-[1.02]' 
+                  ? 'border-t-4 border-primary pt-4 -mt-2 scale-[1.02]' 
                   : ''
               }`}
             >

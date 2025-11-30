@@ -28,29 +28,34 @@ const Calendar = () => {
     <AppLayout>
       <ResizablePanelGroup direction="horizontal" className="h-full">
         <ResizablePanel defaultSize={75} minSize={50}>
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full bg-gradient-to-b from-background to-muted/20">
             {/* Header */}
-            <div className="p-4 md:p-6 lg:p-8 border-b border-border bg-card">
+            <div className="p-4 md:p-6 lg:p-8 border-b-2 border-border/60 bg-card/80 backdrop-blur-sm shadow-sm">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 lg:mb-6">
-                <div className="flex items-center gap-2 md:gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={goToPreviousWeek}
-                    className="h-8 w-8 md:h-10 md:w-10"
+                    className="h-10 w-10 md:h-12 md:w-12 rounded-xl hover:bg-muted hover:scale-110 transition-all duration-300"
                   >
-                    <ChevronLeft className="h-4 w-4 md:h-5 md:w-5" />
+                    <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
                   </Button>
-                  <h1 className="text-2xl font-semibold min-w-[140px] text-center animate-fade-in">
-                    {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
-                  </h1>
+                  <div className="flex flex-col items-center">
+                    <h1 className="text-2xl md:text-3xl font-bold min-w-[180px] text-center animate-fade-in bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text">
+                      {format(weekStart, 'MMM d')} - {format(weekEnd, 'd')}
+                    </h1>
+                    <span className="text-xs md:text-sm text-muted-foreground font-medium">
+                      {format(currentDate, 'yyyy')}
+                    </span>
+                  </div>
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={goToNextWeek}
-                    className="h-8 w-8 md:h-10 md:w-10"
+                    className="h-10 w-10 md:h-12 md:w-12 rounded-xl hover:bg-muted hover:scale-110 transition-all duration-300"
                   >
-                    <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
+                    <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
                   </Button>
                 </div>
                 
@@ -58,33 +63,43 @@ const Calendar = () => {
                   variant="outline"
                   size="default"
                   onClick={goToToday}
-                  className="self-start md:self-auto hover-scale transition-all duration-300"
+                  className="self-start md:self-auto hover-scale transition-all duration-300 border-2 hover:border-primary hover:bg-primary/5 rounded-xl px-6 font-semibold"
                 >
                   {t('calendar.today')}
                 </Button>
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')}>
-                  <TabsList className="w-full sm:w-auto">
-                    <TabsTrigger value="list" className="flex-1 sm:flex-none">{t('calendar.list')}</TabsTrigger>
-                    <TabsTrigger value="calendar" className="flex-1 sm:flex-none">{t('calendar.calendar')}</TabsTrigger>
+                <Tabs value={view} onValueChange={(v) => setView(v as 'list' | 'calendar')} className="w-full sm:w-auto">
+                  <TabsList className="w-full sm:w-auto h-11 bg-muted/60 p-1 rounded-xl">
+                    <TabsTrigger 
+                      value="list" 
+                      className="flex-1 sm:flex-none rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all duration-300"
+                    >
+                      {t('calendar.list')}
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="calendar" 
+                      className="flex-1 sm:flex-none rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-md transition-all duration-300"
+                    >
+                      {t('calendar.calendar')}
+                    </TabsTrigger>
                   </TabsList>
                 </Tabs>
 
                 <Button 
                   onClick={() => setIsAddModalOpen(true)} 
-                  size="default" 
-                  className="w-full sm:w-auto hover-scale transition-all duration-300 shadow-md hover:shadow-lg"
+                  size="lg" 
+                  className="w-full sm:w-auto hover-scale transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl px-6 font-semibold touch-manipulation"
                 >
-                  <Plus className="h-4 w-4 md:h-5 md:w-5 mr-2" />
+                  <Plus className="h-5 w-5 mr-2" />
                   {t('calendar.addActivity')}
                 </Button>
               </div>
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
               {view === 'list' ? (
                 <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
               ) : (
@@ -94,7 +109,7 @@ const Calendar = () => {
           </div>
         </ResizablePanel>
 
-        <ResizableHandle withHandle />
+        <ResizableHandle withHandle className="hover:bg-primary/20 transition-colors" />
 
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
           <TemplatesSidebar />
