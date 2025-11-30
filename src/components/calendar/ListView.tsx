@@ -132,7 +132,6 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
             <>
               {TIME_SLOTS.map((slot) => {
                 const slotActivities = filterActivitiesBySlot(selectedDayActivities, slot.key);
-                if (slotActivities.length === 0) return null;
                 return (
                   <TimeSlotSection
                     key={slot.key}
@@ -147,19 +146,13 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
               })}
               
               {/* Anytime section */}
-              {(() => {
-                const anytimeActivities = filterActivitiesBySlot(selectedDayActivities, 'anytime');
-                if (anytimeActivities.length === 0) return null;
-                return (
-                  <TimeSlotSection
-                    title={t('calendar.sections.anytime')}
-                    emoji="📌"
-                    slot="anytime"
-                    activities={anytimeActivities}
-                    onUpdate={fetchActivities}
-                  />
-                );
-              })()}
+              <TimeSlotSection
+                title={t('calendar.sections.anytime')}
+                emoji="📌"
+                slot="anytime"
+                activities={filterActivitiesBySlot(selectedDayActivities, 'anytime')}
+                onUpdate={fetchActivities}
+              />
             </>
           )}
         </div>
