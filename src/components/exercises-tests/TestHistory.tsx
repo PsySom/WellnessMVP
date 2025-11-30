@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { format } from 'date-fns';
 import { ru, enUS, fr } from 'date-fns/locale';
@@ -37,6 +38,7 @@ export const TestHistory = () => {
   const { getLocalizedField } = useLocale();
   const [testsWithResults, setTestsWithResults] = useState<TestWithResults[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTestId, setSelectedTestId] = useState<string>('all');
 
   useEffect(() => {
     if (user) {
@@ -127,9 +129,30 @@ export const TestHistory = () => {
     );
   }
 
+  const filteredTests = selectedTestId === 'all' 
+    ? testsWithResults 
+    : testsWithResults.filter(t => t.test.id === selectedTestId);
+
   return (
     <div className="space-y-6">
-      {testsWithResults.map(({ test, results }) => {
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">{t('tests.history.filterByTest')}</h2>
+        <Select value={selectedTestId} onValueChange={setSelectedTestId}>
+          <SelectTrigger className="w-[280px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">{t('tests.history.allTests')}</SelectItem>
+            {testsWithResults.map(({ test }) => (
+              <SelectItem key={test.id} value={test.id}>
+                {getLocalizedField(test, 'name')}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {filteredTests.map(({ test, results }) => {
         const chartData = results.map(result => ({
           date: format(new Date(result.completed_at), 'dd MMM', { locale: getDateLocale() }),
           fullDate: format(new Date(result.completed_at), 'PPp', { locale: getDateLocale() }),
@@ -143,20 +166,29 @@ export const TestHistory = () => {
         return (
           <Card key={test.id}>
             <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-xl">{getLocalizedField(test, 'name')}</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {t('tests.history.completedTimes', { count: results.length })}
-                  </p>
-                </div>
-                <Badge className={getCategoryBadgeColor(latestResult.category)}>
-                  {latestResult.category}
-                </Badge>
-              </div>
+              <CardTitle className="text-xl">{getLocalizedField(test, 'name')}</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="h-64">
+            <CardContent className="space-y-4">
+              {/* Result badges */}
+              <div className="flex flex-wrap gap-2">
+                {results.map((result) => (
+                  <Badge 
+                    key={result.id} 
+                    variant="outline"
+                    className={`${getCategoryBadgeColor(result.category)} flex flex-col items-start py-2 px-3`}
+                  >
+                    <span className="text-xs font-normal">
+                      {format(new Date(result.completed_at), 'dd MMM yyyy, HH:mm', { locale: getDateLocale() })}
+                    </span>
+                    <span className="font-semibold">
+                      {result.category} • {result.score}/{result.max_score}
+                    </span>
+                  </Badge>
+                ))}
+              </div>
+
+              {/* Chart */}
+              <div className="h-64 mt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
