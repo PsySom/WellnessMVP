@@ -18,6 +18,8 @@ import { format } from 'date-fns';
 import { CalendarIcon, Star } from 'lucide-react';
 import { z } from 'zod';
 import { triggerActivityUpdate } from '@/utils/activitySync';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { addDays, addWeeks } from 'date-fns';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -47,6 +49,10 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isEditing = Boolean(activity?.id);
+  const [duplicateDialog, setDuplicateDialog] = useState<{ open: boolean; onConfirm: () => void }>({ 
+    open: false, 
+    onConfirm: () => {} 
+  });
   
   const [formData, setFormData] = useState({
     title: '',
@@ -206,66 +212,108 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         triggerActivityUpdate();
       }
     } else {
-      // For new activities, create multiple based on repetition
-      const activitiesToCreate = [];
-      const count = formData.repetition_count;
-      
-      if (formData.repetition_frequency === 'daily' && count > 1) {
-        // Create multiple activities in the same day with different time slots
-        const timeSlots = ['morning', 'afternoon', 'evening'];
-        for (let i = 0; i < count; i++) {
-          const slotIndex = i % timeSlots.length;
-          const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
-          activitiesToCreate.push({
-            ...baseActivityData,
-            start_time: formData.timeSlot === 'exact_time' ? startTime : slotTime,
-          });
+      // Check for duplicates first
+      const { data: existingActivities } = await supabase
+        .from('activities')
+        .select('*')
+        .eq('user_id', user!.id)
+        .eq('date', format(formData.date, 'yyyy-MM-dd'))
+        .eq('category', formData.category);
+
+      const hasDuplicates = existingActivities && existingActivities.length > 0;
+
+      const createActivities = async () => {
+        // For new activities, create multiple based on repetition
+        const activitiesToCreate = [];
+        const count = formData.repetition_count;
+        
+        if (formData.repetition_frequency === 'daily' && count > 1) {
+          // Create activities in consecutive days at the same time
+          for (let i = 0; i < count; i++) {
+            const newDate = addDays(formData.date, i);
+            activitiesToCreate.push({
+              ...baseActivityData,
+              date: format(newDate, 'yyyy-MM-dd'),
+              start_time: startTime,
+            });
+          }
+        } else if (formData.repetition_frequency === 'weekly' && count > 1) {
+          // Create activities in the same day of week for consecutive weeks
+          for (let i = 0; i < count; i++) {
+            const newDate = addWeeks(formData.date, i);
+            activitiesToCreate.push({
+              ...baseActivityData,
+              date: format(newDate, 'yyyy-MM-dd'),
+              start_time: startTime,
+            });
+          }
+        } else if (formData.repetition_frequency === 'monthly' && count > 1) {
+          // Create activities spread across weeks in the month
+          const weeksToSpread = Math.floor(4 / count);
+          for (let i = 0; i < count; i++) {
+            const newDate = addWeeks(formData.date, i * weeksToSpread);
+            activitiesToCreate.push({
+              ...baseActivityData,
+              date: format(newDate, 'yyyy-MM-dd'),
+              start_time: startTime,
+            });
+          }
+        } else {
+          // Single activity
+          activitiesToCreate.push(baseActivityData);
         }
-      } else if (formData.repetition_frequency === 'weekly' && count > 1) {
-        // Create activities spread across the week
-        const daysToSpread = Math.floor(7 / count);
-        for (let i = 0; i < count; i++) {
-          const newDate = new Date(formData.date);
-          newDate.setDate(newDate.getDate() + (i * daysToSpread));
-          activitiesToCreate.push({
-            ...baseActivityData,
-            date: format(newDate, 'yyyy-MM-dd'),
-          });
+
+        const { error } = await supabase.from('activities').insert(activitiesToCreate as any);
+
+        setLoading(false);
+
+        if (error) {
+          console.error('Activity save error:', error);
+          toast.error(t('calendar.form.saveError'));
+        } else {
+          toast.success(t('calendar.form.createSuccess'));
+          onOpenChange(false);
+          triggerActivityUpdate();
         }
-      } else if (formData.repetition_frequency === 'monthly' && count > 1) {
-        // Create activities spread across weeks in the month
-        const weeksToSpread = Math.floor(4 / count);
-        for (let i = 0; i < count; i++) {
-          const newDate = new Date(formData.date);
-          newDate.setDate(newDate.getDate() + (i * weeksToSpread * 7));
-          activitiesToCreate.push({
-            ...baseActivityData,
-            date: format(newDate, 'yyyy-MM-dd'),
-          });
-        }
+      };
+
+      if (hasDuplicates) {
+        setLoading(false);
+        setDuplicateDialog({
+          open: true,
+          onConfirm: () => {
+            setDuplicateDialog({ open: false, onConfirm: () => {} });
+            setLoading(true);
+            createActivities();
+          }
+        });
       } else {
-        // Single activity
-        activitiesToCreate.push(baseActivityData);
-      }
-
-      const { error } = await supabase.from('activities').insert(activitiesToCreate as any);
-
-      setLoading(false);
-
-      if (error) {
-        console.error('Activity save error:', error);
-        toast.error(t('calendar.form.saveError'));
-      } else {
-        toast.success(t('calendar.form.createSuccess'));
-        onOpenChange(false);
-        triggerActivityUpdate();
+        await createActivities();
       }
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+    <>
+      <AlertDialog open={duplicateDialog.open} onOpenChange={(open) => setDuplicateDialog({ ...duplicateDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('calendar.duplicateDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('calendar.duplicateDialog.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('calendar.duplicateDialog.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={duplicateDialog.onConfirm}>
+              {t('calendar.duplicateDialog.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{isEditing ? t('calendar.editActivity') : t('calendar.addActivity')}</DialogTitle>
         </DialogHeader>
@@ -476,5 +524,6 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         </form>
       </DialogContent>
     </Dialog>
+    </>
   );
 };

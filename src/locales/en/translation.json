@@ -341,8 +341,14 @@
         "fri": "Fri",
         "sat": "Sat",
         "sun": "Sun"
-      }
     },
+    "duplicateDialog": {
+      "title": "Duplicate Activity",
+      "description": "A similar activity already exists for this date. Are you sure you want to add it again?",
+      "cancel": "Cancel",
+      "confirm": "Add Anyway"
+    }
+  },
     "sections": {
       "early_morning": "Morning",
       "late_morning": "Late Morning",

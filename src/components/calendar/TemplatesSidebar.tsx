@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ActivityTemplate {
   id: string;
@@ -47,7 +48,11 @@ const getImpactColor = (impactType: string) => {
   }
 };
 
-export const TemplatesSidebar = () => {
+interface TemplatesSidebarProps {
+  selectedDate: Date;
+}
+
+export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
   const { user } = useAuth();
@@ -56,6 +61,11 @@ export const TemplatesSidebar = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<ActivityTemplate | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [activityFilter, setActivityFilter] = useState<'all' | 'core' | 'additional'>('all');
+  const [duplicateDialog, setDuplicateDialog] = useState<{ open: boolean; activity: any; onConfirm: () => void }>({ 
+    open: false, 
+    activity: null, 
+    onConfirm: () => {} 
+  });
 
   const { data: templates = [], isLoading } = useQuery({
     queryKey: ['activity-templates'],
@@ -82,15 +92,17 @@ export const TemplatesSidebar = () => {
     },
   });
 
+  const selectedDateStr = format(selectedDate, 'yyyy-MM-dd');
+  
   const { data: existingActivities = [] } = useQuery({
-    queryKey: ['activities', user?.id, format(new Date(), 'yyyy-MM-dd')],
+    queryKey: ['activities', user?.id, selectedDateStr],
     queryFn: async () => {
       if (!user) return [];
       const { data, error } = await supabase
         .from('activities')
         .select('*')
         .eq('user_id', user.id)
-        .eq('date', format(new Date(), 'yyyy-MM-dd'));
+        .eq('date', selectedDateStr);
       
       if (error) throw error;
       return data || [];
@@ -141,7 +153,7 @@ export const TemplatesSidebar = () => {
     }
 
     try {
-      const today = format(new Date(), 'yyyy-MM-dd');
+      const targetDate = selectedDateStr;
       
       for (const activity of filteredActivities) {
         // Найдем соответствующий шаблон
@@ -175,14 +187,14 @@ export const TemplatesSidebar = () => {
             const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as any);
             activitiesToCreate.push({
               ...baseActivity,
-              date: today,
+              date: targetDate,
               start_time: slotTime,
             });
           }
         } else if (repetitionConfig.frequency === 'weekly' && count > 1) {
           const daysToSpread = Math.floor(7 / count);
           for (let i = 0; i < count; i++) {
-            const newDate = new Date();
+            const newDate = new Date(selectedDate);
             newDate.setDate(newDate.getDate() + (i * daysToSpread));
             activitiesToCreate.push({
               ...baseActivity,
@@ -193,7 +205,7 @@ export const TemplatesSidebar = () => {
         } else if (repetitionConfig.frequency === 'monthly' && count > 1) {
           const weeksToSpread = Math.floor(4 / count);
           for (let i = 0; i < count; i++) {
-            const newDate = new Date();
+            const newDate = new Date(selectedDate);
             newDate.setDate(newDate.getDate() + (i * weeksToSpread * 7));
             activitiesToCreate.push({
               ...baseActivity,
@@ -204,7 +216,7 @@ export const TemplatesSidebar = () => {
         } else {
           activitiesToCreate.push({
             ...baseActivity,
-            date: today,
+            date: targetDate,
             start_time: startTime,
           });
         }
@@ -268,6 +280,23 @@ export const TemplatesSidebar = () => {
 
   return (
     <>
+      <AlertDialog open={duplicateDialog.open} onOpenChange={(open) => setDuplicateDialog({ ...duplicateDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('calendar.duplicateDialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('calendar.duplicateDialog.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('calendar.duplicateDialog.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={duplicateDialog.onConfirm}>
+              {t('calendar.duplicateDialog.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      
       <div className="h-full flex flex-col border-l border-border bg-card/50">
         {/* Секция с пресетами */}
         <div className="p-4 border-b border-border space-y-3">

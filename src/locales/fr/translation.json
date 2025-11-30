@@ -341,8 +341,14 @@
         "fri": "Ven",
         "sat": "Sam",
         "sun": "Dim"
-      }
     },
+    "duplicateDialog": {
+      "title": "Activité Dupliquée",
+      "description": "Une activité similaire existe déjà pour cette date. Êtes-vous sûr de vouloir l'ajouter à nouveau?",
+      "cancel": "Annuler",
+      "confirm": "Ajouter Quand Même"
+    }
+  },
     "sections": {
       "early_morning": "Matin",
       "late_morning": "Fin de matinée",
