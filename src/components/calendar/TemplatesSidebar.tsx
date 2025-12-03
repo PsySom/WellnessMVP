@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Plus, Settings } from 'lucide-react';
+import { Clock, Plus, Settings, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/useLocale';
 import { getCategoryConfig } from '@/config/categoryConfig';
@@ -18,6 +18,7 @@ import { format } from 'date-fns';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { PresetEditModal } from './PresetEditModal';
 
 interface ActivityTemplate {
   id: string;
@@ -52,6 +53,14 @@ interface TemplatesSidebarProps {
   selectedDate: Date;
 }
 
+interface UserPreset {
+  id: string;
+  user_id: string;
+  name: string;
+  emoji: string;
+  activities: any[];
+}
+
 export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
@@ -65,6 +74,10 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
     open: false, 
     activity: null, 
     onConfirm: () => {} 
+  });
+  const [presetEditModal, setPresetEditModal] = useState<{ open: boolean; preset: UserPreset | null }>({
+    open: false,
+    preset: null,
   });
 
   const { data: templates = [], isLoading } = useQuery({
@@ -106,6 +119,23 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
       
       if (error) throw error;
       return data || [];
+    },
+    enabled: !!user,
+  });
+
+  // Fetch user custom presets
+  const { data: userPresets = [] } = useQuery({
+    queryKey: ['user-presets', user?.id],
+    queryFn: async () => {
+      if (!user) return [];
+      const { data, error } = await supabase
+        .from('user_presets')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return (data || []) as UserPreset[];
     },
     enabled: !!user,
   });
@@ -300,12 +330,65 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
       <div className="h-full flex flex-col border-l border-border bg-card/50">
         {/* Секция с пресетами */}
         <div className="p-4 border-b border-border space-y-3">
-          <h3 className="text-sm font-semibold text-foreground">
-            {t('calendar.presets.title')}
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-foreground">
+              {t('calendar.presets.title')}
+            </h3>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-7 text-xs"
+              onClick={() => setPresetEditModal({ open: true, preset: null })}
+            >
+              <PlusCircle className="h-3 w-3 mr-1" />
+              {t('calendar.presets.createPreset')}
+            </Button>
+          </div>
           
           <ScrollArea className="h-[200px]">
             <div className="space-y-2 pr-3">
+              {/* User custom presets */}
+              {userPresets.map((preset) => {
+                const activitiesCount = preset.activities?.length || 0;
+                
+                return (
+                  <Card
+                    key={`user-${preset.id}`}
+                    className={`p-3 cursor-pointer transition-all duration-200 hover:shadow-md border-primary/20 ${
+                      selectedPreset === `user-${preset.id}` ? 'ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => {
+                      setSelectedPreset(selectedPreset === `user-${preset.id}` ? null : `user-${preset.id}`);
+                      setActivityFilter('all');
+                    }}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <span className="text-xl flex-shrink-0">{preset.emoji}</span>
+                        <span className="text-sm font-medium truncate">{preset.name}</span>
+                      </div>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <Badge variant="outline" className="text-xs px-1.5 py-0">
+                          {activitiesCount}
+                        </Badge>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-6 w-6"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPresetEditModal({ open: true, preset });
+                          }}
+                        >
+                          <Settings className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+
+              {/* System presets */}
               {ACTIVITY_PRESETS.map((preset) => {
                 const { total, added } = getPresetActivityCount(preset.id);
                 const hasActivities = total > 0;
@@ -337,17 +420,6 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
                             {added}/{total}
                           </Badge>
                         )}
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-6 w-6"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            // Будущая функция настройки
-                          }}
-                        >
-                          <Settings className="h-3 w-3" />
-                        </Button>
                       </div>
                     </div>
                     {hasActivities && added > 0 && (
@@ -539,6 +611,12 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
         template={selectedTemplate}
         open={!!selectedTemplate}
         onClose={() => setSelectedTemplate(null)}
+      />
+
+      <PresetEditModal
+        open={presetEditModal.open}
+        onOpenChange={(open) => setPresetEditModal({ ...presetEditModal, open })}
+        preset={presetEditModal.preset}
       />
     </>
   );

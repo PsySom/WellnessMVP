@@ -288,7 +288,26 @@
       "addedWithSkipped": "Ajouté: {{added}}, ignoré: {{skipped}}",
       "allCoreActivitiesExist": "Toutes les activités essentielles sont déjà ajoutées pour aujourd'hui",
       "addError": "Erreur lors de l'ajout des activités",
-      "addedToday": "Ajouté aujourd'hui"
+      "addedToday": "Ajouté aujourd'hui",
+      "createPreset": "Créer",
+      "editPreset": "Modifier le modèle",
+      "presetName": "Nom du modèle",
+      "namePlaceholder": "Entrez un nom",
+      "selectActivities": "Sélectionnez les activités",
+      "allCategories": "Toutes les catégories",
+      "distribution": "Répartition par moments de la journée",
+      "dropActivities": "Ajoutez des activités depuis la gauche",
+      "presetCreated": "Modèle créé",
+      "presetUpdated": "Modèle mis à jour",
+      "presetDeleted": "Modèle supprimé",
+      "saveError": "Erreur de sauvegarde",
+      "nameRequired": "Veuillez entrer un nom de modèle"
+    },
+    "dayParts": {
+      "earlyMorning": "Matin",
+      "lateMorning": "Fin de matinée",
+      "afternoon": "Après-midi",
+      "evening": "Soir"
     },
     "categories": {
       "exercise": "Exercice",

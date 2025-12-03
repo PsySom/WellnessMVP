@@ -637,6 +637,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_presets: {
+        Row: {
+          activities: Json
+          created_at: string
+          emoji: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activities?: Json
+          created_at?: string
+          emoji?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activities?: Json
+          created_at?: string
+          emoji?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_recommendations: {
         Row: {
           accepted: boolean | null
