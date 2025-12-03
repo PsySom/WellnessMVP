@@ -297,6 +297,8 @@
       "allCategories": "Все категории",
       "distribution": "Распределение по частям дня",
       "dropActivities": "Добавьте активности слева",
+      "weeklyRepetitions": "Повторений в неделю",
+      "daysPerWeek": "дн./нед.",
       "presetCreated": "Шаблон создан",
       "presetUpdated": "Шаблон обновлён",
       "presetDeleted": "Шаблон удалён",
@@ -306,8 +308,10 @@
     "dayParts": {
       "earlyMorning": "Утро",
       "lateMorning": "Первая половина дня",
+      "midday": "Середина дня",
       "afternoon": "Вторая половина дня",
-      "evening": "Вечер"
+      "evening": "Вечер",
+      "night": "Ночь"
     },
     "categories": {
       "exercise": "Упражнения",

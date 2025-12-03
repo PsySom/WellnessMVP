@@ -297,6 +297,8 @@
       "allCategories": "All Categories",
       "distribution": "Day Parts Distribution",
       "dropActivities": "Add activities from the left",
+      "weeklyRepetitions": "Weekly repetitions",
+      "daysPerWeek": "days/week",
       "presetCreated": "Preset created",
       "presetUpdated": "Preset updated",
       "presetDeleted": "Preset deleted",
@@ -306,8 +308,10 @@
     "dayParts": {
       "earlyMorning": "Morning",
       "lateMorning": "Late Morning",
+      "midday": "Midday",
       "afternoon": "Afternoon",
-      "evening": "Evening"
+      "evening": "Evening",
+      "night": "Night"
     },
     "categories": {
       "exercise": "Exercise",

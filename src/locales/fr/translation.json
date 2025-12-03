@@ -297,6 +297,8 @@
       "allCategories": "Toutes les catégories",
       "distribution": "Répartition par moments de la journée",
       "dropActivities": "Ajoutez des activités depuis la gauche",
+      "weeklyRepetitions": "Répétitions par semaine",
+      "daysPerWeek": "jours/sem.",
       "presetCreated": "Modèle créé",
       "presetUpdated": "Modèle mis à jour",
       "presetDeleted": "Modèle supprimé",
@@ -306,8 +308,10 @@
     "dayParts": {
       "earlyMorning": "Matin",
       "lateMorning": "Fin de matinée",
+      "midday": "Mi-journée",
       "afternoon": "Après-midi",
-      "evening": "Soir"
+      "evening": "Soir",
+      "night": "Nuit"
     },
     "categories": {
       "exercise": "Exercice",
