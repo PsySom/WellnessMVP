@@ -276,7 +276,10 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const categories = [...new Set(templates.map((t) => t.category))];
 
   const getTemplateByActivity = (activity: PresetActivity) => {
-    return templates.find((t) => t.id === activity.template_id || t.category === activity.category);
+    // First try to find by template_id, then fallback to category
+    const byId = templates.find((t) => t.id === activity.template_id);
+    if (byId) return byId;
+    return templates.find((t) => t.category === activity.category);
   };
 
   // Group activities by day part
