@@ -32,9 +32,16 @@ interface ActivityTemplate {
 interface PresetActivity {
   template_id: string;
   category: string;
-  day_part: 'early_morning' | 'late_morning' | 'afternoon' | 'evening';
+  day_part: 'early_morning' | 'late_morning' | 'midday' | 'afternoon' | 'evening' | 'night';
   duration: number;
   repetitions: number;
+}
+
+interface UserPresetData {
+  name: string;
+  emoji: string;
+  activities: PresetActivity[];
+  weekly_repetitions?: number;
 }
 
 interface UserPreset {
@@ -52,10 +59,12 @@ interface PresetEditModalProps {
 }
 
 const DAY_PARTS = [
-  { value: 'early_morning', labelKey: 'calendar.dayParts.earlyMorning' },
-  { value: 'late_morning', labelKey: 'calendar.dayParts.lateMorning' },
-  { value: 'afternoon', labelKey: 'calendar.dayParts.afternoon' },
-  { value: 'evening', labelKey: 'calendar.dayParts.evening' },
+  { value: 'early_morning', labelKey: 'calendar.dayParts.earlyMorning', emoji: '🌅' },
+  { value: 'late_morning', labelKey: 'calendar.dayParts.lateMorning', emoji: '☕' },
+  { value: 'midday', labelKey: 'calendar.dayParts.midday', emoji: '☀️' },
+  { value: 'afternoon', labelKey: 'calendar.dayParts.afternoon', emoji: '🌤️' },
+  { value: 'evening', labelKey: 'calendar.dayParts.evening', emoji: '🌆' },
+  { value: 'night', labelKey: 'calendar.dayParts.night', emoji: '🌙' },
 ];
 
 const EMOJI_OPTIONS = ['📋', '🔋', '🔄', '📈', '🌿', '✨', '🎯', '💪', '🧘', '📚', '🎨', '🏃', '🍎', '☕', '🌙'];
@@ -69,6 +78,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('📋');
   const [activities, setActivities] = useState<PresetActivity[]>([]);
+  const [weeklyRepetitions, setWeeklyRepetitions] = useState<number>(7);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
@@ -89,29 +99,36 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setName(preset.name);
       setEmoji(preset.emoji);
       setActivities(preset.activities || []);
+      setWeeklyRepetitions((preset as any).weekly_repetitions || 7);
     } else {
       setName('');
       setEmoji('📋');
       setActivities([]);
+      setWeeklyRepetitions(7);
     }
   }, [preset, open]);
 
   const saveMutation = useMutation({
-    mutationFn: async (data: { name: string; emoji: string; activities: PresetActivity[] }) => {
+    mutationFn: async (data: UserPresetData) => {
       if (!user) throw new Error('Not authenticated');
 
       const activitiesJson = JSON.parse(JSON.stringify(data.activities));
+      const presetData = { 
+        name: data.name, 
+        emoji: data.emoji, 
+        activities: activitiesJson,
+      };
 
       if (preset?.id) {
         const { error } = await supabase
           .from('user_presets')
-          .update({ name: data.name, emoji: data.emoji, activities: activitiesJson })
+          .update(presetData)
           .eq('id', preset.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('user_presets')
-          .insert([{ user_id: user.id, name: data.name, emoji: data.emoji, activities: activitiesJson }]);
+          .insert([{ user_id: user.id, ...presetData }]);
         if (error) throw error;
       }
     },
@@ -144,7 +161,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       toast.error(t('calendar.presets.nameRequired'));
       return;
     }
-    saveMutation.mutate({ name: name.trim(), emoji, activities });
+    saveMutation.mutate({ name: name.trim(), emoji, activities, weekly_repetitions: weeklyRepetitions });
   };
 
   const addActivity = (template: ActivityTemplate) => {
@@ -268,28 +285,29 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
           {/* Right: Day parts with activities */}
           <div className="flex flex-col space-y-2">
             <Label>{t('calendar.presets.distribution')}</Label>
-            <ScrollArea className="flex-1 h-[400px]">
-              <div className="space-y-3 pr-3">
+            <ScrollArea className="flex-1 h-[350px]">
+              <div className="space-y-2 pr-3">
                 {activitiesByDayPart.map((dayPart) => (
-                  <Card key={dayPart.value} className="p-3">
-                    <div className="flex items-center gap-2 mb-2">
+                  <Card key={dayPart.value} className="p-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm">{dayPart.emoji}</span>
                       <Badge variant="outline" className="text-xs">
                         {t(dayPart.labelKey)}
                       </Badge>
                       <span className="text-xs text-muted-foreground">({dayPart.activities.length})</span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {dayPart.activities.map((activity) => {
                         const template = getTemplateByActivity(activity);
                         return (
                           <div
                             key={activity.originalIndex}
-                            className="flex items-center gap-2 p-2 bg-muted/50 rounded-md"
+                            className="flex items-center gap-1 p-1.5 bg-muted/50 rounded-md"
                           >
-                            <GripVertical className="h-4 w-4 text-muted-foreground" />
+                            <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-sm">{template?.emoji}</span>
-                            <span className="text-sm flex-1 truncate">
+                            <span className="text-xs flex-1 truncate">
                               {template ? getLocalizedName(template) : activity.category}
                             </span>
 
@@ -297,13 +315,13 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                               value={activity.day_part}
                               onValueChange={(v) => updateActivity(activity.originalIndex, { day_part: v as any })}
                             >
-                              <SelectTrigger className="w-28 h-7 text-xs">
+                              <SelectTrigger className="w-24 h-6 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 {DAY_PARTS.map((dp) => (
                                   <SelectItem key={dp.value} value={dp.value}>
-                                    {t(dp.labelKey)}
+                                    {dp.emoji} {t(dp.labelKey)}
                                   </SelectItem>
                                 ))}
                               </SelectContent>
@@ -313,7 +331,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                               value={String(activity.repetitions)}
                               onValueChange={(v) => updateActivity(activity.originalIndex, { repetitions: parseInt(v) })}
                             >
-                              <SelectTrigger className="w-16 h-7 text-xs">
+                              <SelectTrigger className="w-14 h-6 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -328,7 +346,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                             <Button
                               size="icon"
                               variant="ghost"
-                              className="h-7 w-7"
+                              className="h-6 w-6"
                               onClick={() => removeActivity(activity.originalIndex)}
                             >
                               <X className="h-3 w-3" />
@@ -338,7 +356,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                       })}
 
                       {dayPart.activities.length === 0 && (
-                        <p className="text-xs text-muted-foreground text-center py-2">
+                        <p className="text-xs text-muted-foreground text-center py-1">
                           {t('calendar.presets.dropActivities')}
                         </p>
                       )}
@@ -347,6 +365,28 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                 ))}
               </div>
             </ScrollArea>
+
+            {/* Weekly repetitions setting */}
+            <Card className="p-3 mt-2">
+              <div className="flex items-center justify-between">
+                <Label className="text-sm">{t('calendar.presets.weeklyRepetitions')}</Label>
+                <Select
+                  value={String(weeklyRepetitions)}
+                  onValueChange={(v) => setWeeklyRepetitions(parseInt(v))}
+                >
+                  <SelectTrigger className="w-32 h-8">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                      <SelectItem key={n} value={String(n)}>
+                        {n} {t('calendar.presets.daysPerWeek')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </Card>
           </div>
         </div>
 
