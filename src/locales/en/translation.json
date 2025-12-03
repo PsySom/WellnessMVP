@@ -288,7 +288,26 @@
       "addedWithSkipped": "Added: {{added}}, skipped: {{skipped}}",
       "allCoreActivitiesExist": "All core activities already added for today",
       "addError": "Error adding activities",
-      "addedToday": "Added today"
+      "addedToday": "Added today",
+      "createPreset": "Create",
+      "editPreset": "Edit Preset",
+      "presetName": "Preset Name",
+      "namePlaceholder": "Enter name",
+      "selectActivities": "Select Activities",
+      "allCategories": "All Categories",
+      "distribution": "Day Parts Distribution",
+      "dropActivities": "Add activities from the left",
+      "presetCreated": "Preset created",
+      "presetUpdated": "Preset updated",
+      "presetDeleted": "Preset deleted",
+      "saveError": "Error saving",
+      "nameRequired": "Please enter a preset name"
+    },
+    "dayParts": {
+      "earlyMorning": "Morning",
+      "lateMorning": "Late Morning",
+      "afternoon": "Afternoon",
+      "evening": "Evening"
     },
     "categories": {
       "exercise": "Exercise",

@@ -288,7 +288,26 @@
       "addedWithSkipped": "Добавлено: {{added}}, пропущено: {{skipped}}",
       "allCoreActivitiesExist": "Все основные активности уже добавлены за сегодня",
       "addError": "Ошибка при добавлении активностей",
-      "addedToday": "Добавлено сегодня"
+      "addedToday": "Добавлено сегодня",
+      "createPreset": "Создать",
+      "editPreset": "Редактировать шаблон",
+      "presetName": "Название шаблона",
+      "namePlaceholder": "Введите название",
+      "selectActivities": "Выберите активности",
+      "allCategories": "Все категории",
+      "distribution": "Распределение по частям дня",
+      "dropActivities": "Добавьте активности слева",
+      "presetCreated": "Шаблон создан",
+      "presetUpdated": "Шаблон обновлён",
+      "presetDeleted": "Шаблон удалён",
+      "saveError": "Ошибка сохранения",
+      "nameRequired": "Введите название шаблона"
+    },
+    "dayParts": {
+      "earlyMorning": "Утро",
+      "lateMorning": "Первая половина дня",
+      "afternoon": "Вторая половина дня",
+      "evening": "Вечер"
     },
     "categories": {
       "exercise": "Упражнения",
