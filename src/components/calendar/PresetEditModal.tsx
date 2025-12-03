@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,10 @@ import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { getCategoryConfig, getCategoriesByType, getAllCategories, CategoryConfig } from '@/config/categoryConfig';
+import { getCategoryConfig } from '@/config/categoryConfig';
 import ImpactTypeFilter from '@/components/activity-templates/ImpactTypeFilter';
 
-interface CategoryItem {
+interface ActivityTemplate {
   id: string;
   name: string;
   name_en: string;
@@ -69,19 +69,6 @@ const DAY_PARTS = [
 
 const EMOJI_OPTIONS = ['📋', '🔋', '🔄', '📈', '🌿', '✨', '🎯', '💪', '🧘', '📚', '🎨', '🏃', '🍎', '☕', '🌙'];
 
-// Convert CategoryConfig to CategoryItem for display
-const convertCategoryToItem = (cat: CategoryConfig): CategoryItem => ({
-  id: cat.value,
-  name: cat.label.en,
-  name_en: cat.label.en,
-  name_ru: cat.label.ru,
-  name_fr: cat.label.fr,
-  category: cat.value,
-  impact_type: cat.recommendedType,
-  default_duration_minutes: cat.defaultDuration || 30,
-  emoji: cat.emoji,
-});
-
 export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
@@ -94,20 +81,23 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const [weeklyRepetitions, setWeeklyRepetitions] = useState<number>(7);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [draggedTemplate, setDraggedTemplate] = useState<CategoryItem | null>(null);
+  const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
   const [draggedActivityIndex, setDraggedActivityIndex] = useState<number | null>(null);
   const [dragOverDayPart, setDragOverDayPart] = useState<string | null>(null);
 
-  // Get all categories from categoryConfig.ts
-  const allCategories = useMemo(() => getAllCategories().map(convertCategoryToItem), []);
-  
-  // Get filtered categories based on selected impact type
-  const templates = useMemo(() => {
-    if (selectedImpactType === 'all') {
-      return allCategories;
-    }
-    return getCategoriesByType(selectedImpactType as any).map(convertCategoryToItem);
-  }, [selectedImpactType, allCategories]);
+  // Fetch templates from database
+  const { data: templates = [] } = useQuery({
+    queryKey: ['activity-templates'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('activity_templates')
+        .select('*')
+        .order('impact_type', { ascending: true })
+        .order('category', { ascending: true });
+      if (error) throw error;
+      return data as ActivityTemplate[];
+    },
+  });
 
   useEffect(() => {
     if (preset) {
@@ -124,7 +114,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   }, [preset, open]);
 
   // Drag handlers for templates (left side)
-  const handleTemplateDragStart = (e: React.DragEvent, template: CategoryItem) => {
+  const handleTemplateDragStart = (e: React.DragEvent, template: ActivityTemplate) => {
     setDraggedTemplate(template);
     setDraggedActivityIndex(null);
     e.dataTransfer.effectAllowed = 'copy';
@@ -249,7 +239,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
     saveMutation.mutate({ name: name.trim(), emoji, activities, weekly_repetitions: weeklyRepetitions });
   };
 
-  const addActivity = (template: CategoryItem) => {
+  const addActivity = (template: ActivityTemplate) => {
     const newActivity: PresetActivity = {
       template_id: template.id,
       category: template.category,
@@ -268,7 +258,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
     setActivities(activities.map((a, i) => (i === index ? { ...a, ...updates } : a)));
   };
 
-  const getLocalizedName = (template: CategoryItem) => {
+  const getLocalizedName = (template: ActivityTemplate) => {
     if (locale === 'ru' && template.name_ru) return template.name_ru;
     if (locale === 'fr') return template.name_fr;
     return template.name_en;
