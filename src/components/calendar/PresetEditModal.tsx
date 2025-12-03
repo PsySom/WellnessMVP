@@ -81,6 +81,9 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const [weeklyRepetitions, setWeeklyRepetitions] = useState<number>(7);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
+  const [draggedActivityIndex, setDraggedActivityIndex] = useState<number | null>(null);
+  const [dragOverDayPart, setDragOverDayPart] = useState<string | null>(null);
 
   const { data: templates = [] } = useQuery({
     queryKey: ['activity-templates'],
@@ -107,6 +110,76 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setWeeklyRepetitions(7);
     }
   }, [preset, open]);
+
+  // Drag handlers for templates (left side)
+  const handleTemplateDragStart = (e: React.DragEvent, template: ActivityTemplate) => {
+    setDraggedTemplate(template);
+    setDraggedActivityIndex(null);
+    e.dataTransfer.effectAllowed = 'copy';
+  };
+
+  // Drag handlers for existing activities (right side)
+  const handleActivityDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedActivityIndex(index);
+    setDraggedTemplate(null);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragEnd = () => {
+    setDraggedTemplate(null);
+    setDraggedActivityIndex(null);
+    setDragOverDayPart(null);
+  };
+
+  const handleDayPartDragOver = (e: React.DragEvent, dayPartValue: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = draggedTemplate ? 'copy' : 'move';
+    setDragOverDayPart(dayPartValue);
+  };
+
+  const handleDayPartDragLeave = () => {
+    setDragOverDayPart(null);
+  };
+
+  const handleDayPartDrop = (e: React.DragEvent, dayPartValue: string) => {
+    e.preventDefault();
+    setDragOverDayPart(null);
+
+    if (draggedTemplate) {
+      // Adding new activity from template
+      const newActivity: PresetActivity = {
+        template_id: draggedTemplate.id,
+        category: draggedTemplate.category,
+        day_part: dayPartValue as PresetActivity['day_part'],
+        duration: draggedTemplate.default_duration_minutes || 30,
+        repetitions: 1,
+      };
+      setActivities([...activities, newActivity]);
+    } else if (draggedActivityIndex !== null) {
+      // Moving existing activity to different day part
+      setActivities(activities.map((a, i) => 
+        i === draggedActivityIndex ? { ...a, day_part: dayPartValue as PresetActivity['day_part'] } : a
+      ));
+    }
+
+    handleDragEnd();
+  };
+
+  // Handle dropping back to left side (remove activity)
+  const handleRemoveZoneDragOver = (e: React.DragEvent) => {
+    if (draggedActivityIndex !== null) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+  };
+
+  const handleRemoveZoneDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (draggedActivityIndex !== null) {
+      removeActivity(draggedActivityIndex);
+    }
+    handleDragEnd();
+  };
 
   const saveMutation = useMutation({
     mutationFn: async (data: UserPresetData) => {
@@ -263,15 +336,25 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
               </Select>
             </div>
 
-            <ScrollArea className="flex-1 h-[300px]">
+            <ScrollArea 
+              className="flex-1 h-[300px]"
+              onDragOver={handleRemoveZoneDragOver}
+              onDrop={handleRemoveZoneDrop}
+            >
               <div className="space-y-1 pr-3">
                 {filteredTemplates.map((template) => (
                   <Card
                     key={template.id}
-                    className="p-2 cursor-pointer hover:bg-accent/50 transition-colors flex items-center justify-between"
+                    draggable
+                    onDragStart={(e) => handleTemplateDragStart(e, template)}
+                    onDragEnd={handleDragEnd}
+                    className={`p-2 cursor-grab hover:bg-accent/50 transition-all flex items-center justify-between ${
+                      draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
+                    }`}
                     onClick={() => addActivity(template)}
                   >
                     <div className="flex items-center gap-2 min-w-0">
+                      <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                       <span className="text-lg">{template.emoji}</span>
                       <span className="text-sm truncate">{getLocalizedName(template)}</span>
                     </div>
@@ -280,6 +363,11 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                 ))}
               </div>
             </ScrollArea>
+            {draggedActivityIndex !== null && (
+              <div className="mt-2 p-2 border-2 border-dashed border-destructive/50 rounded-md text-center text-xs text-muted-foreground">
+                {t('calendar.presets.dropToRemove')}
+              </div>
+            )}
           </div>
 
           {/* Right: Day parts with activities */}
@@ -288,7 +376,17 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
             <ScrollArea className="flex-1 h-[350px]">
               <div className="space-y-2 pr-3">
                 {activitiesByDayPart.map((dayPart) => (
-                  <Card key={dayPart.value} className="p-2">
+                  <Card 
+                    key={dayPart.value} 
+                    className={`p-2 transition-all ${
+                      dragOverDayPart === dayPart.value 
+                        ? 'ring-2 ring-primary bg-primary/5' 
+                        : ''
+                    }`}
+                    onDragOver={(e) => handleDayPartDragOver(e, dayPart.value)}
+                    onDragLeave={handleDayPartDragLeave}
+                    onDrop={(e) => handleDayPartDrop(e, dayPart.value)}
+                  >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-sm">{dayPart.emoji}</span>
                       <Badge variant="outline" className="text-xs">
@@ -303,7 +401,12 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                         return (
                           <div
                             key={activity.originalIndex}
-                            className="flex items-center gap-1 p-1.5 bg-muted/50 rounded-md"
+                            draggable
+                            onDragStart={(e) => handleActivityDragStart(e, activity.originalIndex)}
+                            onDragEnd={handleDragEnd}
+                            className={`flex items-center gap-1 p-1.5 bg-muted/50 rounded-md cursor-grab transition-all ${
+                              draggedActivityIndex === activity.originalIndex ? 'opacity-50 scale-95' : ''
+                            }`}
                           >
                             <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                             <span className="text-sm">{template?.emoji}</span>
