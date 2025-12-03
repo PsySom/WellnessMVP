@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
@@ -337,11 +337,11 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
             </div>
 
             <ScrollArea 
-              className="flex-1 h-[300px]"
+              className="flex-1 h-[280px] border rounded-md"
               onDragOver={handleRemoveZoneDragOver}
               onDrop={handleRemoveZoneDrop}
             >
-              <div className="space-y-1 pr-3">
+              <div className="space-y-1 p-2">
                 {filteredTemplates.map((template) => (
                   <Card
                     key={template.id}
@@ -362,6 +362,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                   </Card>
                 ))}
               </div>
+              <ScrollBar />
             </ScrollArea>
             {draggedActivityIndex !== null && (
               <div className="mt-2 p-2 border-2 border-dashed border-destructive/50 rounded-md text-center text-xs text-muted-foreground">
@@ -373,8 +374,8 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
           {/* Right: Day parts with activities */}
           <div className="flex flex-col space-y-2">
             <Label>{t('calendar.presets.distribution')}</Label>
-            <ScrollArea className="flex-1 h-[350px]">
-              <div className="space-y-2 pr-3">
+            <ScrollArea className="flex-1 h-[320px] border rounded-md">
+              <div className="space-y-2 p-2">
                 {activitiesByDayPart.map((dayPart) => (
                   <Card 
                     key={dayPart.value} 
@@ -467,6 +468,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                   </Card>
                 ))}
               </div>
+              <ScrollBar />
             </ScrollArea>
 
             {/* Weekly repetitions setting */}
