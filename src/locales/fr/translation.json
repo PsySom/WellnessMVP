@@ -304,7 +304,10 @@
       "presetUpdated": "Modèle mis à jour",
       "presetDeleted": "Modèle supprimé",
       "saveError": "Erreur de sauvegarde",
-      "nameRequired": "Veuillez entrer un nom de modèle"
+      "nameRequired": "Veuillez entrer un nom de modèle",
+      "noActivitiesAdded": "Veuillez ajouter au moins une activité",
+      "dropActivitiesHere": "Déposez les activités ici",
+      "noActivitiesFound": "Aucune activité trouvée"
     },
     "dayParts": {
       "earlyMorning": "Matin",
@@ -899,7 +902,12 @@
     },
     "category": "Catégorie",
     "impactType": "Type d'impact",
-    "defaultDuration": "Durée par défaut"
+    "defaultDuration": "Durée par défaut",
+    "allTypes": "Tous",
+    "restoring": "Réparateurs",
+    "depleting": "Épuisants",
+    "mixed": "Mixtes",
+    "neutral": "Neutres"
   },
   "trackerHistory": {
     "title": "Historique de l'humeur",

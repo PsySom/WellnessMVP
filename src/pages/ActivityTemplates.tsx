@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { GripVertical, Plus, Save, Trash2 } from 'lucide-react';
+import { GripVertical, Plus, Save, Trash2, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -51,6 +51,7 @@ const ActivityTemplates = () => {
   const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [activities, setActivities] = useState<PresetActivity[]>([]);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
@@ -204,7 +205,17 @@ const ActivityTemplates = () => {
   };
 
   const filteredTemplates = templates.filter((t) => {
-    return selectedImpactType === 'all' || t.impact_type === selectedImpactType;
+    const matchesType = selectedImpactType === 'all' || t.impact_type === selectedImpactType;
+    if (!matchesType) return false;
+    
+    if (!searchQuery.trim()) return true;
+    
+    const search = searchQuery.toLowerCase();
+    const localizedName = getLocalizedName(t).toLowerCase();
+    return localizedName.includes(search) || 
+           t.name_en.toLowerCase().includes(search) ||
+           (t.name_ru?.toLowerCase().includes(search) ?? false) ||
+           t.name_fr.toLowerCase().includes(search);
   });
 
   const getTemplateByActivity = (activity: PresetActivity) => {
@@ -222,6 +233,7 @@ const ActivityTemplates = () => {
 
   const clearAll = () => {
     setName('');
+    setSearchQuery('');
     setActivities([]);
   };
 
@@ -255,6 +267,17 @@ const ActivityTemplates = () => {
                 onChange={(e) => setName(e.target.value)} 
                 placeholder={t('calendar.presets.namePlaceholder')}
                 className="mt-1.5"
+              />
+            </div>
+
+            {/* Search activities */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={t('activityTemplates.searchPlaceholder')}
+                className="pl-10"
               />
             </div>
 
