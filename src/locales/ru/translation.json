@@ -304,7 +304,10 @@
       "presetUpdated": "Шаблон обновлён",
       "presetDeleted": "Шаблон удалён",
       "saveError": "Ошибка сохранения",
-      "nameRequired": "Введите название шаблона"
+      "nameRequired": "Введите название шаблона",
+      "noActivitiesAdded": "Добавьте хотя бы одну активность",
+      "dropActivitiesHere": "Перетащите активности сюда",
+      "noActivitiesFound": "Активности не найдены"
     },
     "dayParts": {
       "earlyMorning": "Утро",
@@ -902,7 +905,12 @@
     },
     "category": "Категория",
     "impactType": "Тип воздействия",
-    "defaultDuration": "Длительность по умолчанию"
+    "defaultDuration": "Длительность по умолчанию",
+    "allTypes": "Все",
+    "restoring": "Восстанавливающие",
+    "depleting": "Истощающие",
+    "mixed": "Смешанные",
+    "neutral": "Нейтральные"
   },
   "trackerHistory": {
     "title": "История настроения",

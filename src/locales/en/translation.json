@@ -304,7 +304,10 @@
       "presetUpdated": "Preset updated",
       "presetDeleted": "Preset deleted",
       "saveError": "Error saving",
-      "nameRequired": "Please enter a preset name"
+      "nameRequired": "Please enter a preset name",
+      "noActivitiesAdded": "Please add at least one activity",
+      "dropActivitiesHere": "Drop activities here",
+      "noActivitiesFound": "No activities found"
     },
     "dayParts": {
       "earlyMorning": "Morning",
@@ -900,7 +903,12 @@
     },
     "category": "Category",
     "impactType": "Impact Type",
-    "defaultDuration": "Default Duration"
+    "defaultDuration": "Default Duration",
+    "allTypes": "All",
+    "restoring": "Restoring",
+    "depleting": "Depleting",
+    "mixed": "Mixed",
+    "neutral": "Neutral"
   },
   "trackerHistory": {
     "title": "Mood History",
