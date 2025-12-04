@@ -364,7 +364,29 @@ const ActivityTemplates = () => {
           {/* Right: Day parts with activities */}
           <div className="flex flex-col space-y-3">
             <Label className="text-sm font-medium">{t('calendar.presets.distribution')}</Label>
-            <ScrollArea className="flex-1 min-h-[300px] lg:h-[450px] border rounded-lg">
+            
+            {/* Action buttons below distribution label */}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setActivities([])} 
+                disabled={activities.length === 0}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('calendar.presets.clearDayFields')}
+              </Button>
+              <Button 
+                size="sm"
+                onClick={handleSave} 
+                disabled={saveMutation.isPending || !name.trim() || activities.length === 0}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {t('calendar.presets.saveTemplate')}
+              </Button>
+            </div>
+            
+            <ScrollArea className="flex-1 min-h-[300px] lg:h-[400px] border rounded-lg">
               <div className="space-y-2 p-3">
                 {activitiesByDayPart.map((dayPart) => (
                   <Card 

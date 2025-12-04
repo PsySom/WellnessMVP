@@ -296,6 +296,8 @@
       "selectActivities": "Sélectionnez les activités",
       "allCategories": "Toutes les catégories",
       "distribution": "Répartition par moments de la journée",
+      "clearDayFields": "Effacer les champs",
+      "saveTemplate": "Enregistrer le modèle",
       "dropActivities": "Ajoutez des activités depuis la gauche",
       "dropToRemove": "Déposer ici pour supprimer",
       "weeklyRepetitions": "Répétitions par semaine",
