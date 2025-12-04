@@ -296,6 +296,8 @@
       "selectActivities": "Select Activities",
       "allCategories": "All Categories",
       "distribution": "Day Parts Distribution",
+      "clearDayFields": "Clear day fields",
+      "saveTemplate": "Save template",
       "dropActivities": "Add activities from the left",
       "dropToRemove": "Drop here to remove",
       "weeklyRepetitions": "Weekly repetitions",
