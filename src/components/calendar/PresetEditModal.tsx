@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
@@ -337,7 +337,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
               onDragOver={handleRemoveZoneDragOver}
               onDrop={handleRemoveZoneDrop}
             >
-              <div className="space-y-1.5 p-2">
+              <div className="space-y-1.5 p-2 pr-4">
                 {filteredTemplates.length === 0 ? (
                   <div className="text-center text-sm text-muted-foreground py-8">
                     {t('calendar.presets.noActivitiesFound')}
@@ -362,6 +362,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                   ))
                 )}
               </div>
+              <ScrollBar orientation="vertical" className="w-2" />
             </ScrollArea>
 
             {/* Drop to remove zone */}
