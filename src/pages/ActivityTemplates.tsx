@@ -365,28 +365,7 @@ const ActivityTemplates = () => {
           <div className="flex flex-col space-y-3">
             <Label className="text-sm font-medium">{t('calendar.presets.distribution')}</Label>
             
-            {/* Action buttons below distribution label */}
-            <div className="flex gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setActivities([])} 
-                disabled={activities.length === 0}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t('calendar.presets.clearDayFields')}
-              </Button>
-              <Button 
-                size="sm"
-                onClick={handleSave} 
-                disabled={saveMutation.isPending || !name.trim() || activities.length === 0}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {t('calendar.presets.saveTemplate')}
-              </Button>
-            </div>
-            
-            <ScrollArea className="flex-1 min-h-[300px] lg:h-[400px] border rounded-lg">
+            <ScrollArea className="flex-1 min-h-[300px] lg:h-[350px] border rounded-lg">
               <div className="space-y-2 p-3">
                 {activitiesByDayPart.map((dayPart) => (
                   <Card 
@@ -466,6 +445,27 @@ const ActivityTemplates = () => {
               </div>
               <ScrollBar orientation="vertical" className="w-2" />
             </ScrollArea>
+            
+            {/* Action buttons below day parts list */}
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setActivities([])} 
+                disabled={activities.length === 0}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t('calendar.presets.clearDayFields')}
+              </Button>
+              <Button 
+                size="sm"
+                onClick={handleSave} 
+                disabled={saveMutation.isPending || !name.trim() || activities.length === 0}
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {t('calendar.presets.saveTemplate')}
+              </Button>
+            </div>
           </div>
         </div>
       </div>
