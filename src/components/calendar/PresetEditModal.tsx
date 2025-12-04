@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
@@ -14,8 +14,6 @@ import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { getCategoryConfig } from '@/config/categoryConfig';
-import ImpactTypeFilter from '@/components/activity-templates/ImpactTypeFilter';
 
 interface ActivityTemplate {
   id: string;
@@ -67,8 +65,6 @@ const DAY_PARTS = [
   { value: 'night', labelKey: 'calendar.dayParts.night', emoji: '🌙' },
 ];
 
-const EMOJI_OPTIONS = ['📋', '🔋', '🔄', '📈', '🌿', '✨', '🎯', '💪', '🧘', '📚', '🎨', '🏃', '🍎', '☕', '🌙'];
-
 export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
@@ -80,7 +76,6 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const [activities, setActivities] = useState<PresetActivity[]>([]);
   const [weeklyRepetitions, setWeeklyRepetitions] = useState<number>(7);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
   const [draggedActivityIndex, setDraggedActivityIndex] = useState<number | null>(null);
   const [dragOverDayPart, setDragOverDayPart] = useState<string | null>(null);
@@ -264,18 +259,9 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
     return template.name_en;
   };
 
-  const getCategoryLabel = (category: string) => {
-    const config = getCategoryConfig(category);
-    return config?.label[locale as 'en' | 'ru' | 'fr'] || category;
-  };
-
   const filteredTemplates = templates.filter((t) => {
-    const matchesImpact = selectedImpactType === 'all' || t.impact_type === selectedImpactType;
-    const matchesCategory = selectedCategory === 'all' || t.category === selectedCategory;
-    return matchesImpact && matchesCategory;
+    return selectedImpactType === 'all' || t.impact_type === selectedImpactType;
   });
-
-  const categories = [...new Set(templates.map((t) => t.category))];
 
   const getTemplateByActivity = (activity: PresetActivity) => {
     // First try to find by template_id, then fallback to category
@@ -303,74 +289,84 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
 
         <div className="flex-1 overflow-hidden grid grid-cols-2 gap-4">
           {/* Left: Template selector */}
-          <div className="flex flex-col space-y-3">
-            <div className="flex gap-2 items-end">
-              <div className="flex-1">
-                <Label>{t('calendar.presets.presetName')}</Label>
-                <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('calendar.presets.namePlaceholder')} />
+          <div className="flex flex-col space-y-4">
+            {/* Template name */}
+            <div>
+              <Label className="text-sm font-medium">{t('calendar.presets.presetName')}</Label>
+              <Input 
+                value={name} 
+                onChange={(e) => setName(e.target.value)} 
+                placeholder={t('calendar.presets.namePlaceholder')}
+                className="mt-1.5"
+              />
+            </div>
+
+            {/* Select activities section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium">{t('calendar.presets.selectActivities')}</Label>
+              
+              {/* Impact type filter badges */}
+              <div className="flex flex-wrap gap-2">
+                {[
+                  { value: 'all', emoji: '📋', labelKey: 'activityTemplates.allTypes' },
+                  { value: 'restoring', emoji: '🔋', labelKey: 'activityTemplates.restoring' },
+                  { value: 'depleting', emoji: '⚡', labelKey: 'activityTemplates.depleting' },
+                  { value: 'mixed', emoji: '🔄', labelKey: 'activityTemplates.mixed' },
+                  { value: 'neutral', emoji: '⚖️', labelKey: 'activityTemplates.neutral' },
+                ].map((type) => (
+                  <Badge
+                    key={type.value}
+                    variant={selectedImpactType === type.value ? 'default' : 'outline'}
+                    className={`cursor-pointer px-3 py-1.5 text-sm transition-all hover:scale-105 ${
+                      selectedImpactType === type.value 
+                        ? 'bg-primary text-primary-foreground' 
+                        : 'hover:bg-accent'
+                    }`}
+                    onClick={() => setSelectedImpactType(type.value)}
+                  >
+                    <span className="mr-1.5">{type.emoji}</span>
+                    {t(type.labelKey)}
+                  </Badge>
+                ))}
               </div>
-              <Select value={emoji} onValueChange={setEmoji}>
-                <SelectTrigger className="w-16">
-                  <SelectValue>{emoji}</SelectValue>
-                </SelectTrigger>
-                <SelectContent>
-                  {EMOJI_OPTIONS.map((e) => (
-                    <SelectItem key={e} value={e}>
-                      {e}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label>{t('calendar.presets.selectActivities')}</Label>
-              <ImpactTypeFilter selectedImpactType={selectedImpactType} onImpactTypeChange={setSelectedImpactType} />
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t('calendar.presets.allCategories')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('calendar.presets.allCategories')}</SelectItem>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat} value={cat}>
-                      {getCategoryLabel(cat)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
+            {/* Scrollable activity list */}
             <ScrollArea 
-              className="flex-1 h-[280px] border rounded-md"
+              className="flex-1 h-[260px] border rounded-lg bg-muted/20"
               onDragOver={handleRemoveZoneDragOver}
               onDrop={handleRemoveZoneDrop}
             >
-              <div className="space-y-1 p-2">
-                {filteredTemplates.map((template) => (
-                  <Card
-                    key={template.id}
-                    draggable
-                    onDragStart={(e) => handleTemplateDragStart(e, template)}
-                    onDragEnd={handleDragEnd}
-                    className={`p-2 cursor-grab hover:bg-accent/50 transition-all flex items-center justify-between ${
-                      draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
-                    }`}
-                    onClick={() => addActivity(template)}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-lg">{template.emoji}</span>
-                      <span className="text-sm truncate">{getLocalizedName(template)}</span>
-                    </div>
-                    <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                  </Card>
-                ))}
+              <div className="space-y-1.5 p-2">
+                {filteredTemplates.length === 0 ? (
+                  <div className="text-center text-sm text-muted-foreground py-8">
+                    {t('calendar.presets.noActivitiesFound')}
+                  </div>
+                ) : (
+                  filteredTemplates.map((template) => (
+                    <Card
+                      key={template.id}
+                      draggable
+                      onDragStart={(e) => handleTemplateDragStart(e, template)}
+                      onDragEnd={handleDragEnd}
+                      className={`p-2.5 cursor-grab hover:bg-accent/50 transition-all flex items-center gap-3 ${
+                        draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
+                      }`}
+                      onClick={() => addActivity(template)}
+                    >
+                      <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-xl">{template.emoji}</span>
+                      <span className="text-sm font-medium flex-1 truncate">{getLocalizedName(template)}</span>
+                      <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0 opacity-60" />
+                    </Card>
+                  ))
+                )}
               </div>
-              <ScrollBar />
             </ScrollArea>
+
+            {/* Drop to remove zone */}
             {draggedActivityIndex !== null && (
-              <div className="mt-2 p-2 border-2 border-dashed border-destructive/50 rounded-md text-center text-xs text-muted-foreground">
+              <div className="p-3 border-2 border-dashed border-destructive/50 rounded-lg text-center text-sm text-muted-foreground bg-destructive/5">
                 {t('calendar.presets.dropToRemove')}
               </div>
             )}
@@ -473,7 +469,6 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                   </Card>
                 ))}
               </div>
-              <ScrollBar />
             </ScrollArea>
 
             {/* Weekly repetitions setting */}
