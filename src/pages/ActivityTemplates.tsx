@@ -312,44 +312,46 @@ const ActivityTemplates = () => {
             </div>
 
             {/* Scrollable activity list */}
-            <ScrollArea 
-              className="flex-1 min-h-[300px] lg:h-[400px] border rounded-lg bg-muted/20"
-              onDragOver={handleRemoveZoneDragOver}
-              onDrop={handleRemoveZoneDrop}
-            >
-              <div className="space-y-1.5 p-3 pr-4">
-                {isLoading ? (
-                  <div className="space-y-2">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />
-                    ))}
-                  </div>
-                ) : filteredTemplates.length === 0 ? (
-                  <div className="text-center text-sm text-muted-foreground py-8">
-                    {t('calendar.presets.noActivitiesFound')}
-                  </div>
-                ) : (
-                  filteredTemplates.map((template) => (
-                    <Card
-                      key={template.id}
-                      draggable
-                      onDragStart={(e) => handleTemplateDragStart(e, template)}
-                      onDragEnd={handleDragEnd}
-                      className={`p-3 cursor-grab hover:bg-accent/50 transition-all flex items-center gap-3 ${
-                        draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
-                      }`}
-                      onClick={() => addActivity(template)}
-                    >
-                      <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                      <span className="text-xl">{template.emoji}</span>
-                      <span className="text-sm font-medium flex-1 truncate">{getLocalizedName(template)}</span>
-                      <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0 opacity-60" />
-                    </Card>
-                  ))
-                )}
-              </div>
-              <ScrollBar orientation="vertical" className="w-2" />
-            </ScrollArea>
+            <div className="flex-1 min-h-0 overflow-hidden">
+              <ScrollArea 
+                className="h-full max-h-[400px] border rounded-lg bg-muted/20"
+                onDragOver={handleRemoveZoneDragOver}
+                onDrop={handleRemoveZoneDrop}
+              >
+                <div className="space-y-1.5 p-3 pr-4">
+                  {isLoading ? (
+                    <div className="space-y-2">
+                      {[...Array(6)].map((_, i) => (
+                        <div key={i} className="h-12 bg-muted animate-pulse rounded-lg" />
+                      ))}
+                    </div>
+                  ) : filteredTemplates.length === 0 ? (
+                    <div className="text-center text-sm text-muted-foreground py-8">
+                      {t('calendar.presets.noActivitiesFound')}
+                    </div>
+                  ) : (
+                    filteredTemplates.map((template) => (
+                      <Card
+                        key={template.id}
+                        draggable
+                        onDragStart={(e) => handleTemplateDragStart(e, template)}
+                        onDragEnd={handleDragEnd}
+                        className={`p-3 cursor-grab hover:bg-accent/50 transition-all flex items-center gap-3 ${
+                          draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
+                        }`}
+                        onClick={() => addActivity(template)}
+                      >
+                        <GripVertical className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <span className="text-xl">{template.emoji}</span>
+                        <span className="text-sm font-medium flex-1 truncate">{getLocalizedName(template)}</span>
+                        <Plus className="h-4 w-4 text-muted-foreground flex-shrink-0 opacity-60" />
+                      </Card>
+                    ))
+                  )}
+                </div>
+                <ScrollBar orientation="vertical" className="w-2.5" />
+              </ScrollArea>
+            </div>
 
             {/* Drop to remove zone */}
             {draggedActivityIndex !== null && (
