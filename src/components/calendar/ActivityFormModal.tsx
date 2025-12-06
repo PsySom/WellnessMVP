@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
-import { getCategoriesByType, getGroupsForType, RESTORING_GROUPS } from '@/config/categoryConfig';
+import { getCategoriesByType, getGroupsForType, getCategoryConfig, getAllCategories, RESTORING_GROUPS } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { format } from 'date-fns';
 import { CalendarIcon, Star } from 'lucide-react';
@@ -77,6 +77,14 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     return getCategoriesByType(formData.impact_type);
   }, [formData.impact_type]);
 
+  // Get label for the currently selected category (for display in SelectValue)
+  const getCurrentCategoryLabel = useMemo(() => {
+    const config = getCategoryConfig(formData.category);
+    if (!config) return formData.category;
+    const lang = i18n.language as 'en' | 'ru' | 'fr';
+    return `${config.emoji} ${config.label[lang] || config.label.en}`;
+  }, [formData.category, i18n.language]);
+
   // Auto-fill duration when category with default duration is selected
   useEffect(() => {
     const categoryConfig = availableCategories.find(cat => cat.value === formData.category);
@@ -85,8 +93,10 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     }
   }, [formData.category, availableCategories, activity]);
 
-  // Auto-update category when impact type changes
+  // Auto-update category when impact type changes (only for new activities, not editing)
   useEffect(() => {
+    if (isEditing) return; // Don't auto-change category when editing
+    
     const categories = getCategoriesByType(formData.impact_type);
     if (categories.length > 0) {
       const currentCategoryExists = categories.some(cat => cat.value === formData.category);
@@ -94,7 +104,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         setFormData(prev => ({ ...prev, category: categories[0].value }));
       }
     }
-  }, [formData.impact_type, formData.category]);
+  }, [formData.impact_type, formData.category, isEditing]);
 
   useEffect(() => {
     if (open) {
@@ -409,43 +419,42 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           <div>
             <Label>{t('calendar.form.category')}</Label>
             <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectTrigger><SelectValue>{getCurrentCategoryLabel}</SelectValue></SelectTrigger>
               <SelectContent className="bg-background border shadow-lg z-50 max-h-[400px] overflow-y-auto">
                 {(() => {
+                  // Use all categories to allow user to select any category
+                  const allCategories = getAllCategories();
                   const groups = getGroupsForType(formData.impact_type);
                   
-                  if (groups.length > 0) {
-                    // Render with groups
-                    return groups.map((group, groupIndex) => {
-                      const groupCategories = availableCategories.filter(cat => cat.group === group.id);
-                      if (groupCategories.length === 0) return null;
-                      
-                      return (
-                        <React.Fragment key={group.id}>
-                          {groupIndex > 0 && (
-                            <div className="h-px bg-border my-2 mx-2" />
-                          )}
-                          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-                            {group.label[i18n.language as 'en' | 'ru' | 'fr'] || group.label.en}
-                          </div>
-                          {groupCategories.map(cat => (
-                            <SelectItem key={cat.value} value={cat.value}>
-                              <span className="mr-2">{cat.emoji}</span>
-                              {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
-                            </SelectItem>
-                          ))}
-                        </React.Fragment>
-                      );
-                    });
-                  }
+                  // Group categories by impact type for better organization
+                  const impactGroups = [
+                    { id: 'restoring', label: { en: 'Restoring', ru: 'Восстанавливающие', fr: 'Restaurateur' } },
+                    { id: 'depleting', label: { en: 'Depleting', ru: 'Истощающие', fr: 'Épuisant' } },
+                    { id: 'mixed', label: { en: 'Mixed', ru: 'Смешанные', fr: 'Mixte' } },
+                    { id: 'neutral', label: { en: 'Neutral', ru: 'Нейтральные', fr: 'Neutre' } },
+                  ];
                   
-                  // Render without groups
-                  return availableCategories.map(cat => (
-                    <SelectItem key={cat.value} value={cat.value}>
-                      <span className="mr-2">{cat.emoji}</span>
-                      {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
-                    </SelectItem>
-                  ));
+                  return impactGroups.map((impactGroup, groupIndex) => {
+                    const groupCategories = allCategories.filter(cat => cat.recommendedType === impactGroup.id);
+                    if (groupCategories.length === 0) return null;
+                    
+                    return (
+                      <React.Fragment key={impactGroup.id}>
+                        {groupIndex > 0 && (
+                          <div className="h-px bg-border my-2 mx-2" />
+                        )}
+                        <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+                          {impactGroup.label[i18n.language as 'en' | 'ru' | 'fr'] || impactGroup.label.en}
+                        </div>
+                        {groupCategories.map(cat => (
+                          <SelectItem key={cat.value} value={cat.value}>
+                            <span className="mr-2">{cat.emoji}</span>
+                            {cat.label[i18n.language as 'en' | 'ru' | 'fr'] || cat.label.en}
+                          </SelectItem>
+                        ))}
+                      </React.Fragment>
+                    );
+                  });
                 })()}
               </SelectContent>
             </Select>
