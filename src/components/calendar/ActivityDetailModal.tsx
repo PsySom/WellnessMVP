@@ -44,8 +44,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 const IMPACT_COLORS: Record<string, string> = {
   restoring: 'bg-green-500',
   depleting: 'bg-red-500',
-  mixed: 'bg-orange-500',
-  neutral: 'bg-blue-500'
+  mixed: 'bg-blue-500',
+  neutral: 'bg-orange-500'
 };
 
 export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: ActivityDetailModalProps) => {
@@ -76,7 +76,8 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
     }
   };
 
-  const emoji = CATEGORY_EMOJIS[activity.category] || '📌';
+  // Use emoji from activity if available, fallback to category emoji
+  const emoji = activity.emoji || CATEGORY_EMOJIS[activity.category] || '📌';
   const impactColor = IMPACT_COLORS[activity.impact_type] || 'bg-muted';
 
   return (

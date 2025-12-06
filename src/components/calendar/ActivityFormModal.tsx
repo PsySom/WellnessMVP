@@ -229,7 +229,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         
         if (formData.repetition_frequency === 'daily' && count > 1) {
           // Create multiple activities in the same day with different time slots
-          const timeSlots = ['early_morning', 'late_morning', 'afternoon', 'evening'];
+          const timeSlots = ['early_morning', 'late_morning', 'midday', 'afternoon', 'evening', 'night'];
           for (let i = 0; i < count; i++) {
             const slotIndex = i % timeSlots.length;
             const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
