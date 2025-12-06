@@ -273,7 +273,29 @@
       "saving": "Enregistrement...",
       "saveError": "Échec de l'enregistrement de l'activité",
       "updateSuccess": "Activité mise à jour",
-      "createSuccess": "Activité créée"
+      "createSuccess": "Activité créée",
+      "recurrence": {
+        "none": "Ne pas répéter",
+        "daily": "Chaque jour à la même heure",
+        "weekly": "Chaque semaine le même jour",
+        "monthly": "Chaque mois",
+        "custom": "Personnalisé...",
+        "editCustom": "Modifier la récurrence",
+        "customTitle": "Répéter l'événement",
+        "repeatEvery": "Répéter tous les",
+        "ending": "Fin",
+        "never": "Jamais",
+        "endDate": "À la date",
+        "after": "Après",
+        "occurrences": "occurrences",
+        "done": "Terminé",
+        "units": {
+          "day": "jour",
+          "week": "semaine",
+          "month": "mois",
+          "year": "an"
+        }
+      }
     },
     "presets": {
       "title": "Modèles d'activités",
