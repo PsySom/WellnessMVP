@@ -123,11 +123,6 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
                 <Skeleton key={i} className="h-20 w-full" />
               ))}
             </div>
-          ) : selectedDayActivities.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <p className="text-muted-foreground mb-2">{t('calendar.noActivitiesYet')}</p>
-              <p className="text-sm text-muted-foreground">{t('calendar.addOneToStart')}</p>
-            </div>
           ) : (
             <>
               {TIME_SLOTS.map((slot) => {
