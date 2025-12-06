@@ -123,7 +123,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
 
       if (repetitionConfig.frequency === 'daily' && count > 1) {
         // Для нескольких раз в день - распределяем по слотам
-        const timeSlots = ['early_morning', 'late_morning', 'afternoon', 'evening'];
+        const timeSlots = ['early_morning', 'late_morning', 'midday', 'afternoon', 'evening', 'night'];
         for (let i = 0; i < count; i++) {
           const slotIndex = i % timeSlots.length;
           const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
