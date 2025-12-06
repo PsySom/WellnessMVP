@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 interface CalendarViewProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
+  onDayClick?: (date: Date) => void;
 }
 
 const IMPACT_COLORS: Record<string, string> = {
@@ -17,7 +18,7 @@ const IMPACT_COLORS: Record<string, string> = {
   mixed: 'bg-blue-500'
 };
 
-export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) => {
+export const CalendarView = ({ currentDate, onDateChange, onDayClick }: CalendarViewProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [activities, setActivities] = useState<any[]>([]);
@@ -128,7 +129,10 @@ export const CalendarView = ({ currentDate, onDateChange }: CalendarViewProps) =
             return (
               <button
                 key={day.toString()}
-                onClick={() => onDateChange(day)}
+                onClick={() => {
+                  onDateChange(day);
+                  onDayClick?.(day);
+                }}
                 className={`
                   relative aspect-square p-1 sm:p-2 md:p-3 lg:p-4 rounded-md sm:rounded-lg border transition-all duration-300 hover:scale-105 hover:shadow-lg
                   ${isCurrentMonth ? 'border-border hover:border-primary/50' : 'border-transparent'}
