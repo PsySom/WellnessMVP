@@ -273,7 +273,29 @@
       "saving": "Saving...",
       "saveError": "Failed to save activity",
       "updateSuccess": "Activity updated",
-      "createSuccess": "Activity created"
+      "createSuccess": "Activity created",
+      "recurrence": {
+        "none": "Don't repeat",
+        "daily": "Every day at the same time",
+        "weekly": "Every week on this day",
+        "monthly": "Every month",
+        "custom": "Custom...",
+        "editCustom": "Edit recurrence",
+        "customTitle": "Repeat event",
+        "repeatEvery": "Repeat every",
+        "ending": "Ending",
+        "never": "Never",
+        "endDate": "On date",
+        "after": "After",
+        "occurrences": "occurrences",
+        "done": "Done",
+        "units": {
+          "day": "day",
+          "week": "week",
+          "month": "month",
+          "year": "year"
+        }
+      }
     },
     "presets": {
       "title": "Activity Presets",

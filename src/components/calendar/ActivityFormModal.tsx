@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -14,12 +14,12 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { getCategoriesByType, getGroupsForType, getCategoryConfig, getAllCategories, RESTORING_GROUPS } from '@/config/categoryConfig';
 import { TimeSlot, TIME_SLOTS, getDefaultTimeForSlot } from '@/utils/timeSlots';
-import { format } from 'date-fns';
-import { CalendarIcon, Star } from 'lucide-react';
+import { format, addDays, addWeeks, addMonths, addYears, getDay } from 'date-fns';
+import { CalendarIcon, Star, ChevronUp, ChevronDown } from 'lucide-react';
 import { z } from 'zod';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { addDays, addWeeks } from 'date-fns';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface ActivityFormModalProps {
   open: boolean;
@@ -69,9 +69,16 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     reminder_minutes_before: 15,
     timeSlot: 'anytime' as TimeSlot | 'exact_time' | 'anytime',
     emoji: '📌',
-    repetition_frequency: 'daily' as 'daily' | 'weekly' | 'monthly',
-    repetition_count: 1,
+    // New repetition logic
+    recurrence_type: 'none' as 'none' | 'daily' | 'weekly' | 'monthly' | 'custom',
+    custom_interval: 1,
+    custom_unit: 'day' as 'day' | 'week' | 'month' | 'year',
+    custom_end_type: 'never' as 'never' | 'date' | 'count',
+    custom_end_date: addMonths(new Date(), 1),
+    custom_end_count: 30,
   });
+  
+  const [customRecurrenceOpen, setCustomRecurrenceOpen] = useState(false);
 
   const availableCategories = useMemo(() => {
     return getCategoriesByType(formData.impact_type);
@@ -109,7 +116,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
   useEffect(() => {
     if (open) {
       if (activity) {
-        const repetitionConfig = activity.repetition_config || { frequency: 'daily', count: 1 };
+        const repetitionConfig = activity.repetition_config || {};
         setFormData({
           title: activity.title || '',
           description: activity.description || '',
@@ -125,14 +132,17 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           reminder_minutes_before: activity.reminder_minutes_before || 15,
           timeSlot: activity.start_time ? 'exact_time' : 'anytime',
           emoji: activity.emoji || '📌',
-          repetition_frequency: repetitionConfig.frequency || 'daily',
-          repetition_count: repetitionConfig.count || 1,
+          recurrence_type: repetitionConfig.recurrence_type || 'none',
+          custom_interval: repetitionConfig.custom_interval || 1,
+          custom_unit: repetitionConfig.custom_unit || 'day',
+          custom_end_type: repetitionConfig.custom_end_type || 'never',
+          custom_end_date: repetitionConfig.custom_end_date ? new Date(repetitionConfig.custom_end_date) : addMonths(new Date(), 1),
+          custom_end_count: repetitionConfig.custom_end_count || 30,
         });
       } else if (initialValues) {
         const impactType = initialValues.impact_type || 'neutral';
         const categories = getCategoriesByType(impactType);
         const defaultCategory = categories.length > 0 ? categories[0].value : 'other';
-        const repetitionConfig = initialValues.repetition_config || { frequency: 'daily', count: 1 };
         
         setFormData(prev => ({
           ...prev,
@@ -141,8 +151,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           category: initialValues.category || defaultCategory,
           timeSlot: initialValues.start_time ? 'exact_time' : 'anytime',
           emoji: initialValues.emoji || '📌',
-          repetition_frequency: repetitionConfig.frequency || 'daily',
-          repetition_count: repetitionConfig.count || 1,
+          recurrence_type: 'none',
+          custom_interval: 1,
+          custom_unit: 'day',
+          custom_end_type: 'never',
+          custom_end_date: addMonths(new Date(), 1),
+          custom_end_count: 30,
         }));
       } else {
         // Initialize with first available category for neutral type
@@ -152,7 +166,13 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
         setFormData(prev => ({ 
           ...prev, 
           date: defaultDate || new Date(),
-          category: defaultCategory 
+          category: defaultCategory,
+          recurrence_type: 'none',
+          custom_interval: 1,
+          custom_unit: 'day',
+          custom_end_type: 'never',
+          custom_end_date: addMonths(new Date(), 1),
+          custom_end_count: 30,
         }));
       }
     }
@@ -193,8 +213,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       impact_type: formData.impact_type,
       category: formData.category,
       priority: formData.priority,
-      is_recurring: formData.is_recurring,
-      recurrence_pattern: formData.is_recurring ? formData.recurrence_pattern : null,
+      is_recurring: formData.recurrence_type !== 'none',
+      recurrence_pattern: formData.recurrence_type !== 'none' ? formData.recurrence_type : null,
       reminder_enabled: formData.reminder_enabled,
       reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
       user_id: user!.id,
@@ -202,8 +222,12 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       test_id: testId || null,
       emoji: formData.emoji || '📌',
       repetition_config: {
-        frequency: formData.repetition_frequency,
-        count: formData.repetition_count
+        recurrence_type: formData.recurrence_type,
+        custom_interval: formData.custom_interval,
+        custom_unit: formData.custom_unit,
+        custom_end_type: formData.custom_end_type,
+        custom_end_date: formData.custom_end_type === 'date' ? format(formData.custom_end_date, 'yyyy-MM-dd') : null,
+        custom_end_count: formData.custom_end_type === 'count' ? formData.custom_end_count : null,
       }
     };
 
@@ -233,46 +257,83 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       const hasDuplicates = existingActivities && existingActivities.length > 0;
 
       const createActivities = async () => {
-        // For new activities, create multiple based on repetition
-        const activitiesToCreate = [];
-        const count = formData.repetition_count;
+        // Generate dates based on recurrence type
+        const activitiesToCreate: any[] = [];
+        const baseDate = formData.date;
         
-        if (formData.repetition_frequency === 'daily' && count > 1) {
-          // Create multiple activities in the same day with different time slots
-          const timeSlots = ['early_morning', 'late_morning', 'midday', 'afternoon', 'evening', 'night'];
-          for (let i = 0; i < count; i++) {
-            const slotIndex = i % timeSlots.length;
-            const slotTime = getDefaultTimeForSlot(timeSlots[slotIndex] as TimeSlot);
-            activitiesToCreate.push({
-              ...baseActivityData,
-              date: format(formData.date, 'yyyy-MM-dd'),
-              start_time: slotTime,
-            });
+        const generateDates = (): Date[] => {
+          const dates: Date[] = [baseDate];
+          
+          if (formData.recurrence_type === 'none') {
+            return dates;
           }
-        } else if (formData.repetition_frequency === 'weekly' && count > 1) {
-          // Create activities in the same day of week for consecutive weeks
-          for (let i = 0; i < count; i++) {
-            const newDate = addWeeks(formData.date, i);
-            activitiesToCreate.push({
-              ...baseActivityData,
-              date: format(newDate, 'yyyy-MM-dd'),
-              start_time: startTime,
-            });
+          
+          let interval = 1;
+          let unit: 'day' | 'week' | 'month' | 'year' = 'day';
+          
+          if (formData.recurrence_type === 'daily') {
+            interval = 1;
+            unit = 'day';
+          } else if (formData.recurrence_type === 'weekly') {
+            interval = 1;
+            unit = 'week';
+          } else if (formData.recurrence_type === 'monthly') {
+            interval = 1;
+            unit = 'month';
+          } else if (formData.recurrence_type === 'custom') {
+            interval = formData.custom_interval;
+            unit = formData.custom_unit;
           }
-        } else if (formData.repetition_frequency === 'monthly' && count > 1) {
-          // Create activities spread across weeks in the month
-          const weeksToSpread = Math.floor(4 / count);
-          for (let i = 0; i < count; i++) {
-            const newDate = addWeeks(formData.date, i * weeksToSpread);
-            activitiesToCreate.push({
-              ...baseActivityData,
-              date: format(newDate, 'yyyy-MM-dd'),
-              start_time: startTime,
-            });
-          }
-        } else {
-          // Single activity
-          activitiesToCreate.push(baseActivityData);
+          
+          // Generate additional dates for recurring activities
+          let count = 1;
+          let maxIterations = 365; // Limit to prevent infinite loops
+            
+            if (formData.recurrence_type === 'custom') {
+              if (formData.custom_end_type === 'count') {
+                count = formData.custom_end_count;
+              } else if (formData.custom_end_type === 'never') {
+                // For "never", create activities for next 12 occurrences as reasonable default
+                count = 12;
+              } else if (formData.custom_end_type === 'date') {
+                // Calculate how many occurrences until end date
+                count = maxIterations;
+              }
+            } else {
+              // For preset recurrence types, create 12 occurrences
+              count = 12;
+            }
+            
+            for (let i = 1; i < count && i < maxIterations; i++) {
+              let newDate: Date;
+              if (unit === 'day') {
+                newDate = addDays(baseDate, interval * i);
+              } else if (unit === 'week') {
+                newDate = addWeeks(baseDate, interval * i);
+              } else if (unit === 'month') {
+                newDate = addMonths(baseDate, interval * i);
+              } else {
+                newDate = addYears(baseDate, interval * i);
+              }
+              
+              // Check end date condition
+              if (formData.recurrence_type === 'custom' && formData.custom_end_type === 'date') {
+                if (newDate > formData.custom_end_date) break;
+              }
+              
+              dates.push(newDate);
+            }
+          
+          return dates;
+        };
+        
+        const dates = generateDates();
+        
+        for (const date of dates) {
+          activitiesToCreate.push({
+            ...baseActivityData,
+            date: format(date, 'yyyy-MM-dd'),
+          });
         }
 
         const { error } = await supabase.from('activities').insert(activitiesToCreate as any);
@@ -484,44 +545,166 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
 
           <div>
             <Label>{t('calendar.form.repetitions')}</Label>
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <Select 
-                value={formData.repetition_frequency} 
-                onValueChange={(v: any) => setFormData({ ...formData, repetition_frequency: v })}
+            <Select 
+              value={formData.recurrence_type} 
+              onValueChange={(v: any) => {
+                if (v === 'custom') {
+                  setCustomRecurrenceOpen(true);
+                }
+                setFormData({ ...formData, recurrence_type: v });
+              }}
+            >
+              <SelectTrigger className="mt-2"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">{t('calendar.form.recurrence.none')}</SelectItem>
+                <SelectItem value="daily">{t('calendar.form.recurrence.daily')}</SelectItem>
+                <SelectItem value="weekly">{t('calendar.form.recurrence.weekly')}</SelectItem>
+                <SelectItem value="monthly">{t('calendar.form.recurrence.monthly')}</SelectItem>
+                <SelectItem value="custom">{t('calendar.form.recurrence.custom')}</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            {formData.recurrence_type === 'custom' && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="mt-2 w-full text-sm"
+                onClick={() => setCustomRecurrenceOpen(true)}
               >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="daily">{t('calendar.form.perDay')}</SelectItem>
-                  <SelectItem value="weekly">{t('calendar.form.perWeek')}</SelectItem>
-                  <SelectItem value="monthly">{t('calendar.form.perMonth')}</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <Select 
-                value={formData.repetition_count.toString()} 
-                onValueChange={(v) => setFormData({ ...formData, repetition_count: parseInt(v, 10) })}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {formData.repetition_frequency === 'daily' && 
-                    [1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
-                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
-                    ))
-                  }
-                  {formData.repetition_frequency === 'weekly' && 
-                    [1, 2, 3, 4, 5, 6, 7].map(num => (
-                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
-                    ))
-                  }
-                  {formData.repetition_frequency === 'monthly' && 
-                    [1, 2, 3, 4].map(num => (
-                      <SelectItem key={num} value={num.toString()}>{num}x</SelectItem>
-                    ))
-                  }
-                </SelectContent>
-              </Select>
-            </div>
+                {t('calendar.form.recurrence.editCustom')}: {formData.custom_interval} {t(`calendar.form.recurrence.units.${formData.custom_unit}`)}
+              </Button>
+            )}
           </div>
+          
+          {/* Custom Recurrence Dialog */}
+          <Dialog open={customRecurrenceOpen} onOpenChange={setCustomRecurrenceOpen}>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>{t('calendar.form.recurrence.customTitle')}</DialogTitle>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                {/* Interval with unit */}
+                <div className="flex items-center gap-3">
+                  <Label className="whitespace-nowrap">{t('calendar.form.recurrence.repeatEvery')}</Label>
+                  <div className="flex items-center gap-1">
+                    <div className="relative w-16">
+                      <Input 
+                        type="number" 
+                        min={1}
+                        value={formData.custom_interval} 
+                        onChange={(e) => setFormData({ ...formData, custom_interval: Math.max(1, parseInt(e.target.value) || 1) })}
+                        className="pr-6 text-center"
+                      />
+                      <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
+                        <button 
+                          type="button" 
+                          className="p-0.5 hover:bg-accent rounded"
+                          onClick={() => setFormData({ ...formData, custom_interval: formData.custom_interval + 1 })}
+                        >
+                          <ChevronUp className="w-3 h-3" />
+                        </button>
+                        <button 
+                          type="button" 
+                          className="p-0.5 hover:bg-accent rounded"
+                          onClick={() => setFormData({ ...formData, custom_interval: Math.max(1, formData.custom_interval - 1) })}
+                        >
+                          <ChevronDown className="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    <Select 
+                      value={formData.custom_unit} 
+                      onValueChange={(v: any) => setFormData({ ...formData, custom_unit: v })}
+                    >
+                      <SelectTrigger className="w-28">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="day">{t('calendar.form.recurrence.units.day')}</SelectItem>
+                        <SelectItem value="week">{t('calendar.form.recurrence.units.week')}</SelectItem>
+                        <SelectItem value="month">{t('calendar.form.recurrence.units.month')}</SelectItem>
+                        <SelectItem value="year">{t('calendar.form.recurrence.units.year')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                {/* End condition */}
+                <div className="space-y-3">
+                  <Label>{t('calendar.form.recurrence.ending')}</Label>
+                  <RadioGroup 
+                    value={formData.custom_end_type}
+                    onValueChange={(v: any) => setFormData({ ...formData, custom_end_type: v })}
+                    className="space-y-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="never" id="end-never" />
+                      <Label htmlFor="end-never" className="cursor-pointer font-normal">
+                        {t('calendar.form.recurrence.never')}
+                      </Label>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="date" id="end-date" />
+                      <Label htmlFor="end-date" className="cursor-pointer font-normal">
+                        {t('calendar.form.recurrence.endDate')}
+                      </Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            disabled={formData.custom_end_type !== 'date'}
+                            className="ml-auto"
+                          >
+                            {format(formData.custom_end_date, 'd MMM yyyy')}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="end">
+                          <Calendar 
+                            mode="single" 
+                            selected={formData.custom_end_date} 
+                            onSelect={(date) => date && setFormData({ ...formData, custom_end_date: date })}
+                            disabled={(date) => date < formData.date}
+                            className="pointer-events-auto"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    
+                    <div className="flex items-center gap-3">
+                      <RadioGroupItem value="count" id="end-count" />
+                      <Label htmlFor="end-count" className="cursor-pointer font-normal">
+                        {t('calendar.form.recurrence.after')}
+                      </Label>
+                      <div className="flex items-center gap-2 ml-auto">
+                        <Input 
+                          type="number" 
+                          min={1}
+                          disabled={formData.custom_end_type !== 'count'}
+                          value={formData.custom_end_count} 
+                          onChange={(e) => setFormData({ ...formData, custom_end_count: Math.max(1, parseInt(e.target.value) || 1) })}
+                          className="w-16 text-center"
+                        />
+                        <span className="text-sm text-muted-foreground">
+                          {t('calendar.form.recurrence.occurrences')}
+                        </span>
+                      </div>
+                    </div>
+                  </RadioGroup>
+                </div>
+              </div>
+              
+              <DialogFooter className="gap-2 mt-4">
+                <Button type="button" variant="outline" onClick={() => setCustomRecurrenceOpen(false)}>
+                  {t('calendar.form.cancel')}
+                </Button>
+                <Button type="button" onClick={() => setCustomRecurrenceOpen(false)}>
+                  {t('calendar.form.recurrence.done')}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
 
           <div>
             <Label>{t('calendar.form.description')}</Label>
