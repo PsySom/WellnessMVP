@@ -103,7 +103,14 @@ const Calendar = () => {
               {view === 'list' ? (
                 <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
               ) : (
-                <CalendarView currentDate={currentDate} onDateChange={setCurrentDate} />
+                <CalendarView 
+                  currentDate={currentDate} 
+                  onDateChange={setCurrentDate}
+                  onDayClick={(date) => {
+                    setCurrentDate(date);
+                    setView('list');
+                  }}
+                />
               )}
             </div>
           </div>
