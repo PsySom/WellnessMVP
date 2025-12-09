@@ -37,6 +37,8 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     setIsDragOver(true);
     if (index !== undefined) {
       setDragOverIndex(index);
+    } else {
+      setDragOverIndex(null);
     }
   };
 
@@ -52,7 +54,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     }
   };
 
-  const calculateNewTime = (targetActivity: any, position: 'before' | 'after' = 'before') => {
+  const calculateNewTime = (targetActivity: any, position: 'before' | 'after' = 'after') => {
     if (!targetActivity.start_time) {
       return getDefaultTimeForSlot(slot);
     }
@@ -65,6 +67,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     if (position === 'before') {
       newMinutes = Math.max(0, targetMinutes - duration);
     } else {
+      // Размещаем после целевой активности (с её длительностью)
       newMinutes = targetMinutes + duration;
     }
     
@@ -91,14 +94,14 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
       if (sortedActivities.length === 0) {
         // Пустой слот - используем начальное время слота
         newTime = getDefaultTimeForSlot(slot);
-      } else if (targetIndex === undefined) {
-        // Перетащили в конец списка - добавляем после последней активности
+      } else if (targetIndex !== undefined) {
+        // Перетащили на конкретную активность - размещаем после неё
+        const targetActivity = sortedActivities[targetIndex];
+        newTime = calculateNewTime(targetActivity, 'after');
+      } else {
+        // Перетащили в область слота (не на конкретную активность) - добавляем после последней
         const lastActivity = sortedActivities[sortedActivities.length - 1];
         newTime = calculateNewTime(lastActivity, 'after');
-      } else {
-        // Перетащили между активностями - вставляем перед целевой
-        const targetActivity = sortedActivities[targetIndex];
-        newTime = calculateNewTime(targetActivity, 'before');
       }
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -188,15 +191,15 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
     if (sortedActivities.length === 0) {
       // Пустой слот - используем начальное время слота
       newTime = getDefaultTimeForSlot(slot);
-    } else if (targetIndex === undefined) {
-      // Перетащили в конец списка - добавляем после последней активности
-      const lastActivity = sortedActivities[sortedActivities.length - 1];
-      newTime = calculateNewTime(lastActivity, 'after');
-    } else {
-      // Перетащили между активностями
+    } else if (targetIndex !== undefined) {
+      // Перетащили на конкретную активность - размещаем после неё
       const targetActivity = sortedActivities[targetIndex];
       if (activityId === targetActivity.id) return;
-      newTime = calculateNewTime(targetActivity, 'before');
+      newTime = calculateNewTime(targetActivity, 'after');
+    } else {
+      // Перетащили в область слота - добавляем после последней активности
+      const lastActivity = sortedActivities[sortedActivities.length - 1];
+      newTime = calculateNewTime(lastActivity, 'after');
     }
 
     const { error } = await supabase
@@ -312,7 +315,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
               onDrop={(e) => handleDrop(e, index)}
               className={`transition-all duration-300 ease-out ${
                 dragOverIndex === index 
-                  ? 'border-t-4 border-primary pt-4 -mt-2 scale-[1.02]' 
+                  ? 'border-b-4 border-primary pb-4 mb-2 scale-[1.02] bg-primary/5 rounded-lg' 
                   : ''
               }`}
             >
