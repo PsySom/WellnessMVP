@@ -240,6 +240,7 @@
       "anytime": "N'importe quand",
       "activityType": "Type d'activité",
       "minutes": "min",
+      "minutesShort": "min",
       "hour": "heure",
       "hours": "heures",
       "more": "Plus",

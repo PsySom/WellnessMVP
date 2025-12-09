@@ -77,12 +77,9 @@ export const ListView = ({ currentDate, onDateChange, onSlotClick }: ListViewPro
     setLoading(false);
   };
 
-  const selectedDayActivities = activities.filter(a => 
-    isSameDay(new Date(a.date), currentDate)
-  );
-
-  const completedCount = selectedDayActivities.filter(a => a.status === 'completed').length;
-  const totalCount = selectedDayActivities.length;
+  // Activities are already filtered by date in fetchActivities query
+  const completedCount = activities.filter(a => a.status === 'completed').length;
+  const totalCount = activities.length;
   const completionRate = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
@@ -127,7 +124,7 @@ export const ListView = ({ currentDate, onDateChange, onSlotClick }: ListViewPro
           ) : (
             <>
               {TIME_SLOTS.map((slot) => {
-                const slotActivities = filterActivitiesBySlot(selectedDayActivities, slot.key);
+                const slotActivities = filterActivitiesBySlot(activities, slot.key);
                 return (
                   <TimeSlotSection
                     key={slot.key}
@@ -148,7 +145,7 @@ export const ListView = ({ currentDate, onDateChange, onSlotClick }: ListViewPro
                 title={t('calendar.sections.anytime')}
                 emoji="📌"
                 slot="anytime"
-                activities={filterActivitiesBySlot(selectedDayActivities, 'anytime')}
+                activities={filterActivitiesBySlot(activities, 'anytime')}
                 onUpdate={fetchActivities}
                 date={format(currentDate, 'yyyy-MM-dd')}
                 onEmptyClick={(slotKey) => onSlotClick?.(slotKey, format(currentDate, 'yyyy-MM-dd'))}
