@@ -16,6 +16,8 @@ const Calendar = () => {
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [initialSlot, setInitialSlot] = useState<string | null>(null);
+  const [initialDate, setInitialDate] = useState<string | null>(null);
 
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentDate, { weekStartsOn: 1 });
@@ -23,6 +25,20 @@ const Calendar = () => {
   const goToPreviousWeek = () => setCurrentDate(subWeeks(currentDate, 1));
   const goToNextWeek = () => setCurrentDate(addWeeks(currentDate, 1));
   const goToToday = () => setCurrentDate(new Date());
+
+  const handleSlotClick = (slot: string, date: string) => {
+    setInitialSlot(slot);
+    setInitialDate(date);
+    setIsAddModalOpen(true);
+  };
+
+  const handleModalClose = (open: boolean) => {
+    setIsAddModalOpen(open);
+    if (!open) {
+      setInitialSlot(null);
+      setInitialDate(null);
+    }
+  };
 
   return (
     <AppLayout>
@@ -101,7 +117,11 @@ const Calendar = () => {
             {/* Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
               {view === 'list' ? (
-                <ListView currentDate={currentDate} onDateChange={setCurrentDate} />
+                <ListView 
+                  currentDate={currentDate} 
+                  onDateChange={setCurrentDate} 
+                  onSlotClick={handleSlotClick}
+                />
               ) : (
                 <CalendarView 
                   currentDate={currentDate} 
@@ -125,8 +145,9 @@ const Calendar = () => {
 
       <ActivityFormModal
         open={isAddModalOpen}
-        onOpenChange={setIsAddModalOpen}
-        defaultDate={currentDate}
+        onOpenChange={handleModalClose}
+        defaultDate={initialDate ? new Date(initialDate) : currentDate}
+        initialValues={initialSlot ? { slot: initialSlot } : undefined}
       />
     </AppLayout>
   );
