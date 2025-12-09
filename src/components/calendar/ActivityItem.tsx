@@ -148,7 +148,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                 )}
                 {activity.duration_minutes && (
                   <Badge variant="secondary" className="text-sm font-medium px-2.5 py-1 transition-all duration-300 hover:bg-primary hover:text-primary-foreground">
-                    {activity.duration_minutes} мин
+                    {activity.duration_minutes} {t('calendar.form.minutesShort')}
                   </Badge>
                 )}
                 <div className={`w-3 h-3 rounded-full ${impactColor} shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl`} 

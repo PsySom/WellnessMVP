@@ -240,6 +240,7 @@
       "anytime": "В любое время",
       "activityType": "Типы активности",
       "minutes": "мин",
+      "minutesShort": "мин",
       "hour": "час",
       "hours": "часа",
       "more": "Более",
