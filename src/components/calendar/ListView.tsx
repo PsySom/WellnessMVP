@@ -12,9 +12,10 @@ import { TIME_SLOTS, filterActivitiesBySlot } from '@/utils/timeSlots';
 interface ListViewProps {
   currentDate: Date;
   onDateChange: (date: Date) => void;
+  onSlotClick?: (slot: string, date: string) => void;
 }
 
-export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
+export const ListView = ({ currentDate, onDateChange, onSlotClick }: ListViewProps) => {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [activities, setActivities] = useState<any[]>([]);
@@ -137,6 +138,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
                     activities={slotActivities}
                     onUpdate={fetchActivities}
                     date={format(currentDate, 'yyyy-MM-dd')}
+                    onEmptyClick={(slotKey) => onSlotClick?.(slotKey, format(currentDate, 'yyyy-MM-dd'))}
                   />
                 );
               })}
@@ -149,6 +151,7 @@ export const ListView = ({ currentDate, onDateChange }: ListViewProps) => {
                 activities={filterActivitiesBySlot(selectedDayActivities, 'anytime')}
                 onUpdate={fetchActivities}
                 date={format(currentDate, 'yyyy-MM-dd')}
+                onEmptyClick={(slotKey) => onSlotClick?.(slotKey, format(currentDate, 'yyyy-MM-dd'))}
               />
             </>
           )}

@@ -13,9 +13,10 @@ interface TimeSlotSectionProps {
   activities: any[];
   onUpdate: () => void;
   date?: string; // ISO date string (YYYY-MM-DD)
+  onEmptyClick?: (slot: TimeSlot) => void;
 }
 
-export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onUpdate, date }: TimeSlotSectionProps) => {
+export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onUpdate, date, onEmptyClick }: TimeSlotSectionProps) => {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   
@@ -281,8 +282,14 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
         onDragOver={(e) => handleDragOver(e)}
         onDragLeave={handleDragLeave}
         onDrop={(e) => handleDrop(e)}
+        onClick={(e) => {
+          if (isEmpty && onEmptyClick) {
+            e.stopPropagation();
+            onEmptyClick(slot);
+          }
+        }}
         className={`space-y-3 rounded-xl transition-all duration-300 ease-out ${
-          isEmpty ? 'border-3 border-dashed border-border/60 p-4 min-h-[80px] flex items-center justify-center' : ''
+          isEmpty ? 'border-3 border-dashed border-border/60 p-4 min-h-[80px] flex items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/5' : ''
         } ${isDragOver && isEmpty ? 'border-primary bg-primary/5 scale-[1.03] shadow-lg ring-2 ring-primary/20' : ''}`}
       >
         {isEmpty ? (
@@ -293,7 +300,7 @@ export const TimeSlotSection = ({ title, timeRange, emoji, slot, activities, onU
                 <p className="text-sm font-medium text-primary">Переместите сюда</p>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">Пусто</p>
+              <p className="text-xs text-muted-foreground hover:text-primary transition-colors">Нажмите, чтобы добавить</p>
             )}
           </div>
         ) : (
