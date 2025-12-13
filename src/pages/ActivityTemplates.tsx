@@ -389,69 +389,94 @@ const ActivityTemplates = () => {
                 </div>
 
                 {/* Impact type filter badges */}
-                <div className="flex flex-wrap gap-1.5">
-                  {[
-                    { value: 'all', emoji: '📋', labelKey: 'activityTemplates.allTypes' },
-                    { value: 'restoring', emoji: '🔋', labelKey: 'activityTemplates.restoring' },
-                    { value: 'depleting', emoji: '⚡', labelKey: 'activityTemplates.depleting' },
-                    { value: 'mixed', emoji: '🔄', labelKey: 'activityTemplates.mixed' },
-                    { value: 'neutral', emoji: '⚖️', labelKey: 'activityTemplates.neutral' },
-                  ].map((type) => (
-                    <Badge
-                      key={type.value}
-                      variant={selectedImpactType === type.value ? 'default' : 'outline'}
-                      className={`cursor-pointer px-2 py-1 text-xs transition-all hover:scale-105 ${
-                        selectedImpactType === type.value 
-                          ? 'bg-primary text-primary-foreground' 
-                          : 'hover:bg-accent'
-                      }`}
-                      onClick={() => setSelectedImpactType(type.value)}
-                    >
-                      <span className="mr-1">{type.emoji}</span>
-                      {t(type.labelKey)}
-                    </Badge>
-                  ))}
-                </div>
-
-                {/* Scrollable activity list */}
-                <ScrollArea 
-                  className="flex-1 min-h-0 border rounded-lg bg-muted/20"
-                  onDragOver={handleRemoveZoneDragOver}
-                  onDrop={handleRemoveZoneDrop}
-                >
-                  <div className="space-y-1 p-2">
-                    {templatesLoading ? (
-                      <div className="space-y-2">
-                        {[...Array(4)].map((_, i) => (
-                          <div key={i} className="h-10 bg-muted animate-pulse rounded-md" />
-                        ))}
-                      </div>
-                    ) : filteredTemplates.length === 0 ? (
-                      <div className="text-center text-xs text-muted-foreground py-6">
-                        {t('calendar.presets.noActivitiesFound')}
-                      </div>
-                    ) : (
-                      filteredTemplates.map((template) => (
-                        <Card
-                          key={template.id}
-                          draggable
-                          onDragStart={(e) => handleTemplateDragStart(e, template)}
-                          onDragEnd={handleDragEnd}
-                          className={`p-2 cursor-grab hover:bg-accent/50 transition-all flex items-center gap-2 ${
-                            draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
-                          }`}
-                          onClick={() => addActivity(template)}
-                        >
-                          <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
-                          <span className="text-base">{template.emoji}</span>
-                          <span className="text-xs font-medium flex-1 truncate">{getLocalizedName(template)}</span>
-                          <Plus className="h-3 w-3 text-muted-foreground flex-shrink-0 opacity-60" />
-                        </Card>
-                      ))
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs font-medium">{t('calendar.presets.selectActivities')}</Label>
+                    {selectedImpactType !== 'all' && (
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
+                        {filteredTemplates.length} / {templates.length}
+                      </Badge>
                     )}
                   </div>
-                  <ScrollBar orientation="vertical" className="w-2" />
-                </ScrollArea>
+                  <div className="flex flex-wrap gap-1">
+                    {[
+                      { value: 'all', emoji: '📋', labelKey: 'activityTemplates.allTypes', color: 'bg-muted' },
+                      { value: 'restoring', emoji: '🔋', labelKey: 'activityTemplates.restoring', color: 'bg-green-500/20 border-green-500/50' },
+                      { value: 'depleting', emoji: '⚡', labelKey: 'activityTemplates.depleting', color: 'bg-red-500/20 border-red-500/50' },
+                      { value: 'mixed', emoji: '🔄', labelKey: 'activityTemplates.mixed', color: 'bg-yellow-500/20 border-yellow-500/50' },
+                      { value: 'neutral', emoji: '⚖️', labelKey: 'activityTemplates.neutral', color: 'bg-blue-500/20 border-blue-500/50' },
+                    ].map((type) => (
+                      <Badge
+                        key={type.value}
+                        variant={selectedImpactType === type.value ? 'default' : 'outline'}
+                        className={`cursor-pointer px-1.5 py-0.5 text-[10px] transition-all hover:scale-105 ${
+                          selectedImpactType === type.value 
+                            ? 'bg-primary text-primary-foreground ring-2 ring-primary/30' 
+                            : `hover:${type.color}`
+                        }`}
+                        onClick={() => setSelectedImpactType(type.value)}
+                      >
+                        <span className="mr-0.5">{type.emoji}</span>
+                        {t(type.labelKey)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Scrollable activity list with fixed height */}
+                <div className="flex-1 min-h-0 relative">
+                  <ScrollArea 
+                    className="h-full max-h-[300px] border rounded-lg bg-muted/20"
+                    onDragOver={handleRemoveZoneDragOver}
+                    onDrop={handleRemoveZoneDrop}
+                  >
+                    <div className="space-y-1 p-2 pr-3">
+                      {templatesLoading ? (
+                        <div className="space-y-2">
+                          {[...Array(6)].map((_, i) => (
+                            <div key={i} className="h-9 bg-muted animate-pulse rounded-md" />
+                          ))}
+                        </div>
+                      ) : filteredTemplates.length === 0 ? (
+                        <div className="text-center text-xs text-muted-foreground py-8">
+                          {t('calendar.presets.noActivitiesFound')}
+                        </div>
+                      ) : (
+                        filteredTemplates.map((template) => (
+                          <Card
+                            key={template.id}
+                            draggable
+                            onDragStart={(e) => handleTemplateDragStart(e, template)}
+                            onDragEnd={handleDragEnd}
+                            className={`p-2 cursor-grab hover:bg-accent/50 transition-all flex items-center gap-2 ${
+                              draggedTemplate?.id === template.id ? 'opacity-50 scale-95' : ''
+                            }`}
+                            onClick={() => addActivity(template)}
+                          >
+                            <GripVertical className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                            <span className="text-base">{template.emoji}</span>
+                            <span className="text-xs font-medium flex-1 truncate">{getLocalizedName(template)}</span>
+                            <Badge 
+                              variant="outline" 
+                              className={`text-[9px] px-1 py-0 ${
+                                template.impact_type === 'restoring' ? 'border-green-500/50 text-green-600' :
+                                template.impact_type === 'depleting' ? 'border-red-500/50 text-red-600' :
+                                template.impact_type === 'mixed' ? 'border-yellow-500/50 text-yellow-600' :
+                                'border-blue-500/50 text-blue-600'
+                              }`}
+                            >
+                              {template.impact_type === 'restoring' ? '🔋' :
+                               template.impact_type === 'depleting' ? '⚡' :
+                               template.impact_type === 'mixed' ? '🔄' : '⚖️'}
+                            </Badge>
+                            <Plus className="h-3 w-3 text-muted-foreground flex-shrink-0 opacity-60" />
+                          </Card>
+                        ))
+                      )}
+                    </div>
+                    <ScrollBar orientation="vertical" className="w-2.5" />
+                  </ScrollArea>
+                </div>
 
                 {/* Drop to remove zone */}
                 {draggedActivityIndex !== null && (
