@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers, Play, Square, Archive, RotateCcw, Clock } from 'lucide-react';
+import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers, Play, Square, Archive, RotateCcw, Clock, Tag, Filter } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,7 +21,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
-import type { UserPreset, PresetActivity, RecurrenceConfig } from '@/types/preset';
+import { PRESET_TAGS, type UserPreset, type PresetActivity, type RecurrenceConfig, type PresetTag } from '@/types/preset';
 
 interface ActivityTemplate {
   id: string;
@@ -52,6 +52,21 @@ const RECURRENCE_TYPES = [
   { value: 'custom', labelKey: 'calendar.form.recurrence.custom' },
 ];
 
+const TAG_EMOJIS: Record<PresetTag, string> = {
+  routine: '🔄',
+  care: '💝',
+  health: '🏥',
+  sport: '🏃',
+  habits: '✅',
+  tasks: '📋',
+  rest: '😴',
+  learning: '📚',
+  development: '🌱',
+  antistress: '🧘',
+  basic_needs: '🏠',
+  other: '📌',
+};
+
 const ActivityTemplates = () => {
   const { t } = useTranslation();
   const { locale } = useLocale();
@@ -67,6 +82,7 @@ const ActivityTemplates = () => {
   const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
   const [draggedActivityIndex, setDraggedActivityIndex] = useState<number | null>(null);
   const [dragOverDayPart, setDragOverDayPart] = useState<string | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   // Recurrence settings
   const [recurrenceType, setRecurrenceType] = useState<string>('none');
@@ -77,8 +93,9 @@ const ActivityTemplates = () => {
   const [customEndDate, setCustomEndDate] = useState<Date>(addMonths(new Date(), 1));
   const [customEndCount, setCustomEndCount] = useState<number>(30);
 
-  // Library tab
+  // Library tab and filter
   const [libraryTab, setLibraryTab] = useState<'active' | 'archive'>('active');
+  const [libraryTagFilter, setLibraryTagFilter] = useState<string>('all');
 
   // Fetch templates from database
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
@@ -107,21 +124,31 @@ const ActivityTemplates = () => {
       if (error) throw error;
       return data.map(p => ({
         ...p,
-        activities: Array.isArray(p.activities) ? p.activities : JSON.parse(p.activities as string || '[]')
+        activities: Array.isArray(p.activities) ? p.activities : JSON.parse(p.activities as string || '[]'),
+        tags: Array.isArray(p.tags) ? p.tags : []
       })) as UserPreset[];
     },
     enabled: !!user,
   });
 
-  // Filter presets by archive status
+  // Filter presets by archive status and tags
   const activePresets = userPresets.filter(p => !p.is_archived);
   const archivedPresets = userPresets.filter(p => p.is_archived);
+  
+  const filteredActivePresets = libraryTagFilter === 'all' 
+    ? activePresets 
+    : activePresets.filter(p => p.tags?.includes(libraryTagFilter));
+  
+  const filteredArchivedPresets = libraryTagFilter === 'all'
+    ? archivedPresets
+    : archivedPresets.filter(p => p.tags?.includes(libraryTagFilter));
 
   // Load preset into editor
   const loadPresetForEditing = (preset: UserPreset) => {
     setEditingPreset(preset);
     setName(preset.name);
     setActivities(preset.activities || []);
+    setSelectedTags(preset.tags || []);
   };
 
   // Clear editor
@@ -132,6 +159,14 @@ const ActivityTemplates = () => {
     setRecurrenceType('none');
     setRecurrenceCount(7);
     setSearchQuery('');
+    setSelectedTags([]);
+  };
+
+  // Toggle tag selection
+  const toggleTag = (tag: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
+    );
   };
 
   // Drag handlers for templates (left side)
@@ -215,8 +250,9 @@ const ActivityTemplates = () => {
       const activitiesJson = JSON.parse(JSON.stringify(activities));
       const presetData = { 
         name: name.trim(), 
-        emoji: '📋', 
+        emoji: selectedTags.length > 0 ? TAG_EMOJIS[selectedTags[0] as PresetTag] || '📋' : '📋', 
         activities: activitiesJson,
+        tags: selectedTags,
       };
 
       if (editingPreset?.id) {
@@ -541,6 +577,31 @@ const ActivityTemplates = () => {
                   />
                 </div>
 
+                {/* Tags selector */}
+                <div className="space-y-1">
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Tag className="h-3 w-3" />
+                    {t('activityTemplates.selectTags')}
+                  </Label>
+                  <div className="flex flex-wrap gap-1">
+                    {PRESET_TAGS.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+                        className={`cursor-pointer px-1.5 py-0.5 text-[10px] transition-all hover:scale-105 ${
+                          selectedTags.includes(tag) 
+                            ? 'bg-primary text-primary-foreground' 
+                            : 'hover:bg-accent'
+                        }`}
+                        onClick={() => toggleTag(tag)}
+                      >
+                        <span className="mr-0.5">{TAG_EMOJIS[tag]}</span>
+                        {t(`activityTemplates.tags.${tag}`)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Search activities */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -853,7 +914,7 @@ const ActivityTemplates = () => {
           {/* RIGHT: Template Library with Tabs */}
           <Card className="flex flex-col p-4 overflow-hidden">
             <Tabs value={libraryTab} onValueChange={(v) => setLibraryTab(v as 'active' | 'archive')} className="flex flex-col h-full">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <Layers className="h-5 w-5" />
                   {t('activityTemplates.library')}
@@ -861,13 +922,43 @@ const ActivityTemplates = () => {
                 <TabsList className="h-8">
                   <TabsTrigger value="active" className="text-xs px-3 h-7">
                     <Play className="h-3 w-3 mr-1" />
-                    {t('activityTemplates.activeTab')} ({activePresets.length})
+                    {t('activityTemplates.activeTab')} ({filteredActivePresets.length})
                   </TabsTrigger>
                   <TabsTrigger value="archive" className="text-xs px-3 h-7">
                     <Archive className="h-3 w-3 mr-1" />
-                    {t('activityTemplates.archiveTab')} ({archivedPresets.length})
+                    {t('activityTemplates.archiveTab')} ({filteredArchivedPresets.length})
                   </TabsTrigger>
                 </TabsList>
+              </div>
+
+              {/* Tag filter for library */}
+              <div className="mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <Filter className="h-3.5 w-3.5 text-muted-foreground" />
+                  <Label className="text-xs text-muted-foreground">{t('activityTemplates.filterByTags')}</Label>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  <Badge
+                    variant={libraryTagFilter === 'all' ? 'default' : 'outline'}
+                    className="cursor-pointer px-1.5 py-0.5 text-[10px] transition-all hover:scale-105"
+                    onClick={() => setLibraryTagFilter('all')}
+                  >
+                    {t('activityTemplates.allTags')}
+                  </Badge>
+                  {PRESET_TAGS.map((tag) => (
+                    <Badge
+                      key={tag}
+                      variant={libraryTagFilter === tag ? 'default' : 'outline'}
+                      className={`cursor-pointer px-1.5 py-0.5 text-[10px] transition-all hover:scale-105 ${
+                        libraryTagFilter === tag ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                      }`}
+                      onClick={() => setLibraryTagFilter(tag)}
+                    >
+                      <span className="mr-0.5">{TAG_EMOJIS[tag]}</span>
+                      {t(`activityTemplates.tags.${tag}`)}
+                    </Badge>
+                  ))}
+                </div>
               </div>
 
               <TabsContent value="active" className="flex-1 min-h-0 mt-0">
@@ -878,20 +969,20 @@ const ActivityTemplates = () => {
                         <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
                       ))}
                     </div>
-                  ) : activePresets.length === 0 ? (
+                  ) : filteredActivePresets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                       <Layers className="h-10 w-10 mb-2 opacity-50" />
                       <p className="text-sm">{t('activityTemplates.noPresets')}</p>
                     </div>
                   ) : (
                     <div className="space-y-2 pr-2">
-                      {activePresets.map((preset) => (
+                      {filteredActivePresets.map((preset) => (
                         <Card key={preset.id} className={`p-3 hover:bg-accent/30 transition-all ${preset.is_active ? 'ring-2 ring-green-500/50 bg-green-500/5' : ''}`}>
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2">
                               <span className="text-2xl">{preset.emoji}</span>
-                              <div>
-                                <div className="flex items-center gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
                                   <p className="font-medium text-sm">{preset.name}</p>
                                   {preset.is_active && (
                                     <Badge className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 border-green-500/30">
@@ -902,6 +993,15 @@ const ActivityTemplates = () => {
                                 <p className="text-xs text-muted-foreground">
                                   {preset.activities?.length || 0} {t('activityTemplates.activitiesCount')}
                                 </p>
+                                {preset.tags && preset.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-0.5 mt-1">
+                                    {preset.tags.map(tag => (
+                                      <span key={tag} className="text-[10px] text-muted-foreground">
+                                        {TAG_EMOJIS[tag as PresetTag]}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                                 {preset.last_activated_at && (
                                   <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                                     <Clock className="h-2.5 w-2.5" />
@@ -910,17 +1010,24 @@ const ActivityTemplates = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-1">
-                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => loadPresetForEditing(preset)}>
-                                <Edit className="h-3.5 w-3.5" />
+                            <div className="flex flex-col gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-6 px-2 text-xs"
+                                onClick={() => loadPresetForEditing(preset)}
+                              >
+                                <Edit className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.edit')}
                               </Button>
                               <Button 
                                 variant="ghost" 
-                                size="icon" 
-                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                size="sm" 
+                                className="h-6 px-2 text-xs text-orange-600 hover:text-orange-600 hover:bg-orange-500/10"
                                 onClick={() => archiveMutation.mutate(preset.id)}
                               >
-                                <Archive className="h-3.5 w-3.5" />
+                                <Archive className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.archive')}
                               </Button>
                             </div>
                           </div>
@@ -974,23 +1081,32 @@ const ActivityTemplates = () => {
 
               <TabsContent value="archive" className="flex-1 min-h-0 mt-0">
                 <ScrollArea className="h-full">
-                  {archivedPresets.length === 0 ? (
+                  {filteredArchivedPresets.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
                       <Archive className="h-10 w-10 mb-2 opacity-50" />
                       <p className="text-sm">{t('activityTemplates.noArchivedPresets')}</p>
                     </div>
                   ) : (
                     <div className="space-y-2 pr-2">
-                      {archivedPresets.map((preset) => (
+                      {filteredArchivedPresets.map((preset) => (
                         <Card key={preset.id} className="p-3 hover:bg-accent/30 transition-all opacity-75">
                           <div className="flex items-start justify-between">
                             <div className="flex items-center gap-2">
                               <span className="text-2xl grayscale">{preset.emoji}</span>
-                              <div>
+                              <div className="flex-1 min-w-0">
                                 <p className="font-medium text-sm">{preset.name}</p>
                                 <p className="text-xs text-muted-foreground">
                                   {preset.activities?.length || 0} {t('activityTemplates.activitiesCount')}
                                 </p>
+                                {preset.tags && preset.tags.length > 0 && (
+                                  <div className="flex flex-wrap gap-0.5 mt-1">
+                                    {preset.tags.map(tag => (
+                                      <span key={tag} className="text-[10px] text-muted-foreground grayscale">
+                                        {TAG_EMOJIS[tag as PresetTag]}
+                                      </span>
+                                    ))}
+                                  </div>
+                                )}
                                 {preset.last_activated_at && (
                                   <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
                                     <Clock className="h-2.5 w-2.5" />
@@ -999,22 +1115,24 @@ const ActivityTemplates = () => {
                                 )}
                               </div>
                             </div>
-                            <div className="flex gap-1">
+                            <div className="flex flex-col gap-1">
                               <Button 
                                 variant="ghost" 
-                                size="icon" 
-                                className="h-7 w-7"
+                                size="sm" 
+                                className="h-6 px-2 text-xs"
                                 onClick={() => restoreMutation.mutate(preset.id)}
                               >
-                                <RotateCcw className="h-3.5 w-3.5" />
+                                <RotateCcw className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.restore')}
                               </Button>
                               <Button 
                                 variant="ghost" 
-                                size="icon" 
-                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                size="sm" 
+                                className="h-6 px-2 text-xs text-destructive hover:text-destructive hover:bg-destructive/10"
                                 onClick={() => deleteMutation.mutate(preset.id)}
                               >
-                                <Trash2 className="h-3.5 w-3.5" />
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.delete')}
                               </Button>
                             </div>
                           </div>

@@ -9,7 +9,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { Plus, X, GripVertical, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, X, GripVertical, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronUp, Tag } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,6 +18,22 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { format, addMonths, addDays, addWeeks, addYears } from 'date-fns';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { PRESET_TAGS, type PresetTag } from '@/types/preset';
+
+const TAG_EMOJIS: Record<PresetTag, string> = {
+  routine: '🔄',
+  care: '💝',
+  health: '🏥',
+  sport: '🏃',
+  habits: '✅',
+  tasks: '📋',
+  rest: '😴',
+  learning: '📚',
+  development: '🌱',
+  antistress: '🧘',
+  basic_needs: '🏠',
+  other: '📌',
+};
 
 interface ActivityTemplate {
   id: string;
