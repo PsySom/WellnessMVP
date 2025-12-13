@@ -577,31 +577,6 @@ const ActivityTemplates = () => {
                   />
                 </div>
 
-                {/* Tags selector */}
-                <div className="space-y-1">
-                  <Label className="text-xs font-medium flex items-center gap-1">
-                    <Tag className="h-3 w-3" />
-                    {t('activityTemplates.selectTags')}
-                  </Label>
-                  <div className="flex flex-wrap gap-1">
-                    {PRESET_TAGS.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? 'default' : 'outline'}
-                        className={`cursor-pointer px-1.5 py-0.5 text-[10px] transition-all hover:scale-105 ${
-                          selectedTags.includes(tag) 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'hover:bg-accent'
-                        }`}
-                        onClick={() => toggleTag(tag)}
-                      >
-                        <span className="mr-0.5">{TAG_EMOJIS[tag]}</span>
-                        {t(`activityTemplates.tags.${tag}`)}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
                 {/* Search activities */}
                 <div className="relative">
                   <Search className="absolute left-2.5 top-1/2 transform -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
@@ -906,6 +881,50 @@ const ActivityTemplates = () => {
                       </div>
                     </div>
                   )}
+
+                  {/* Tags selector - dropdown */}
+                  <div className="space-y-1 pt-1.5 border-t border-border">
+                    <Label className="text-xs font-medium flex items-center gap-1">
+                      <Tag className="h-3 w-3" />
+                      {t('activityTemplates.templateTags')}
+                    </Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button variant="outline" className="w-full h-8 justify-between text-xs">
+                          {selectedTags.length > 0 ? (
+                            <span className="flex items-center gap-1 truncate">
+                              {selectedTags.slice(0, 3).map(tag => (
+                                <span key={tag}>{TAG_EMOJIS[tag as PresetTag]} {t(`activityTemplates.tags.${tag}`)}</span>
+                              ))}
+                              {selectedTags.length > 3 && <span>+{selectedTags.length - 3}</span>}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground">{t('activityTemplates.selectTagsPlaceholder')}</span>
+                          )}
+                          <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-56 p-2" align="start">
+                        <div className="space-y-1">
+                          {PRESET_TAGS.map((tag) => (
+                            <div
+                              key={tag}
+                              onClick={() => toggleTag(tag)}
+                              className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors text-xs ${
+                                selectedTags.includes(tag) 
+                                  ? 'bg-primary text-primary-foreground' 
+                                  : 'hover:bg-accent'
+                              }`}
+                            >
+                              <span>{TAG_EMOJIS[tag]}</span>
+                              <span className="flex-1">{t(`activityTemplates.tags.${tag}`)}</span>
+                              {selectedTags.includes(tag) && <span>✓</span>}
+                            </div>
+                          ))}
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </Card>
               </div>
             </div>

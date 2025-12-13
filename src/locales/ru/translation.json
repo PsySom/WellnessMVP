@@ -35,6 +35,8 @@
     "deactivateError": "Ошибка при отмене шаблона",
     "neverActivated": "Никогда не активировался",
     "selectTags": "Выберите теги",
+    "selectTagsPlaceholder": "Выберите теги шаблона...",
+    "templateTags": "Теги шаблона",
     "filterByTags": "Фильтр по тегам",
     "allTags": "Все теги",
     "tags": {
