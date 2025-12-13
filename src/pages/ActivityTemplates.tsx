@@ -489,7 +489,7 @@ const ActivityTemplates = () => {
               {/* Right column: Day parts distribution */}
               <div className="flex flex-col h-full min-h-0 overflow-hidden">
                 <Label className="flex-shrink-0 mb-2 text-xs">{t('calendar.presets.distribution')}</Label>
-                <div className="flex-1 min-h-0 max-h-[300px] overflow-hidden border rounded-md">
+                <div className="flex-1 min-h-0 max-h-[400px] overflow-hidden border rounded-md">
                   <ScrollArea className="h-full">
                     <div className="space-y-1.5 p-2">
                     {activitiesByDayPart.map((dayPart) => (
