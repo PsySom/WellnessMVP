@@ -35,6 +35,8 @@
     "deactivateError": "Erreur lors de la désactivation du modèle",
     "neverActivated": "Jamais activé",
     "selectTags": "Sélectionner les tags",
+    "selectTagsPlaceholder": "Sélectionner les tags du modèle...",
+    "templateTags": "Tags du modèle",
     "filterByTags": "Filtrer par tags",
     "allTags": "Tous les tags",
     "tags": {

@@ -35,6 +35,8 @@
     "deactivateError": "Error deactivating template",
     "neverActivated": "Never activated",
     "selectTags": "Select tags",
+    "selectTagsPlaceholder": "Select template tags...",
+    "templateTags": "Template tags",
     "filterByTags": "Filter by tags",
     "allTags": "All tags",
     "tags": {
