@@ -450,9 +450,9 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
           </div>
 
           {/* Right: Day parts with activities */}
-          <div className="flex flex-col space-y-2">
-            <Label>{t('calendar.presets.distribution')}</Label>
-            <ScrollArea className="flex-1 h-[320px] border rounded-md">
+          <div className="flex flex-col h-full min-h-0">
+            <Label className="flex-shrink-0 mb-2">{t('calendar.presets.distribution')}</Label>
+            <ScrollArea className="flex-1 min-h-0 max-h-[280px] border rounded-md">
               <div className="space-y-2 p-2">
                 {activitiesByDayPart.map((dayPart) => (
                   <Card 
