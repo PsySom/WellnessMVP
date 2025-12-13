@@ -197,7 +197,9 @@
     },
     "impactTypes": {
       "restorative": "Восстанавливающее",
+      "restoring": "Восстанавливающее",
       "draining": "Истощающее",
+      "depleting": "Истощающее",
       "neutral": "Нейтральное",
       "mixed": "Смешанное"
     },
@@ -383,6 +385,16 @@
       "deleteConfirmation": "Вы уверены, что хотите удалить эту активность? Это действие необратимо.",
       "deleteSuccess": "Активность успешно удалена",
       "deleteError": "Не удалось удалить активность"
+    },
+    "quickView": {
+      "type": "Тип",
+      "duration": "Продолжительность",
+      "timeSlot": "Время",
+      "repetitions": "Повторения",
+      "singleActivity": "Одна активность",
+      "coreActivity": "Основная",
+      "editDetails": "Подробнее",
+      "create": "Создать"
     },
     "duplicateDialog": {
       "title": "Дубликат активности",

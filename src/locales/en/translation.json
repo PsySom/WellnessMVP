@@ -197,7 +197,9 @@
     },
     "impactTypes": {
       "restorative": "Restorative",
+      "restoring": "Restoring",
       "draining": "Draining",
+      "depleting": "Depleting",
       "neutral": "Neutral",
       "mixed": "Mixed"
     },
@@ -383,6 +385,16 @@
       "deleteConfirmation": "Are you sure you want to delete this activity? This action cannot be undone.",
       "deleteSuccess": "Activity deleted successfully",
       "deleteError": "Failed to delete activity"
+    },
+    "quickView": {
+      "type": "Type",
+      "duration": "Duration",
+      "timeSlot": "Time Slot",
+      "repetitions": "Repetitions",
+      "singleActivity": "Single activity",
+      "coreActivity": "Core activity",
+      "editDetails": "Edit details",
+      "create": "Create"
     },
     "weekdays": {
       "short": {
