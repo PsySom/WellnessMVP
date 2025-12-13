@@ -44,6 +44,7 @@ interface UserPresetData {
   emoji: string;
   activities: PresetActivity[];
   recurrence_type: string;
+  recurrence_count?: number;
   custom_interval?: number;
   custom_unit?: string;
   custom_end_type?: string;
@@ -58,6 +59,7 @@ interface UserPreset {
   emoji: string;
   activities: PresetActivity[];
   recurrence_type?: string;
+  recurrence_count?: number;
   custom_interval?: number;
   custom_unit?: string;
   custom_end_type?: string;
@@ -105,6 +107,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   
   // Recurrence settings
   const [recurrenceType, setRecurrenceType] = useState<string>('none');
+  const [recurrenceCount, setRecurrenceCount] = useState<number>(7); // Number of repetitions for daily/weekly/monthly
   const [customInterval, setCustomInterval] = useState<number>(1);
   const [customUnit, setCustomUnit] = useState<string>('day');
   const [customEndType, setCustomEndType] = useState<string>('never');
@@ -132,6 +135,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setEmoji(preset.emoji);
       setActivities(preset.activities || []);
       setRecurrenceType(preset.recurrence_type || 'none');
+      setRecurrenceCount(preset.recurrence_count || 7);
       setCustomInterval(preset.custom_interval || 1);
       setCustomUnit(preset.custom_unit || 'day');
       setCustomEndType(preset.custom_end_type || 'never');
@@ -142,6 +146,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setEmoji('📋');
       setActivities([]);
       setRecurrenceType('none');
+      setRecurrenceCount(7);
       setCustomInterval(1);
       setCustomUnit('day');
       setCustomEndType('never');
@@ -286,6 +291,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       emoji, 
       activities, 
       recurrence_type: recurrenceType,
+      recurrence_count: recurrenceCount,
       custom_interval: customInterval,
       custom_unit: customUnit,
       custom_end_type: customEndType,
@@ -580,6 +586,45 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Repetition count for daily/weekly/monthly */}
+              {(recurrenceType === 'daily' || recurrenceType === 'weekly' || recurrenceType === 'monthly') && (
+                <div className="flex items-center gap-2 pt-2 border-t border-border">
+                  <Label className="text-xs whitespace-nowrap">{t('calendar.presets.repeatFor')}</Label>
+                  <div className="flex items-center gap-1">
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={() => setRecurrenceCount(Math.max(1, recurrenceCount - 1))}
+                    >
+                      <ChevronDown className="h-3 w-3" />
+                    </Button>
+                    <Input
+                      type="number"
+                      value={recurrenceCount}
+                      onChange={(e) => setRecurrenceCount(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-14 h-7 text-center text-xs px-1"
+                      min={1}
+                    />
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="outline"
+                      className="h-7 w-7"
+                      onClick={() => setRecurrenceCount(recurrenceCount + 1)}
+                    >
+                      <ChevronUp className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <span className="text-xs text-muted-foreground">
+                    {recurrenceType === 'daily' && t('calendar.presets.days')}
+                    {recurrenceType === 'weekly' && t('calendar.presets.weeks')}
+                    {recurrenceType === 'monthly' && t('calendar.presets.months')}
+                  </span>
+                </div>
+              )}
 
               {/* Custom recurrence settings */}
               {recurrenceType === 'custom' && (
