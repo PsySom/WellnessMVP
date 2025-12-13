@@ -34,11 +34,11 @@
     "activateError": "Error activating template",
     "deactivateError": "Error deactivating template",
     "neverActivated": "Never activated",
-    "selectTags": "Select tags",
-    "selectTagsPlaceholder": "Select template tags...",
-    "templateTags": "Template tags",
-    "filterByTags": "Filter by tags",
-    "allTags": "All tags",
+    "selectTags": "Select notes",
+    "selectTagsPlaceholder": "Select notes...",
+    "templateTags": "Note",
+    "filterByTags": "Filter by notes",
+    "allTags": "All notes",
     "tags": {
       "routine": "Routine",
       "care": "Care",
@@ -50,7 +50,7 @@
       "learning": "Learning",
       "development": "Development",
       "antistress": "Anti-stress",
-      "basic_needs": "Basic Needs",
+      "basic_needs": "Basic needs",
       "other": "Other"
     }
   },
@@ -938,7 +938,8 @@
     "time": "time",
     "times": "times",
     "minutes": "minutes",
-    "hour": "hour"
+    "hour": "hour",
+    "clear": "Clear"
   },
   "testDetail": {
     "backToTests": "Back to Tests",
