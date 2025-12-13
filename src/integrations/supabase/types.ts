@@ -39,6 +39,7 @@ export type Database = {
           title: string
           updated_at: string | null
           user_id: string
+          user_preset_id: string | null
         }
         Insert: {
           category: Database["public"]["Enums"]["activity_category"]
@@ -64,6 +65,7 @@ export type Database = {
           title: string
           updated_at?: string | null
           user_id: string
+          user_preset_id?: string | null
         }
         Update: {
           category?: Database["public"]["Enums"]["activity_category"]
@@ -89,6 +91,7 @@ export type Database = {
           title?: string
           updated_at?: string | null
           user_id?: string
+          user_preset_id?: string | null
         }
         Relationships: [
           {
@@ -103,6 +106,13 @@ export type Database = {
             columns: ["test_id"]
             isOneToOne: false
             referencedRelation: "tests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activities_user_preset_id_fkey"
+            columns: ["user_preset_id"]
+            isOneToOne: false
+            referencedRelation: "user_presets"
             referencedColumns: ["id"]
           },
         ]
@@ -639,28 +649,43 @@ export type Database = {
       }
       user_presets: {
         Row: {
+          activation_end_date: string | null
+          activation_start_date: string | null
           activities: Json
           created_at: string
           emoji: string
           id: string
+          is_active: boolean | null
+          is_archived: boolean | null
+          last_activated_at: string | null
           name: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          activation_end_date?: string | null
+          activation_start_date?: string | null
           activities?: Json
           created_at?: string
           emoji?: string
           id?: string
+          is_active?: boolean | null
+          is_archived?: boolean | null
+          last_activated_at?: string | null
           name: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          activation_end_date?: string | null
+          activation_start_date?: string | null
           activities?: Json
           created_at?: string
           emoji?: string
           id?: string
+          is_active?: boolean | null
+          is_archived?: boolean | null
+          last_activated_at?: string | null
           name?: string
           updated_at?: string
           user_id?: string
