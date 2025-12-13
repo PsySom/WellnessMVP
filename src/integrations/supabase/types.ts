@@ -659,6 +659,7 @@ export type Database = {
           is_archived: boolean | null
           last_activated_at: string | null
           name: string
+          tags: string[] | null
           updated_at: string
           user_id: string
         }
@@ -673,6 +674,7 @@ export type Database = {
           is_archived?: boolean | null
           last_activated_at?: string | null
           name: string
+          tags?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -687,6 +689,7 @@ export type Database = {
           is_archived?: boolean | null
           last_activated_at?: string | null
           name?: string
+          tags?: string[] | null
           updated_at?: string
           user_id?: string
         }

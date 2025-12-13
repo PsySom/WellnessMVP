@@ -19,6 +19,7 @@ export interface UserPreset {
   last_activated_at: string | null;
   activation_start_date: string | null;
   activation_end_date: string | null;
+  tags: string[];
 }
 
 export interface RecurrenceConfig {
@@ -30,3 +31,21 @@ export interface RecurrenceConfig {
   customEndDate?: string;
   customEndCount?: number;
 }
+
+// Preset tag options
+export const PRESET_TAGS = [
+  'routine',
+  'care', 
+  'health',
+  'sport',
+  'habits',
+  'tasks',
+  'rest',
+  'learning',
+  'development',
+  'antistress',
+  'basic_needs',
+  'other'
+] as const;
+
+export type PresetTag = typeof PRESET_TAGS[number];
