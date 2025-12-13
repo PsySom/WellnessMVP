@@ -34,11 +34,11 @@
     "activateError": "Ошибка при активации шаблона",
     "deactivateError": "Ошибка при отмене шаблона",
     "neverActivated": "Никогда не активировался",
-    "selectTags": "Выберите теги",
-    "selectTagsPlaceholder": "Выберите теги шаблона...",
-    "templateTags": "Теги шаблона",
-    "filterByTags": "Фильтр по тегам",
-    "allTags": "Все теги",
+    "selectTags": "Выберите примечания",
+    "selectTagsPlaceholder": "Выберите примечания...",
+    "templateTags": "Примечание",
+    "filterByTags": "Фильтр по примечаниям",
+    "allTags": "Все примечания",
     "tags": {
       "routine": "Рутина",
       "care": "Забота",
@@ -940,7 +940,8 @@
     "time": "раз",
     "times": "раза",
     "minutes": "минут",
-    "hour": "час"
+    "hour": "час",
+    "clear": "Очистить"
   },
   "testDetail": {
     "backToTests": "Назад к тестам",

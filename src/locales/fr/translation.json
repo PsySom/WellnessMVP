@@ -34,11 +34,11 @@
     "activateError": "Erreur lors de l'activation du modèle",
     "deactivateError": "Erreur lors de la désactivation du modèle",
     "neverActivated": "Jamais activé",
-    "selectTags": "Sélectionner les tags",
-    "selectTagsPlaceholder": "Sélectionner les tags du modèle...",
-    "templateTags": "Tags du modèle",
-    "filterByTags": "Filtrer par tags",
-    "allTags": "Tous les tags",
+    "selectTags": "Sélectionner les notes",
+    "selectTagsPlaceholder": "Sélectionner les notes...",
+    "templateTags": "Note",
+    "filterByTags": "Filtrer par notes",
+    "allTags": "Toutes les notes",
     "tags": {
       "routine": "Routine",
       "care": "Soins",
@@ -938,7 +938,8 @@
     "time": "fois",
     "times": "fois",
     "minutes": "minutes",
-    "hour": "heure"
+    "hour": "heure",
+    "clear": "Effacer"
   },
   "testDetail": {
     "backToTests": "Retour aux tests",
