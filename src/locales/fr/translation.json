@@ -197,7 +197,9 @@
     },
     "impactTypes": {
       "restorative": "Réparateur",
+      "restoring": "Réparateur",
       "draining": "Épuisant",
+      "depleting": "Épuisant",
       "neutral": "Neutre",
       "mixed": "Mixte"
     },
@@ -383,6 +385,16 @@
       "deleteConfirmation": "Êtes-vous sûr de vouloir supprimer cette activité ? Cette action est irréversible.",
       "deleteSuccess": "Activité supprimée avec succès",
       "deleteError": "Échec de la suppression de l'activité"
+    },
+    "quickView": {
+      "type": "Type",
+      "duration": "Durée",
+      "timeSlot": "Créneau",
+      "repetitions": "Répétitions",
+      "singleActivity": "Activité unique",
+      "coreActivity": "Activité principale",
+      "editDetails": "Détails",
+      "create": "Créer"
     },
     "weekdays": {
       "short": {

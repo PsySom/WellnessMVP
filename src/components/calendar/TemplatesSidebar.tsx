@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Plus, Settings, PlusCircle } from 'lucide-react';
+import { Clock, Settings, PlusCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/useLocale';
 import { getCategoryConfig } from '@/config/categoryConfig';
@@ -19,6 +19,7 @@ import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { PresetEditModal } from './PresetEditModal';
+import { TemplateQuickView } from './TemplateQuickView';
 
 interface ActivityTemplate {
   id: string;
@@ -51,6 +52,7 @@ const getImpactColor = (impactType: string) => {
 
 interface TemplatesSidebarProps {
   selectedDate: Date;
+  onOpenActivityModal?: (template: ActivityTemplate) => void;
 }
 
 interface UserPreset {
@@ -61,7 +63,7 @@ interface UserPreset {
   activities: any[];
 }
 
-export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
+export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: TemplatesSidebarProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
   const { user } = useAuth();
@@ -548,58 +550,82 @@ export const TemplatesSidebar = ({ selectedDate }: TemplatesSidebarProps) => {
                   activity => activity.category === template.category
                 );
 
-                return (
-                  <Card 
-                    key={template.id}
-                    draggable
-                    onDragStart={handleDragStart}
-                    className={`p-3 hover:shadow-md transition-all duration-300 cursor-grab active:cursor-grabbing group relative ${
-                      isAlreadyAddedToday ? 'opacity-60' : ''
-                    }`}
-                    onClick={() => setSelectedTemplate(template)}
-                  >
-                    {isAlreadyAddedToday && (
-                      <div className="absolute top-2 right-2 z-10">
-                        <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
-                          ✓ {t('calendar.presets.addedToday')}
-                        </Badge>
-                      </div>
-                    )}
-                  <div className="flex items-start gap-2">
-                    <div className="text-2xl">{template.emoji}</div>
+                const handleQuickCreate = async () => {
+                  if (!user) return;
+                  
+                  try {
+                    const activityData = {
+                      user_id: user.id,
+                      title: getLocalizedName(template),
+                      category: template.category,
+                      impact_type: template.impact_type,
+                      duration_minutes: template.default_duration_minutes || 60,
+                      status: 'planned' as const,
+                      emoji: template.emoji,
+                      date: selectedDateStr,
+                      start_time: null,
+                    };
                     
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-sm text-foreground mb-1 line-clamp-2">
-                        {getLocalizedName(template)}
-                      </h4>
-                      
-                      <div className="flex flex-wrap gap-1 mb-1">
-                        <Badge variant="outline" className="text-xs px-1.5 py-0">
-                          {getCategoryLabel(template.category)}
-                        </Badge>
-                      </div>
+                    await addActivityMutation.mutateAsync(activityData);
+                    toast.success(t('calendar.form.createSuccess'));
+                  } catch (error) {
+                    console.error('Error creating activity:', error);
+                    toast.error(t('calendar.form.saveError'));
+                  }
+                };
 
-                      {template.default_duration_minutes !== null && template.default_duration_minutes > 0 && (
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="h-3 w-3" />
-                          <span>{template.default_duration_minutes} min</span>
+                return (
+                  <TemplateQuickView
+                    key={template.id}
+                    template={template}
+                    onDragStart={handleDragStart}
+                    onEditDetails={() => {
+                      if (onOpenActivityModal) {
+                        onOpenActivityModal(template);
+                      } else {
+                        setSelectedTemplate(template);
+                      }
+                    }}
+                    onCreateActivity={handleQuickCreate}
+                    isAlreadyAddedToday={isAlreadyAddedToday}
+                    isCoreActivity={isCoreActivity}
+                  >
+                    <Card 
+                      className={`p-3 hover:shadow-md transition-all duration-300 cursor-grab active:cursor-grabbing group relative ${
+                        isAlreadyAddedToday ? 'opacity-60' : ''
+                      }`}
+                    >
+                      {isAlreadyAddedToday && (
+                        <div className="absolute top-2 right-2 z-10">
+                          <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30">
+                            ✓ {t('calendar.presets.addedToday')}
+                          </Badge>
                         </div>
                       )}
-                    </div>
+                      <div className="flex items-start gap-2">
+                        <div className="text-2xl">{template.emoji}</div>
+                        
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm text-foreground mb-1 line-clamp-2">
+                            {getLocalizedName(template)}
+                          </h4>
+                          
+                          <div className="flex flex-wrap gap-1 mb-1">
+                            <Badge variant="outline" className="text-xs px-1.5 py-0">
+                              {getCategoryLabel(template.category)}
+                            </Badge>
+                          </div>
 
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedTemplate(template);
-                      }}
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                  </div>
-                </Card>
+                          {template.default_duration_minutes !== null && template.default_duration_minutes > 0 && (
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              <span>{template.default_duration_minutes} {t('calendar.form.minutesShort')}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  </TemplateQuickView>
                 );
               })
             )}
