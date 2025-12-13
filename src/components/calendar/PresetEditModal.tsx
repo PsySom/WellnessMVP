@@ -9,11 +9,15 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { Plus, X, GripVertical, Trash2, Search } from 'lucide-react';
+import { Plus, X, GripVertical, Trash2, Search, Calendar as CalendarIcon, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format, addMonths, addDays, addWeeks, addYears } from 'date-fns';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface ActivityTemplate {
   id: string;
@@ -39,7 +43,12 @@ interface UserPresetData {
   name: string;
   emoji: string;
   activities: PresetActivity[];
-  weekly_repetitions?: number;
+  recurrence_type: string;
+  custom_interval?: number;
+  custom_unit?: string;
+  custom_end_type?: string;
+  custom_end_date?: string;
+  custom_end_count?: number;
 }
 
 interface UserPreset {
@@ -48,6 +57,12 @@ interface UserPreset {
   name: string;
   emoji: string;
   activities: PresetActivity[];
+  recurrence_type?: string;
+  custom_interval?: number;
+  custom_unit?: string;
+  custom_end_type?: string;
+  custom_end_date?: string;
+  custom_end_count?: number;
 }
 
 interface PresetEditModalProps {
@@ -65,6 +80,14 @@ const DAY_PARTS = [
   { value: 'night', labelKey: 'calendar.dayParts.night', emoji: '🌙' },
 ];
 
+const RECURRENCE_TYPES = [
+  { value: 'none', labelKey: 'calendar.form.recurrence.none' },
+  { value: 'daily', labelKey: 'calendar.form.recurrence.daily' },
+  { value: 'weekly', labelKey: 'calendar.form.recurrence.weekly' },
+  { value: 'monthly', labelKey: 'calendar.form.recurrence.monthly' },
+  { value: 'custom', labelKey: 'calendar.form.recurrence.custom' },
+];
+
 export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalProps) => {
   const { t } = useTranslation();
   const { locale } = useLocale();
@@ -74,12 +97,20 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const [name, setName] = useState('');
   const [emoji, setEmoji] = useState('📋');
   const [activities, setActivities] = useState<PresetActivity[]>([]);
-  const [weeklyRepetitions, setWeeklyRepetitions] = useState<number>(7);
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [draggedTemplate, setDraggedTemplate] = useState<ActivityTemplate | null>(null);
   const [draggedActivityIndex, setDraggedActivityIndex] = useState<number | null>(null);
   const [dragOverDayPart, setDragOverDayPart] = useState<string | null>(null);
+  
+  // Recurrence settings
+  const [recurrenceType, setRecurrenceType] = useState<string>('none');
+  const [customInterval, setCustomInterval] = useState<number>(1);
+  const [customUnit, setCustomUnit] = useState<string>('day');
+  const [customEndType, setCustomEndType] = useState<string>('never');
+  const [customEndDate, setCustomEndDate] = useState<Date>(addMonths(new Date(), 1));
+  const [customEndCount, setCustomEndCount] = useState<number>(30);
+  const [customRecurrenceOpen, setCustomRecurrenceOpen] = useState(false);
 
   // Fetch templates from database
   const { data: templates = [] } = useQuery({
@@ -100,12 +131,22 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setName(preset.name);
       setEmoji(preset.emoji);
       setActivities(preset.activities || []);
-      setWeeklyRepetitions((preset as any).weekly_repetitions || 7);
+      setRecurrenceType(preset.recurrence_type || 'none');
+      setCustomInterval(preset.custom_interval || 1);
+      setCustomUnit(preset.custom_unit || 'day');
+      setCustomEndType(preset.custom_end_type || 'never');
+      setCustomEndDate(preset.custom_end_date ? new Date(preset.custom_end_date) : addMonths(new Date(), 1));
+      setCustomEndCount(preset.custom_end_count || 30);
     } else {
       setName('');
       setEmoji('📋');
       setActivities([]);
-      setWeeklyRepetitions(7);
+      setRecurrenceType('none');
+      setCustomInterval(1);
+      setCustomUnit('day');
+      setCustomEndType('never');
+      setCustomEndDate(addMonths(new Date(), 1));
+      setCustomEndCount(30);
       setSearchQuery('');
     }
   }, [preset, open]);
@@ -233,7 +274,17 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       toast.error(t('calendar.presets.nameRequired'));
       return;
     }
-    saveMutation.mutate({ name: name.trim(), emoji, activities, weekly_repetitions: weeklyRepetitions });
+    saveMutation.mutate({ 
+      name: name.trim(), 
+      emoji, 
+      activities, 
+      recurrence_type: recurrenceType,
+      custom_interval: customInterval,
+      custom_unit: customUnit,
+      custom_end_type: customEndType,
+      custom_end_date: format(customEndDate, 'yyyy-MM-dd'),
+      custom_end_count: customEndCount,
+    });
   };
 
   const addActivity = (template: ActivityTemplate) => {
@@ -497,26 +548,133 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
               </div>
             </ScrollArea>
 
-            {/* Weekly repetitions setting */}
-            <Card className="p-3 mt-2">
-              <div className="flex items-center justify-between">
-                <Label className="text-sm">{t('calendar.presets.weeklyRepetitions')}</Label>
+            {/* Recurrence settings - fixed below scroll */}
+            <Card className="p-3 flex-shrink-0 space-y-3">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">{t('calendar.form.recurrenceType')}</Label>
                 <Select
-                  value={String(weeklyRepetitions)}
-                  onValueChange={(v) => setWeeklyRepetitions(parseInt(v))}
+                  value={recurrenceType}
+                  onValueChange={(v) => {
+                    setRecurrenceType(v);
+                    if (v === 'custom') {
+                      setCustomRecurrenceOpen(true);
+                    }
+                  }}
                 >
-                  <SelectTrigger className="w-32 h-8">
+                  <SelectTrigger className="w-full h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {[1, 2, 3, 4, 5, 6, 7].map((n) => (
-                      <SelectItem key={n} value={String(n)}>
-                        {n} {t('calendar.presets.daysPerWeek')}
+                    {RECURRENCE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        {t(type.labelKey)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              {/* Custom recurrence settings */}
+              {recurrenceType === 'custom' && (
+                <div className="space-y-3 pt-2 border-t border-border">
+                  {/* Repeat every */}
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs whitespace-nowrap">{t('calendar.form.recurrence.repeatEvery')}</Label>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => setCustomInterval(Math.max(1, customInterval - 1))}
+                      >
+                        <ChevronDown className="h-3 w-3" />
+                      </Button>
+                      <Input
+                        type="number"
+                        value={customInterval}
+                        onChange={(e) => setCustomInterval(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-12 h-7 text-center text-xs px-1"
+                        min={1}
+                      />
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="outline"
+                        className="h-7 w-7"
+                        onClick={() => setCustomInterval(customInterval + 1)}
+                      >
+                        <ChevronUp className="h-3 w-3" />
+                      </Button>
+                    </div>
+                    <Select value={customUnit} onValueChange={setCustomUnit}>
+                      <SelectTrigger className="w-24 h-7 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="day">{t('calendar.form.recurrence.units.day')}</SelectItem>
+                        <SelectItem value="week">{t('calendar.form.recurrence.units.week')}</SelectItem>
+                        <SelectItem value="month">{t('calendar.form.recurrence.units.month')}</SelectItem>
+                        <SelectItem value="year">{t('calendar.form.recurrence.units.year')}</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* End type */}
+                  <div className="space-y-2">
+                    <Label className="text-xs">{t('calendar.form.recurrence.ending')}</Label>
+                    <RadioGroup
+                      value={customEndType}
+                      onValueChange={setCustomEndType}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="never" id="end-never" />
+                        <Label htmlFor="end-never" className="text-xs">{t('calendar.form.recurrence.never')}</Label>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="date" id="end-date" />
+                        <Label htmlFor="end-date" className="text-xs">{t('calendar.form.recurrence.endDate')}</Label>
+                        {customEndType === 'date' && (
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" size="sm" className="h-7 text-xs">
+                                <CalendarIcon className="h-3 w-3 mr-1" />
+                                {format(customEndDate, 'dd.MM.yyyy')}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={customEndDate}
+                                onSelect={(date) => date && setCustomEndDate(date)}
+                                disabled={(date) => date < new Date()}
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <RadioGroupItem value="count" id="end-count" />
+                        <Label htmlFor="end-count" className="text-xs">{t('calendar.form.recurrence.after')}</Label>
+                        {customEndType === 'count' && (
+                          <>
+                            <Input
+                              type="number"
+                              value={customEndCount}
+                              onChange={(e) => setCustomEndCount(Math.max(1, parseInt(e.target.value) || 1))}
+                              className="w-16 h-7 text-xs"
+                              min={1}
+                            />
+                            <span className="text-xs text-muted-foreground">{t('calendar.form.recurrence.occurrences')}</span>
+                          </>
+                        )}
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              )}
             </Card>
           </div>
         </div>

@@ -334,7 +334,10 @@
       "nameRequired": "Veuillez entrer un nom de modèle",
       "noActivitiesAdded": "Veuillez ajouter au moins une activité",
       "dropActivitiesHere": "Déposez les activités ici",
-      "noActivitiesFound": "Aucune activité trouvée"
+      "noActivitiesFound": "Aucune activité trouvée",
+      "apply": "Appliquer",
+      "disable": "Désactiver",
+      "deleteError": "Erreur lors de la suppression du modèle"
     },
     "dayParts": {
       "earlyMorning": "Matin",

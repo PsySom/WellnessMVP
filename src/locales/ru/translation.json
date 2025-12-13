@@ -334,7 +334,10 @@
       "nameRequired": "Введите название шаблона",
       "noActivitiesAdded": "Добавьте хотя бы одну активность",
       "dropActivitiesHere": "Перетащите активности сюда",
-      "noActivitiesFound": "Активности не найдены"
+      "noActivitiesFound": "Активности не найдены",
+      "apply": "Применить",
+      "disable": "Отключить",
+      "deleteError": "Ошибка удаления шаблона"
     },
     "dayParts": {
       "earlyMorning": "Утро",

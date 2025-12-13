@@ -334,7 +334,10 @@
       "nameRequired": "Please enter a preset name",
       "noActivitiesAdded": "Please add at least one activity",
       "dropActivitiesHere": "Drop activities here",
-      "noActivitiesFound": "No activities found"
+      "noActivitiesFound": "No activities found",
+      "apply": "Apply",
+      "disable": "Disable",
+      "deleteError": "Error deleting preset"
     },
     "dayParts": {
       "earlyMorning": "Morning",
