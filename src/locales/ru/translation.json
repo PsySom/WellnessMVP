@@ -34,6 +34,7 @@
     "activateError": "Ошибка при активации шаблона",
     "deactivateError": "Ошибка при отмене шаблона",
     "neverActivated": "Никогда не активировался",
+    "additionalSettings": "Дополнительные настройки",
     "selectTags": "Выберите примечания",
     "selectTagsPlaceholder": "Выберите примечания...",
     "templateTags": "Примечание",

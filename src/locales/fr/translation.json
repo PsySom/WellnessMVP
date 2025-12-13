@@ -34,6 +34,7 @@
     "activateError": "Erreur lors de l'activation du modèle",
     "deactivateError": "Erreur lors de la désactivation du modèle",
     "neverActivated": "Jamais activé",
+    "additionalSettings": "Paramètres supplémentaires",
     "selectTags": "Sélectionner les notes",
     "selectTagsPlaceholder": "Sélectionner les notes...",
     "templateTags": "Note",

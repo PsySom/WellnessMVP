@@ -34,6 +34,7 @@
     "activateError": "Error activating template",
     "deactivateError": "Error deactivating template",
     "neverActivated": "Never activated",
+    "additionalSettings": "Additional settings",
     "selectTags": "Select notes",
     "selectTagsPlaceholder": "Select notes...",
     "templateTags": "Note",
