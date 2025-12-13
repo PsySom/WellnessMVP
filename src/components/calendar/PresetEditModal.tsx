@@ -160,9 +160,11 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
 
   // Drag handlers for existing activities (right side)
   const handleActivityDragStart = (e: React.DragEvent, index: number) => {
+    e.stopPropagation();
     setDraggedActivityIndex(index);
     setDraggedTemplate(null);
     e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', String(index));
   };
 
   const handleDragEnd = () => {
@@ -173,6 +175,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
 
   const handleDayPartDragOver = (e: React.DragEvent, dayPartValue: string) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = draggedTemplate ? 'copy' : 'move';
     setDragOverDayPart(dayPartValue);
   };
@@ -183,6 +186,7 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
 
   const handleDayPartDrop = (e: React.DragEvent, dayPartValue: string) => {
     e.preventDefault();
+    e.stopPropagation();
     setDragOverDayPart(null);
 
     if (draggedTemplate) {
@@ -197,9 +201,12 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
       setActivities([...activities, newActivity]);
     } else if (draggedActivityIndex !== null) {
       // Moving existing activity to different day part
-      setActivities(activities.map((a, i) => 
-        i === draggedActivityIndex ? { ...a, day_part: dayPartValue as PresetActivity['day_part'] } : a
-      ));
+      const updatedActivities = [...activities];
+      updatedActivities[draggedActivityIndex] = {
+        ...updatedActivities[draggedActivityIndex],
+        day_part: dayPartValue as PresetActivity['day_part']
+      };
+      setActivities(updatedActivities);
     }
 
     handleDragEnd();
@@ -457,11 +464,11 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
                 {activitiesByDayPart.map((dayPart) => (
                   <Card 
                     key={dayPart.value} 
-                    className={`p-2 transition-all ${
+                    className={`p-2 transition-all min-h-[48px] ${
                       dragOverDayPart === dayPart.value 
-                        ? 'ring-2 ring-primary bg-primary/5' 
-                        : ''
-                    }`}
+                        ? 'ring-2 ring-primary bg-primary/10 scale-[1.01]' 
+                        : 'hover:bg-muted/30'
+                    } ${draggedActivityIndex !== null ? 'cursor-copy' : ''}`}
                     onDragOver={(e) => handleDayPartDragOver(e, dayPart.value)}
                     onDragLeave={handleDayPartDragLeave}
                     onDrop={(e) => handleDayPartDrop(e, dayPart.value)}
