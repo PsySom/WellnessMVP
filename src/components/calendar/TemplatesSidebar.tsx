@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Settings, PlusCircle, Play, X } from 'lucide-react';
+import { Clock, Settings, PlusCircle, Play, Square, Archive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/useLocale';
 import { getCategoryConfig } from '@/config/categoryConfig';
@@ -14,12 +14,13 @@ import { useTranslation } from 'react-i18next';
 import { ACTIVITY_PRESETS, getCoreActivities, getAdditionalActivities } from '@/config/activityPresets';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
+import { format, addDays, addWeeks, addMonths } from 'date-fns';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { PresetEditModal } from './PresetEditModal';
 import { TemplateQuickView } from './TemplateQuickView';
+import type { UserPreset } from '@/types/preset';
 
 interface ActivityTemplate {
   id: string;
@@ -53,14 +54,6 @@ const getImpactColor = (impactType: string) => {
 interface TemplatesSidebarProps {
   selectedDate: Date;
   onOpenActivityModal?: (template: ActivityTemplate) => void;
-}
-
-interface UserPreset {
-  id: string;
-  user_id: string;
-  name: string;
-  emoji: string;
-  activities: any[];
 }
 
 export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: TemplatesSidebarProps) => {
@@ -124,7 +117,7 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
     enabled: !!user,
   });
 
-  // Fetch user custom presets
+  // Fetch user custom presets (excluding archived)
   const { data: userPresets = [] } = useQuery({
     queryKey: ['user-presets', user?.id],
     queryFn: async () => {
@@ -133,10 +126,14 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
         .from('user_presets')
         .select('*')
         .eq('user_id', user.id)
+        .eq('is_archived', false)
         .order('created_at', { ascending: false });
       
       if (error) throw error;
-      return (data || []) as UserPreset[];
+      return (data || []).map(p => ({
+        ...p,
+        activities: Array.isArray(p.activities) ? p.activities : JSON.parse(p.activities as string || '[]')
+      })) as UserPreset[];
     },
     enabled: !!user,
   });
@@ -271,58 +268,116 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
     }
   };
 
-  // Handle applying a user preset
-  const handleApplyUserPreset = async (preset: UserPreset) => {
-    if (!user || !preset.activities?.length) return;
+  // Handle activating a user preset - creates activities
+  const activateMutation = useMutation({
+    mutationFn: async (preset: UserPreset) => {
+      if (!user || !preset.activities?.length) throw new Error('Invalid preset');
 
-    try {
+      const startDate = new Date(selectedDate);
+      const activitiesToCreate: any[] = [];
+
       for (const activity of preset.activities) {
         const template = templates.find(t => t.id === activity.template_id);
         if (!template) continue;
 
-        const startTime = activity.day_part && activity.day_part !== 'anytime' 
+        const startTime = activity.day_part 
           ? getDefaultTimeForSlot(activity.day_part as any)
           : null;
 
-        const activityData = {
+        activitiesToCreate.push({
           user_id: user.id,
+          user_preset_id: preset.id,
           title: getLocalizedName(template),
           category: activity.category,
           impact_type: template.impact_type,
           duration_minutes: activity.duration || template.default_duration_minutes || 60,
-          status: 'planned' as const,
+          status: 'planned',
           emoji: template.emoji,
           date: selectedDateStr,
           start_time: startTime,
-        };
-
-        await addActivityMutation.mutateAsync(activityData);
+        });
       }
 
-      toast.success(t('calendar.presets.activitiesAdded', { count: preset.activities.length }));
-    } catch (error) {
-      console.error('Error applying preset:', error);
-      toast.error(t('calendar.presets.addError'));
-    }
-  };
+      if (activitiesToCreate.length > 0) {
+        const { error: insertError } = await supabase
+          .from('activities')
+          .insert(activitiesToCreate);
+        if (insertError) throw insertError;
+      }
 
-  // Handle disabling a user preset (hide from list)
-  const handleDisableUserPreset = async (presetId: string) => {
-    try {
+      // Update preset status
+      const { error: updateError } = await supabase
+        .from('user_presets')
+        .update({
+          is_active: true,
+          last_activated_at: new Date().toISOString(),
+          activation_start_date: selectedDateStr,
+          activation_end_date: selectedDateStr,
+        })
+        .eq('id', preset.id);
+      if (updateError) throw updateError;
+
+      return activitiesToCreate.length;
+    },
+    onSuccess: (count) => {
+      triggerActivityUpdate();
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      toast.success(t('calendar.presets.activitiesAdded', { count }));
+    },
+    onError: (error) => {
+      console.error('Error activating preset:', error);
+      toast.error(t('calendar.presets.addError'));
+    },
+  });
+
+  // Deactivate preset - removes activities created by this preset
+  const deactivateMutation = useMutation({
+    mutationFn: async (presetId: string) => {
+      // Delete all activities created by this preset
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', presetId);
+      if (deleteError) throw deleteError;
+
+      // Update preset status
+      const { error: updateError } = await supabase
+        .from('user_presets')
+        .update({
+          is_active: false,
+          activation_start_date: null,
+          activation_end_date: null,
+        })
+        .eq('id', presetId);
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      triggerActivityUpdate();
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      toast.success(t('activityTemplates.presetDeactivated'));
+    },
+    onError: (error) => {
+      console.error('Error deactivating preset:', error);
+      toast.error(t('activityTemplates.deactivateError'));
+    },
+  });
+
+  // Archive preset (soft delete)
+  const archiveMutation = useMutation({
+    mutationFn: async (presetId: string) => {
       const { error } = await supabase
         .from('user_presets')
-        .delete()
+        .update({ is_archived: true, is_active: false })
         .eq('id', presetId);
-      
       if (error) throw error;
-      
+    },
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
-      toast.success(t('calendar.presets.presetDeleted'));
-    } catch (error) {
-      console.error('Error disabling preset:', error);
-      toast.error(t('calendar.presets.deleteError'));
-    }
-  };
+      toast.success(t('activityTemplates.presetArchived'));
+    },
+  });
 
   const filteredTemplates = templates.filter((template) => {
     const matchesImpactType = selectedImpactType === 'all' || template.impact_type === selectedImpactType;
@@ -362,6 +417,11 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
     return category;
   };
 
+  const formatLastActivated = (date: string | null) => {
+    if (!date) return null;
+    return format(new Date(date), 'dd.MM.yyyy');
+  };
+
   return (
     <>
       <AlertDialog open={duplicateDialog.open} onOpenChange={(open) => setDuplicateDialog({ ...duplicateDialog, open })}>
@@ -399,7 +459,7 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
             </Button>
           </div>
           
-          <ScrollArea className="h-[200px]">
+          <ScrollArea className="h-[240px]">
             <div className="space-y-2 pr-3">
               {/* User custom presets */}
               {userPresets.map((preset) => {
@@ -408,9 +468,9 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
                 return (
                   <Card
                     key={`user-${preset.id}`}
-                    className={`p-3 transition-all duration-200 hover:shadow-md border-primary/20 ${
-                      selectedPreset === `user-${preset.id}` ? 'ring-2 ring-primary' : ''
-                    }`}
+                    className={`p-3 transition-all duration-200 hover:shadow-md ${
+                      preset.is_active ? 'ring-2 ring-green-500/50 bg-green-500/5' : 'border-primary/20'
+                    } ${selectedPreset === `user-${preset.id}` ? 'ring-2 ring-primary' : ''}`}
                   >
                     <div 
                       className="flex items-center justify-between mb-1 cursor-pointer"
@@ -421,7 +481,21 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
                     >
                       <div className="flex items-center gap-2 flex-1 min-w-0">
                         <span className="text-xl flex-shrink-0">{preset.emoji}</span>
-                        <span className="text-sm font-medium truncate">{preset.name}</span>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1">
+                            <span className="text-sm font-medium truncate">{preset.name}</span>
+                            {preset.is_active && (
+                              <Badge className="text-[9px] px-1 py-0 bg-green-500/20 text-green-600 border-green-500/30">
+                                ✓
+                              </Badge>
+                            )}
+                          </div>
+                          {preset.last_activated_at && (
+                            <p className="text-[10px] text-muted-foreground">
+                              {formatLastActivated(preset.last_activated_at)}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <Badge variant="outline" className="text-xs px-1.5 py-0">
@@ -441,32 +515,47 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
                       </div>
                     </div>
                     
-                    {/* Apply and Disable buttons */}
+                    {/* Action buttons */}
                     <div className="flex gap-2 mt-2 pt-2 border-t border-border">
-                      <Button
-                        size="sm"
-                        variant="default"
-                        className="flex-1 h-7 text-xs"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleApplyUserPreset(preset);
-                        }}
-                        disabled={addActivityMutation.isPending}
-                      >
-                        <Play className="h-3 w-3 mr-1" />
-                        {t('calendar.presets.apply')}
-                      </Button>
+                      {preset.is_active ? (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="flex-1 h-7 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deactivateMutation.mutate(preset.id);
+                          }}
+                          disabled={deactivateMutation.isPending}
+                        >
+                          <Square className="h-3 w-3 mr-1" />
+                          {t('activityTemplates.deactivate')}
+                        </Button>
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="default"
+                          className="flex-1 h-7 text-xs"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            activateMutation.mutate(preset);
+                          }}
+                          disabled={activateMutation.isPending}
+                        >
+                          <Play className="h-3 w-3 mr-1" />
+                          {t('calendar.presets.apply')}
+                        </Button>
+                      )}
                       <Button
                         size="sm"
                         variant="outline"
-                        className="flex-1 h-7 text-xs"
+                        className="h-7 text-xs px-2"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDisableUserPreset(preset.id);
+                          archiveMutation.mutate(preset.id);
                         }}
                       >
-                        <X className="h-3 w-3 mr-1" />
-                        {t('calendar.presets.disable')}
+                        <Archive className="h-3 w-3" />
                       </Button>
                     </div>
                   </Card>

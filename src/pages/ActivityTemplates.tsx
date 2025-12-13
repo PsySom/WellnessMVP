@@ -9,7 +9,8 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
-import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers, Play, Square, Archive, RotateCcw, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +18,10 @@ import { toast } from 'sonner';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format, addMonths } from 'date-fns';
+import { format, addDays, addWeeks, addMonths } from 'date-fns';
+import { getDefaultTimeForSlot } from '@/utils/timeSlots';
+import { triggerActivityUpdate } from '@/utils/activitySync';
+import type { UserPreset, PresetActivity, RecurrenceConfig } from '@/types/preset';
 
 interface ActivityTemplate {
   id: string;
@@ -29,24 +33,6 @@ interface ActivityTemplate {
   impact_type: string;
   default_duration_minutes: number | null;
   emoji: string;
-}
-
-interface PresetActivity {
-  template_id: string;
-  category: string;
-  day_part: 'early_morning' | 'late_morning' | 'midday' | 'afternoon' | 'evening' | 'night';
-  duration: number;
-  repetitions: number;
-}
-
-interface UserPreset {
-  id: string;
-  user_id: string;
-  name: string;
-  emoji: string;
-  activities: PresetActivity[];
-  created_at: string;
-  updated_at: string;
 }
 
 const DAY_PARTS = [
@@ -91,6 +77,9 @@ const ActivityTemplates = () => {
   const [customEndDate, setCustomEndDate] = useState<Date>(addMonths(new Date(), 1));
   const [customEndCount, setCustomEndCount] = useState<number>(30);
 
+  // Library tab
+  const [libraryTab, setLibraryTab] = useState<'active' | 'archive'>('active');
+
   // Fetch templates from database
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
     queryKey: ['activity-templates'],
@@ -123,6 +112,10 @@ const ActivityTemplates = () => {
     },
     enabled: !!user,
   });
+
+  // Filter presets by archive status
+  const activePresets = userPresets.filter(p => !p.is_archived);
+  const archivedPresets = userPresets.filter(p => p.is_archived);
 
   // Load preset into editor
   const loadPresetForEditing = (preset: UserPreset) => {
@@ -250,6 +243,38 @@ const ActivityTemplates = () => {
     },
   });
 
+  // Archive mutation (soft delete)
+  const archiveMutation = useMutation({
+    mutationFn: async (presetId: string) => {
+      const { error } = await supabase
+        .from('user_presets')
+        .update({ is_archived: true, is_active: false })
+        .eq('id', presetId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      toast.success(t('activityTemplates.presetArchived'));
+      if (editingPreset) clearEditor();
+    },
+  });
+
+  // Restore from archive mutation
+  const restoreMutation = useMutation({
+    mutationFn: async (presetId: string) => {
+      const { error } = await supabase
+        .from('user_presets')
+        .update({ is_archived: false })
+        .eq('id', presetId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      toast.success(t('activityTemplates.presetRestored'));
+    },
+  });
+
+  // Permanent delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (presetId: string) => {
       const { error } = await supabase.from('user_presets').delete().eq('id', presetId);
@@ -259,6 +284,139 @@ const ActivityTemplates = () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
       toast.success(t('calendar.presets.presetDeleted'));
       if (editingPreset) clearEditor();
+    },
+  });
+
+  // Activate preset - creates activities in calendar
+  const activateMutation = useMutation({
+    mutationFn: async (preset: UserPreset) => {
+      if (!user) throw new Error('Not authenticated');
+
+      const startDate = new Date();
+      let endDate = startDate;
+
+      // Calculate end date based on recurrence
+      if (recurrenceType === 'daily') {
+        endDate = addDays(startDate, recurrenceCount - 1);
+      } else if (recurrenceType === 'weekly') {
+        endDate = addWeeks(startDate, recurrenceCount);
+      } else if (recurrenceType === 'monthly') {
+        endDate = addMonths(startDate, recurrenceCount);
+      } else if (recurrenceType === 'custom') {
+        if (customEndType === 'date') {
+          endDate = customEndDate;
+        } else if (customEndType === 'count') {
+          const multiplier = customEndCount * customInterval;
+          if (customUnit === 'day') endDate = addDays(startDate, multiplier);
+          else if (customUnit === 'week') endDate = addWeeks(startDate, multiplier);
+          else if (customUnit === 'month') endDate = addMonths(startDate, multiplier);
+        } else {
+          endDate = addMonths(startDate, 12); // Default to 1 year for "never"
+        }
+      }
+
+      // Create activities based on recurrence
+      const activitiesToCreate: any[] = [];
+      let currentDate = new Date(startDate);
+
+      while (currentDate <= endDate) {
+        for (const activity of preset.activities) {
+          const template = templates.find(t => t.id === activity.template_id);
+          if (!template) continue;
+
+          const startTime = getDefaultTimeForSlot(activity.day_part as any);
+
+          activitiesToCreate.push({
+            user_id: user.id,
+            user_preset_id: preset.id,
+            title: getLocalizedName(template),
+            category: activity.category,
+            impact_type: template.impact_type,
+            duration_minutes: activity.duration || template.default_duration_minutes || 60,
+            status: 'planned',
+            emoji: template.emoji,
+            date: format(currentDate, 'yyyy-MM-dd'),
+            start_time: startTime,
+          });
+        }
+
+        // Move to next recurrence date
+        if (recurrenceType === 'none') break;
+        else if (recurrenceType === 'daily') currentDate = addDays(currentDate, 1);
+        else if (recurrenceType === 'weekly') currentDate = addDays(currentDate, 7);
+        else if (recurrenceType === 'monthly') currentDate = addMonths(currentDate, 1);
+        else if (recurrenceType === 'custom') {
+          if (customUnit === 'day') currentDate = addDays(currentDate, customInterval);
+          else if (customUnit === 'week') currentDate = addWeeks(currentDate, customInterval);
+          else if (customUnit === 'month') currentDate = addMonths(currentDate, customInterval);
+          else currentDate = addMonths(currentDate, customInterval * 12);
+        }
+      }
+
+      // Insert all activities
+      if (activitiesToCreate.length > 0) {
+        const { error: insertError } = await supabase
+          .from('activities')
+          .insert(activitiesToCreate);
+        if (insertError) throw insertError;
+      }
+
+      // Update preset status
+      const { error: updateError } = await supabase
+        .from('user_presets')
+        .update({
+          is_active: true,
+          last_activated_at: new Date().toISOString(),
+          activation_start_date: format(startDate, 'yyyy-MM-dd'),
+          activation_end_date: format(endDate, 'yyyy-MM-dd'),
+        })
+        .eq('id', preset.id);
+      if (updateError) throw updateError;
+
+      return activitiesToCreate.length;
+    },
+    onSuccess: (count) => {
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      triggerActivityUpdate();
+      toast.success(t('activityTemplates.presetActivated', { count }));
+    },
+    onError: (error) => {
+      console.error('Error activating preset:', error);
+      toast.error(t('activityTemplates.activateError'));
+    },
+  });
+
+  // Deactivate preset - removes activities created by this preset
+  const deactivateMutation = useMutation({
+    mutationFn: async (presetId: string) => {
+      // Delete all activities created by this preset
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', presetId);
+      if (deleteError) throw deleteError;
+
+      // Update preset status
+      const { error: updateError } = await supabase
+        .from('user_presets')
+        .update({
+          is_active: false,
+          activation_start_date: null,
+          activation_end_date: null,
+        })
+        .eq('id', presetId);
+      if (updateError) throw updateError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      triggerActivityUpdate();
+      toast.success(t('activityTemplates.presetDeactivated'));
+    },
+    onError: (error) => {
+      console.error('Error deactivating preset:', error);
+      toast.error(t('activityTemplates.deactivateError'));
     },
   });
 
@@ -327,9 +485,15 @@ const ActivityTemplates = () => {
   }));
 
   // Statistics
-  const totalPresets = userPresets.length;
-  const totalActivitiesInPresets = userPresets.reduce((sum, p) => sum + (p.activities?.length || 0), 0);
+  const totalPresets = activePresets.length;
+  const totalActivitiesInPresets = activePresets.reduce((sum, p) => sum + (p.activities?.length || 0), 0);
   const avgActivitiesPerPreset = totalPresets > 0 ? Math.round(totalActivitiesInPresets / totalPresets) : 0;
+  const activePresetsCount = activePresets.filter(p => p.is_active).length;
+
+  const formatLastActivated = (date: string | null) => {
+    if (!date) return t('activityTemplates.neverActivated');
+    return format(new Date(date), 'dd.MM.yyyy HH:mm');
+  };
 
   return (
     <AppLayout>
@@ -686,68 +850,182 @@ const ActivityTemplates = () => {
             </div>
           </Card>
 
-          {/* RIGHT: Template Library */}
+          {/* RIGHT: Template Library with Tabs */}
           <Card className="flex flex-col p-4 overflow-hidden">
-            <h2 className="text-lg font-semibold flex items-center gap-2 mb-4">
-              <Layers className="h-5 w-5" />
-              {t('activityTemplates.library')}
-            </h2>
+            <Tabs value={libraryTab} onValueChange={(v) => setLibraryTab(v as 'active' | 'archive')} className="flex flex-col h-full">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Layers className="h-5 w-5" />
+                  {t('activityTemplates.library')}
+                </h2>
+                <TabsList className="h-8">
+                  <TabsTrigger value="active" className="text-xs px-3 h-7">
+                    <Play className="h-3 w-3 mr-1" />
+                    {t('activityTemplates.activeTab')} ({activePresets.length})
+                  </TabsTrigger>
+                  <TabsTrigger value="archive" className="text-xs px-3 h-7">
+                    <Archive className="h-3 w-3 mr-1" />
+                    {t('activityTemplates.archiveTab')} ({archivedPresets.length})
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
-            <ScrollArea className="flex-1 min-h-0">
-              {presetsLoading ? (
-                <div className="space-y-2 p-2">
-                  {[...Array(4)].map((_, i) => (
-                    <div key={i} className="h-16 bg-muted animate-pulse rounded-lg" />
-                  ))}
-                </div>
-              ) : userPresets.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
-                  <Layers className="h-10 w-10 mb-2 opacity-50" />
-                  <p className="text-sm">{t('activityTemplates.noPresets')}</p>
-                </div>
-              ) : (
-                <div className="space-y-2 pr-2">
-                  {userPresets.map((preset) => (
-                    <Card key={preset.id} className="p-3 hover:bg-accent/30 transition-all">
-                      <div className="flex items-start justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{preset.emoji}</span>
-                          <div>
-                            <p className="font-medium text-sm">{preset.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {preset.activities?.length || 0} {t('activityTemplates.activitiesCount')}
-                            </p>
+              <TabsContent value="active" className="flex-1 min-h-0 mt-0">
+                <ScrollArea className="h-full">
+                  {presetsLoading ? (
+                    <div className="space-y-2 p-2">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-20 bg-muted animate-pulse rounded-lg" />
+                      ))}
+                    </div>
+                  ) : activePresets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+                      <Layers className="h-10 w-10 mb-2 opacity-50" />
+                      <p className="text-sm">{t('activityTemplates.noPresets')}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pr-2">
+                      {activePresets.map((preset) => (
+                        <Card key={preset.id} className={`p-3 hover:bg-accent/30 transition-all ${preset.is_active ? 'ring-2 ring-green-500/50 bg-green-500/5' : ''}`}>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">{preset.emoji}</span>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <p className="font-medium text-sm">{preset.name}</p>
+                                  {preset.is_active && (
+                                    <Badge className="text-[10px] px-1.5 py-0 bg-green-500/20 text-green-600 border-green-500/30">
+                                      {t('activityTemplates.active')}
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {preset.activities?.length || 0} {t('activityTemplates.activitiesCount')}
+                                </p>
+                                {preset.last_activated_at && (
+                                  <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                    <Clock className="h-2.5 w-2.5" />
+                                    {formatLastActivated(preset.last_activated_at)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => loadPresetForEditing(preset)}>
+                                <Edit className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => archiveMutation.mutate(preset.id)}
+                              >
+                                <Archive className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
                           </div>
-                        </div>
-                        <div className="flex gap-1">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => loadPresetForEditing(preset)}>
-                            <Edit className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive"
-                            onClick={() => deleteMutation.mutate(preset.id)}>
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      </div>
 
-                      {/* Day parts preview */}
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {DAY_PARTS.map((dp) => {
-                          const count = (preset.activities || []).filter(a => a.day_part === dp.value).length;
-                          if (count === 0) return null;
-                          return (
-                            <Badge key={dp.value} variant="secondary" className="text-[10px] px-1.5 py-0">
-                              {dp.emoji} {count}
-                            </Badge>
-                          );
-                        })}
-                      </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-              <ScrollBar orientation="vertical" />
-            </ScrollArea>
+                          {/* Day parts preview */}
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {DAY_PARTS.map((dp) => {
+                              const count = (preset.activities || []).filter(a => a.day_part === dp.value).length;
+                              if (count === 0) return null;
+                              return (
+                                <Badge key={dp.value} variant="secondary" className="text-[10px] px-1.5 py-0">
+                                  {dp.emoji} {count}
+                                </Badge>
+                              );
+                            })}
+                          </div>
+
+                          {/* Activate/Deactivate buttons */}
+                          <div className="flex gap-2 mt-2 pt-2 border-t border-border">
+                            {preset.is_active ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="flex-1 h-7 text-xs"
+                                onClick={() => deactivateMutation.mutate(preset.id)}
+                                disabled={deactivateMutation.isPending}
+                              >
+                                <Square className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.deactivate')}
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="default"
+                                className="flex-1 h-7 text-xs"
+                                onClick={() => activateMutation.mutate(preset)}
+                                disabled={activateMutation.isPending}
+                              >
+                                <Play className="h-3 w-3 mr-1" />
+                                {t('activityTemplates.activate')}
+                              </Button>
+                            )}
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                  <ScrollBar orientation="vertical" />
+                </ScrollArea>
+              </TabsContent>
+
+              <TabsContent value="archive" className="flex-1 min-h-0 mt-0">
+                <ScrollArea className="h-full">
+                  {archivedPresets.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-40 text-muted-foreground">
+                      <Archive className="h-10 w-10 mb-2 opacity-50" />
+                      <p className="text-sm">{t('activityTemplates.noArchivedPresets')}</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 pr-2">
+                      {archivedPresets.map((preset) => (
+                        <Card key={preset.id} className="p-3 hover:bg-accent/30 transition-all opacity-75">
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl grayscale">{preset.emoji}</span>
+                              <div>
+                                <p className="font-medium text-sm">{preset.name}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {preset.activities?.length || 0} {t('activityTemplates.activitiesCount')}
+                                </p>
+                                {preset.last_activated_at && (
+                                  <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
+                                    <Clock className="h-2.5 w-2.5" />
+                                    {formatLastActivated(preset.last_activated_at)}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex gap-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7"
+                                onClick={() => restoreMutation.mutate(preset.id)}
+                              >
+                                <RotateCcw className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-7 w-7 text-destructive hover:text-destructive"
+                                onClick={() => deleteMutation.mutate(preset.id)}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                          </div>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                  <ScrollBar orientation="vertical" />
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
           </Card>
         </div>
 
@@ -758,10 +1036,14 @@ const ActivityTemplates = () => {
             <h2 className="text-lg font-semibold">{t('activityTemplates.statistics')}</h2>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <div className="text-center p-3 bg-muted/30 rounded-lg">
               <p className="text-2xl font-bold text-primary">{totalPresets}</p>
               <p className="text-xs text-muted-foreground">{t('activityTemplates.totalPresets')}</p>
+            </div>
+            <div className="text-center p-3 bg-muted/30 rounded-lg">
+              <p className="text-2xl font-bold text-primary">{activePresetsCount}</p>
+              <p className="text-xs text-muted-foreground">{t('activityTemplates.activePresets')}</p>
             </div>
             <div className="text-center p-3 bg-muted/30 rounded-lg">
               <p className="text-2xl font-bold text-primary">{totalActivitiesInPresets}</p>
@@ -772,8 +1054,8 @@ const ActivityTemplates = () => {
               <p className="text-xs text-muted-foreground">{t('activityTemplates.avgPerPreset')}</p>
             </div>
             <div className="text-center p-3 bg-muted/30 rounded-lg">
-              <p className="text-2xl font-bold text-primary">{templates.length}</p>
-              <p className="text-xs text-muted-foreground">{t('activityTemplates.availableActivities')}</p>
+              <p className="text-2xl font-bold text-primary">{archivedPresets.length}</p>
+              <p className="text-xs text-muted-foreground">{t('activityTemplates.archivedPresets')}</p>
             </div>
           </div>
         </Card>
