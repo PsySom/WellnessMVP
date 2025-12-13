@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useLocale } from '@/hooks/useLocale';
 import { getCategoryConfig } from '@/config/categoryConfig';
 import ImpactTypeFilter from '@/components/activity-templates/ImpactTypeFilter';
-import TemplateDetailModal from '@/components/activity-templates/TemplateDetailModal';
+
 import { useTranslation } from 'react-i18next';
 import { ACTIVITY_PRESETS, getCoreActivities, getAdditionalActivities } from '@/config/activityPresets';
 import { useAuth } from '@/contexts/AuthContext';
@@ -69,7 +69,6 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [selectedImpactType, setSelectedImpactType] = useState<string>('all');
-  const [selectedTemplate, setSelectedTemplate] = useState<ActivityTemplate | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
   const [activityFilter, setActivityFilter] = useState<'all' | 'core' | 'additional'>('all');
   const [duplicateDialog, setDuplicateDialog] = useState<{ open: boolean; activity: any; onConfirm: () => void }>({ 
@@ -582,8 +581,6 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
                     onEditDetails={() => {
                       if (onOpenActivityModal) {
                         onOpenActivityModal(template);
-                      } else {
-                        setSelectedTemplate(template);
                       }
                     }}
                     onCreateActivity={handleQuickCreate}
@@ -632,12 +629,6 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
           </div>
         </ScrollArea>
       </div>
-
-      <TemplateDetailModal
-        template={selectedTemplate}
-        open={!!selectedTemplate}
-        onClose={() => setSelectedTemplate(null)}
-      />
 
       <PresetEditModal
         open={presetEditModal.open}

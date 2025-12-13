@@ -216,15 +216,6 @@ export const TemplateQuickView = ({
           {/* Actions */}
           <div className="flex gap-2 pt-2 border-t border-border">
             <Button
-              variant="outline"
-              size="sm"
-              className="flex-1"
-              onClick={handleEditDetails}
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              {t('calendar.quickView.editDetails')}
-            </Button>
-            <Button
               variant="default"
               size="sm"
               className="flex-1"
@@ -233,6 +224,15 @@ export const TemplateQuickView = ({
             >
               <Plus className="h-3 w-3 mr-1" />
               {t('calendar.quickView.create')}
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex-1"
+              onClick={handleEditDetails}
+            >
+              <Edit className="h-3 w-3 mr-1" />
+              {t('calendar.quickView.editDetails')}
             </Button>
           </div>
         </div>
