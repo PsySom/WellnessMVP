@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers, Play, Square, Archive, RotateCcw, Clock, Tag, Filter } from 'lucide-react';
+import { GripVertical, Plus, Save, Trash2, Search, Edit, ChevronDown, ChevronUp, Calendar as CalendarIcon, BarChart3, History, Layers, Play, Square, Archive, RotateCcw, Clock, Tag, Filter, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLocale } from '@/hooks/useLocale';
 import { useAuth } from '@/contexts/AuthContext';
@@ -96,6 +96,7 @@ const ActivityTemplates = () => {
   // Library tab and filter
   const [libraryTab, setLibraryTab] = useState<'active' | 'archive'>('active');
   const [libraryTagFilter, setLibraryTagFilter] = useState<string>('all');
+  const [showAdditionalSettings, setShowAdditionalSettings] = useState<boolean>(false);
 
   // Fetch templates from database
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
@@ -882,48 +883,73 @@ const ActivityTemplates = () => {
                     </div>
                   )}
 
-                  {/* Tags selector - dropdown */}
-                  <div className="space-y-1 pt-1.5 border-t border-border">
-                    <Label className="text-xs font-medium flex items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      {t('activityTemplates.templateTags')}
-                    </Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="w-full h-8 justify-between text-xs">
-                          {selectedTags.length > 0 ? (
-                            <span className="flex items-center gap-1 truncate">
-                              {selectedTags.slice(0, 3).map(tag => (
-                                <span key={tag}>{TAG_EMOJIS[tag as PresetTag]} {t(`activityTemplates.tags.${tag}`)}</span>
-                              ))}
-                              {selectedTags.length > 3 && <span>+{selectedTags.length - 3}</span>}
-                            </span>
-                          ) : (
-                            <span className="text-muted-foreground">{t('activityTemplates.selectTagsPlaceholder')}</span>
-                          )}
-                          <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-56 p-2" align="start">
+                  {/* Additional settings collapsible */}
+                  <div className="pt-1.5 border-t border-border">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-between h-7 text-xs"
+                      onClick={() => setShowAdditionalSettings(!showAdditionalSettings)}
+                    >
+                      <span className="flex items-center gap-1">
+                        <Settings className="h-3 w-3" />
+                        {t('activityTemplates.additionalSettings')}
+                      </span>
+                      {showAdditionalSettings ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      )}
+                    </Button>
+
+                    {showAdditionalSettings && (
+                      <div className="space-y-2 mt-2">
+                        {/* Tags selector - dropdown */}
                         <div className="space-y-1">
-                          {PRESET_TAGS.map((tag) => (
-                            <div
-                              key={tag}
-                              onClick={() => toggleTag(tag)}
-                              className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors text-xs ${
-                                selectedTags.includes(tag) 
-                                  ? 'bg-primary text-primary-foreground' 
-                                  : 'hover:bg-accent'
-                              }`}
-                            >
-                              <span>{TAG_EMOJIS[tag]}</span>
-                              <span className="flex-1">{t(`activityTemplates.tags.${tag}`)}</span>
-                              {selectedTags.includes(tag) && <span>✓</span>}
-                            </div>
-                          ))}
+                          <Label className="text-xs font-medium flex items-center gap-1">
+                            <Tag className="h-3 w-3" />
+                            {t('activityTemplates.templateTags')}
+                          </Label>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button variant="outline" className="w-full h-8 justify-between text-xs">
+                                {selectedTags.length > 0 ? (
+                                  <span className="flex items-center gap-1 truncate">
+                                    {selectedTags.slice(0, 3).map(tag => (
+                                      <span key={tag}>{TAG_EMOJIS[tag as PresetTag]} {t(`activityTemplates.tags.${tag}`)}</span>
+                                    ))}
+                                    {selectedTags.length > 3 && <span>+{selectedTags.length - 3}</span>}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground">{t('activityTemplates.selectTagsPlaceholder')}</span>
+                                )}
+                                <ChevronDown className="h-3 w-3 ml-1 opacity-50" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-56 p-2" align="start">
+                              <div className="space-y-1">
+                                {PRESET_TAGS.map((tag) => (
+                                  <div
+                                    key={tag}
+                                    onClick={() => toggleTag(tag)}
+                                    className={`flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer transition-colors text-xs ${
+                                      selectedTags.includes(tag) 
+                                        ? 'bg-primary text-primary-foreground' 
+                                        : 'hover:bg-accent'
+                                    }`}
+                                  >
+                                    <span>{TAG_EMOJIS[tag]}</span>
+                                    <span className="flex-1">{t(`activityTemplates.tags.${tag}`)}</span>
+                                    {selectedTags.includes(tag) && <span>✓</span>}
+                                  </div>
+                                ))}
+                              </div>
+                            </PopoverContent>
+                          </Popover>
                         </div>
-                      </PopoverContent>
-                    </Popover>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </div>
