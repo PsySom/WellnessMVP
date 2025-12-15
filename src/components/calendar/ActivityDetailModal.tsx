@@ -61,7 +61,9 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
   // Check if activity is part of a recurrence group
   const repetitionConfig = activity?.repetition_config || {};
   const recurrenceGroupId = repetitionConfig.recurrence_group_id;
-  const isRecurring = recurrenceGroupId && repetitionConfig.recurrence_type !== 'none';
+  // Check for recurrence - only show options if recurrence_group_id exists
+  const recurrenceType = repetitionConfig.recurrence_type || 'none';
+  const isRecurring = Boolean(recurrenceGroupId) && recurrenceType !== 'none';
 
   const handleEditClick = () => {
     if (isRecurring) {
