@@ -19,6 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, addDays, addWeeks, addMonths } from 'date-fns';
+import { generateRecurrenceDates, calculateActivationEndDate } from '@/utils/recurrenceUtils';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { PRESET_TAGS, type UserPreset, type PresetActivity, type RecurrenceConfig, type PresetTag } from '@/types/preset';
@@ -280,17 +281,26 @@ const ActivityTemplates = () => {
     },
   });
 
-  // Archive mutation (soft delete)
+  // Archive mutation (soft delete) - also removes associated activities
   const archiveMutation = useMutation({
     mutationFn: async (presetId: string) => {
+      // Delete all activities created by this preset
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', presetId);
+      if (deleteError) throw deleteError;
+
       const { error } = await supabase
         .from('user_presets')
-        .update({ is_archived: true, is_active: false })
+        .update({ is_archived: true, is_active: false, activation_start_date: null, activation_end_date: null })
         .eq('id', presetId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      triggerActivityUpdate();
       toast.success(t('activityTemplates.presetArchived'));
       if (editingPreset) clearEditor();
     },
@@ -311,52 +321,52 @@ const ActivityTemplates = () => {
     },
   });
 
-  // Permanent delete mutation
+  // Permanent delete mutation - also removes associated activities
   const deleteMutation = useMutation({
     mutationFn: async (presetId: string) => {
+      // Delete all activities created by this preset
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', presetId);
+      if (deleteError) throw deleteError;
+
       const { error } = await supabase.from('user_presets').delete().eq('id', presetId);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
+      triggerActivityUpdate();
       toast.success(t('calendar.presets.presetDeleted'));
       if (editingPreset) clearEditor();
     },
   });
 
-  // Activate preset - creates activities in calendar
+  // Activate preset - creates activities in calendar based on recurrence settings
   const activateMutation = useMutation({
     mutationFn: async (preset: UserPreset) => {
       if (!user) throw new Error('Not authenticated');
 
       const startDate = new Date();
-      let endDate = startDate;
+      
+      // Build recurrence settings from current state
+      const recurrenceSettings = {
+        recurrence_type: recurrenceType,
+        recurrence_count: recurrenceCount,
+        custom_interval: customInterval,
+        custom_unit: customUnit,
+        custom_end_type: customEndType,
+        custom_end_date: format(customEndDate, 'yyyy-MM-dd'),
+        custom_end_count: customEndCount,
+      };
 
-      // Calculate end date based on recurrence
-      if (recurrenceType === 'daily') {
-        endDate = addDays(startDate, recurrenceCount - 1);
-      } else if (recurrenceType === 'weekly') {
-        endDate = addWeeks(startDate, recurrenceCount);
-      } else if (recurrenceType === 'monthly') {
-        endDate = addMonths(startDate, recurrenceCount);
-      } else if (recurrenceType === 'custom') {
-        if (customEndType === 'date') {
-          endDate = customEndDate;
-        } else if (customEndType === 'count') {
-          const multiplier = customEndCount * customInterval;
-          if (customUnit === 'day') endDate = addDays(startDate, multiplier);
-          else if (customUnit === 'week') endDate = addWeeks(startDate, multiplier);
-          else if (customUnit === 'month') endDate = addMonths(startDate, multiplier);
-        } else {
-          endDate = addMonths(startDate, 12); // Default to 1 year for "never"
-        }
-      }
-
-      // Create activities based on recurrence
+      // Generate all dates based on recurrence using shared utility
+      const recurrenceDates = generateRecurrenceDates(startDate, recurrenceSettings);
       const activitiesToCreate: any[] = [];
-      let currentDate = new Date(startDate);
 
-      while (currentDate <= endDate) {
+      // Create activities for each date in recurrence
+      for (const dateStr of recurrenceDates) {
         for (const activity of preset.activities) {
           const template = templates.find(t => t.id === activity.template_id);
           if (!template) continue;
@@ -372,31 +382,26 @@ const ActivityTemplates = () => {
             duration_minutes: activity.duration || template.default_duration_minutes || 60,
             status: 'planned',
             emoji: template.emoji,
-            date: format(currentDate, 'yyyy-MM-dd'),
+            date: dateStr,
             start_time: startTime,
           });
         }
+      }
 
-        // Move to next recurrence date
-        if (recurrenceType === 'none') break;
-        else if (recurrenceType === 'daily') currentDate = addDays(currentDate, 1);
-        else if (recurrenceType === 'weekly') currentDate = addDays(currentDate, 7);
-        else if (recurrenceType === 'monthly') currentDate = addMonths(currentDate, 1);
-        else if (recurrenceType === 'custom') {
-          if (customUnit === 'day') currentDate = addDays(currentDate, customInterval);
-          else if (customUnit === 'week') currentDate = addWeeks(currentDate, customInterval);
-          else if (customUnit === 'month') currentDate = addMonths(currentDate, customInterval);
-          else currentDate = addMonths(currentDate, customInterval * 12);
+      // Insert all activities in batches
+      if (activitiesToCreate.length > 0) {
+        const batchSize = 100;
+        for (let i = 0; i < activitiesToCreate.length; i += batchSize) {
+          const batch = activitiesToCreate.slice(i, i + batchSize);
+          const { error: insertError } = await supabase
+            .from('activities')
+            .insert(batch);
+          if (insertError) throw insertError;
         }
       }
 
-      // Insert all activities
-      if (activitiesToCreate.length > 0) {
-        const { error: insertError } = await supabase
-          .from('activities')
-          .insert(activitiesToCreate);
-        if (insertError) throw insertError;
-      }
+      // Calculate activation end date using shared utility
+      const activationEndDate = calculateActivationEndDate(startDate, recurrenceSettings);
 
       // Update preset status
       const { error: updateError } = await supabase
@@ -405,7 +410,7 @@ const ActivityTemplates = () => {
           is_active: true,
           last_activated_at: new Date().toISOString(),
           activation_start_date: format(startDate, 'yyyy-MM-dd'),
-          activation_end_date: format(endDate, 'yyyy-MM-dd'),
+          activation_end_date: activationEndDate,
         })
         .eq('id', preset.id);
       if (updateError) throw updateError;

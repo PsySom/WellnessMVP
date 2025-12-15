@@ -266,15 +266,20 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
           .update(presetData)
           .eq('id', preset.id);
         if (error) throw error;
+        return preset.id;
       } else {
-        const { error } = await supabase
+        const { data: newPreset, error } = await supabase
           .from('user_presets')
-          .insert([{ user_id: user.id, ...presetData }]);
+          .insert([{ user_id: user.id, ...presetData }])
+          .select('id')
+          .single();
         if (error) throw error;
+        return newPreset.id;
       }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success(preset ? t('calendar.presets.presetUpdated') : t('calendar.presets.presetCreated'));
       onOpenChange(false);
     },
@@ -287,11 +292,21 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
   const deleteMutation = useMutation({
     mutationFn: async () => {
       if (!preset?.id) throw new Error('No preset to delete');
+      
+      // Delete all activities created by this preset
+      const { error: deleteActivitiesError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', preset.id);
+      if (deleteActivitiesError) throw deleteActivitiesError;
+      
+      // Delete the preset itself
       const { error } = await supabase.from('user_presets').delete().eq('id', preset.id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       toast.success(t('calendar.presets.presetDeleted'));
       onOpenChange(false);
     },
