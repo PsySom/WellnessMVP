@@ -71,6 +71,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     emoji: '📌',
     // New repetition logic
     recurrence_type: 'none' as 'none' | 'daily' | 'weekly' | 'monthly' | 'custom',
+    recurrence_count: 7, // Number of repetitions for daily/weekly/monthly
     custom_interval: 1,
     custom_unit: 'day' as 'day' | 'week' | 'month' | 'year',
     custom_end_type: 'never' as 'never' | 'date' | 'count',
@@ -133,6 +134,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           timeSlot: activity.start_time ? 'exact_time' : 'anytime',
           emoji: activity.emoji || '📌',
           recurrence_type: repetitionConfig.recurrence_type || 'none',
+          recurrence_count: repetitionConfig.recurrence_count || 7,
           custom_interval: repetitionConfig.custom_interval || 1,
           custom_unit: repetitionConfig.custom_unit || 'day',
           custom_end_type: repetitionConfig.custom_end_type || 'never',
@@ -152,6 +154,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           timeSlot: initialValues.start_time ? 'exact_time' : 'anytime',
           emoji: initialValues.emoji || '📌',
           recurrence_type: 'none',
+          recurrence_count: 7,
           custom_interval: 1,
           custom_unit: 'day',
           custom_end_type: 'never',
@@ -168,6 +171,7 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           date: defaultDate || new Date(),
           category: defaultCategory,
           recurrence_type: 'none',
+          recurrence_count: 7,
           custom_interval: 1,
           custom_unit: 'day',
           custom_end_type: 'never',
@@ -223,6 +227,8 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       emoji: formData.emoji || '📌',
       repetition_config: {
         recurrence_type: formData.recurrence_type,
+        recurrence_count: formData.recurrence_count,
+        recurrence_group_id: formData.recurrence_type !== 'none' ? crypto.randomUUID() : null,
         custom_interval: formData.custom_interval,
         custom_unit: formData.custom_unit,
         custom_end_type: formData.custom_end_type,
@@ -286,22 +292,19 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
           }
           
           // Generate additional dates for recurring activities
-          let count = 1;
+          let count = formData.recurrence_count;
           let maxIterations = 365; // Limit to prevent infinite loops
             
             if (formData.recurrence_type === 'custom') {
               if (formData.custom_end_type === 'count') {
                 count = formData.custom_end_count;
               } else if (formData.custom_end_type === 'never') {
-                // For "never", create activities for next 12 occurrences as reasonable default
-                count = 12;
+                // For "never", create activities for next 365 occurrences as max
+                count = 365;
               } else if (formData.custom_end_type === 'date') {
                 // Calculate how many occurrences until end date
                 count = maxIterations;
               }
-            } else {
-              // For preset recurrence types, create 12 occurrences
-              count = 12;
             }
             
             for (let i = 1; i < count && i < maxIterations; i++) {
@@ -563,6 +566,46 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
                 <SelectItem value="custom">{t('calendar.form.recurrence.custom')}</SelectItem>
               </SelectContent>
             </Select>
+            
+            {/* Recurrence count selector for daily/weekly/monthly */}
+            {(formData.recurrence_type === 'daily' || formData.recurrence_type === 'weekly' || formData.recurrence_type === 'monthly') && (
+              <div className="mt-3 flex items-center gap-3">
+                <Label className="whitespace-nowrap text-sm">{t('calendar.form.recurrence.repeatFor')}</Label>
+                <div className="flex items-center gap-1">
+                  <div className="relative w-16">
+                    <Input 
+                      type="number" 
+                      min={1}
+                      max={365}
+                      value={formData.recurrence_count} 
+                      onChange={(e) => setFormData({ ...formData, recurrence_count: Math.max(1, Math.min(365, parseInt(e.target.value) || 1)) })}
+                      className="pr-6 text-center"
+                    />
+                    <div className="absolute right-1 top-1/2 -translate-y-1/2 flex flex-col">
+                      <button 
+                        type="button" 
+                        className="p-0.5 hover:bg-accent rounded"
+                        onClick={() => setFormData({ ...formData, recurrence_count: Math.min(365, formData.recurrence_count + 1) })}
+                      >
+                        <ChevronUp className="w-3 h-3" />
+                      </button>
+                      <button 
+                        type="button" 
+                        className="p-0.5 hover:bg-accent rounded"
+                        onClick={() => setFormData({ ...formData, recurrence_count: Math.max(1, formData.recurrence_count - 1) })}
+                      >
+                        <ChevronDown className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {formData.recurrence_type === 'daily' && t('calendar.form.recurrence.days')}
+                    {formData.recurrence_type === 'weekly' && t('calendar.form.recurrence.weeks')}
+                    {formData.recurrence_type === 'monthly' && t('calendar.form.recurrence.months')}
+                  </span>
+                </div>
+              </div>
+            )}
             
             {formData.recurrence_type === 'custom' && (
               <Button 
