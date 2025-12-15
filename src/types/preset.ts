@@ -20,6 +20,14 @@ export interface UserPreset {
   activation_start_date: string | null;
   activation_end_date: string | null;
   tags: string[];
+  // Recurrence settings
+  recurrence_type?: string;
+  recurrence_count?: number;
+  custom_interval?: number;
+  custom_unit?: string;
+  custom_end_type?: string;
+  custom_end_date?: string;
+  custom_end_count?: number;
 }
 
 export interface RecurrenceConfig {
