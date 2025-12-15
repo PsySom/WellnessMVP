@@ -14,7 +14,8 @@ import { useTranslation } from 'react-i18next';
 import { ACTIVITY_PRESETS, getCoreActivities, getAdditionalActivities } from '@/config/activityPresets';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { format, addDays, addWeeks, addMonths } from 'date-fns';
+import { format } from 'date-fns';
+import { generateRecurrenceDates, calculateActivationEndDate } from '@/utils/recurrenceUtils';
 import { getDefaultTimeForSlot } from '@/utils/timeSlots';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -268,42 +269,68 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
     }
   };
 
-  // Handle activating a user preset - creates activities
+  // Handle activating a user preset - creates activities based on recurrence settings
   const activateMutation = useMutation({
     mutationFn: async (preset: UserPreset) => {
       if (!user || !preset.activities?.length) throw new Error('Invalid preset');
 
       const startDate = new Date(selectedDate);
+      
+      // Get recurrence settings from preset (stored in activities JSON or preset fields)
+      const presetData = preset as any;
+      const recurrenceSettings = {
+        recurrence_type: presetData.recurrence_type || 'none',
+        recurrence_count: presetData.recurrence_count || 7,
+        custom_interval: presetData.custom_interval || 1,
+        custom_unit: presetData.custom_unit || 'day',
+        custom_end_type: presetData.custom_end_type || 'never',
+        custom_end_date: presetData.custom_end_date,
+        custom_end_count: presetData.custom_end_count || 30,
+      };
+
+      // Generate all dates based on recurrence
+      const recurrenceDates = generateRecurrenceDates(startDate, recurrenceSettings);
       const activitiesToCreate: any[] = [];
 
-      for (const activity of preset.activities) {
-        const template = templates.find(t => t.id === activity.template_id);
-        if (!template) continue;
+      // Create activities for each date in recurrence
+      for (const dateStr of recurrenceDates) {
+        for (const activity of preset.activities) {
+          const template = templates.find(t => t.id === activity.template_id);
+          if (!template) continue;
 
-        const startTime = activity.day_part 
-          ? getDefaultTimeForSlot(activity.day_part as any)
-          : null;
+          const startTime = activity.day_part 
+            ? getDefaultTimeForSlot(activity.day_part as any)
+            : null;
 
-        activitiesToCreate.push({
-          user_id: user.id,
-          user_preset_id: preset.id,
-          title: getLocalizedName(template),
-          category: activity.category,
-          impact_type: template.impact_type,
-          duration_minutes: activity.duration || template.default_duration_minutes || 60,
-          status: 'planned',
-          emoji: template.emoji,
-          date: selectedDateStr,
-          start_time: startTime,
-        });
+          activitiesToCreate.push({
+            user_id: user.id,
+            user_preset_id: preset.id,
+            title: getLocalizedName(template),
+            category: activity.category,
+            impact_type: template.impact_type,
+            duration_minutes: activity.duration || template.default_duration_minutes || 60,
+            status: 'planned',
+            emoji: template.emoji,
+            date: dateStr,
+            start_time: startTime,
+          });
+        }
       }
 
       if (activitiesToCreate.length > 0) {
-        const { error: insertError } = await supabase
-          .from('activities')
-          .insert(activitiesToCreate);
-        if (insertError) throw insertError;
+        // Insert in batches to avoid potential limits
+        const batchSize = 100;
+        for (let i = 0; i < activitiesToCreate.length; i += batchSize) {
+          const batch = activitiesToCreate.slice(i, i + batchSize);
+          const { error: insertError } = await supabase
+            .from('activities')
+            .insert(batch);
+          if (insertError) throw insertError;
+        }
       }
+
+      // Calculate activation end date
+      const activationEndDate = calculateActivationEndDate(startDate, recurrenceSettings);
 
       // Update preset status
       const { error: updateError } = await supabase
@@ -311,8 +338,8 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
         .update({
           is_active: true,
           last_activated_at: new Date().toISOString(),
-          activation_start_date: selectedDateStr,
-          activation_end_date: selectedDateStr,
+          activation_start_date: format(startDate, 'yyyy-MM-dd'),
+          activation_end_date: activationEndDate,
         })
         .eq('id', preset.id);
       if (updateError) throw updateError;
@@ -364,16 +391,25 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
     },
   });
 
-  // Archive preset (soft delete)
+  // Archive preset (soft delete) - also removes associated activities
   const archiveMutation = useMutation({
     mutationFn: async (presetId: string) => {
+      // Delete all activities created by this preset
+      const { error: deleteError } = await supabase
+        .from('activities')
+        .delete()
+        .eq('user_preset_id', presetId);
+      if (deleteError) throw deleteError;
+
       const { error } = await supabase
         .from('user_presets')
-        .update({ is_archived: true, is_active: false })
+        .update({ is_archived: true, is_active: false, activation_start_date: null, activation_end_date: null })
         .eq('id', presetId);
       if (error) throw error;
     },
     onSuccess: () => {
+      triggerActivityUpdate();
+      queryClient.invalidateQueries({ queryKey: ['activities'] });
       queryClient.invalidateQueries({ queryKey: ['user-presets'] });
       toast.success(t('activityTemplates.presetArchived'));
     },
