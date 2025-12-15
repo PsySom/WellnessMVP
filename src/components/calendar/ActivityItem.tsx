@@ -48,26 +48,36 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
   const [recurrenceInfo, setRecurrenceInfo] = useState<{ total: number; remaining: number } | null>(null);
   const isCompleted = activity.status === 'completed';
 
-  // Get recurrence info
+  // Get recurrence info - check both recurrence_group_id and user_preset_id
   const repetitionConfig = activity?.repetition_config || {};
   const recurrenceGroupId = repetitionConfig.recurrence_group_id;
-  const isRecurring = recurrenceGroupId && repetitionConfig.recurrence_type !== 'none';
+  const userPresetId = activity?.user_preset_id;
+  const recurrenceType = repetitionConfig.recurrence_type || 'none';
+  const isRecurring = Boolean(recurrenceGroupId) && recurrenceType !== 'none';
+  const isFromPreset = Boolean(userPresetId);
+  const hasGroup = isRecurring || isFromPreset;
 
   useEffect(() => {
     const fetchRecurrenceInfo = async () => {
-      if (!isRecurring || !recurrenceGroupId) return;
+      if (!hasGroup) return;
 
       const { data: allActivities, error } = await supabase
         .from('activities')
-        .select('id, date, repetition_config')
+        .select('id, date, repetition_config, user_preset_id')
         .eq('user_id', activity.user_id);
 
       if (error || !allActivities) return;
 
-      // Filter activities with the same recurrence_group_id
+      // Filter activities with the same group (recurrence_group_id or user_preset_id)
       const groupActivities = allActivities.filter((a: any) => {
-        const config = a.repetition_config as any;
-        return config?.recurrence_group_id === recurrenceGroupId;
+        if (recurrenceGroupId) {
+          const config = a.repetition_config as any;
+          return config?.recurrence_group_id === recurrenceGroupId;
+        }
+        if (userPresetId) {
+          return a.user_preset_id === userPresetId;
+        }
+        return false;
       });
 
       const total = groupActivities.length;
@@ -84,7 +94,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     };
 
     fetchRecurrenceInfo();
-  }, [isRecurring, recurrenceGroupId, activity.user_id]);
+  }, [hasGroup, recurrenceGroupId, userPresetId, activity.user_id]);
 
   const handleDragStart = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -93,6 +103,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
     e.dataTransfer.setData('activityId', activity.id);
     e.dataTransfer.setData('startTime', activity.start_time || '');
     e.dataTransfer.setData('duration', activity.duration_minutes?.toString() || '60');
+    e.dataTransfer.setData('activityData', JSON.stringify(activity));
     
     // Создаем ghost image для drag
     const dragImage = document.createElement('div');
@@ -192,7 +203,7 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                 )}
                 <div className={`w-3 h-3 rounded-full ${impactColor} shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl`} 
                      title={activity.impact_type} />
-                {isRecurring && recurrenceInfo && (
+                {hasGroup && recurrenceInfo && (
                   <Badge variant="outline" className="text-xs font-medium px-2 py-0.5 flex items-center gap-1">
                     <Repeat className="h-3 w-3" />
                     {recurrenceInfo.remaining}/{recurrenceInfo.total}
