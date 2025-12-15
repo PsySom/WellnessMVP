@@ -363,6 +363,7 @@
       "saving": "Saving...",
       "saveError": "Failed to save activity",
       "updateSuccess": "Activity updated",
+      "updateAllSuccess": "Updated {{count}} activities",
       "createSuccess": "Activity created",
       "recurrence": {
         "none": "Don't repeat",
@@ -488,7 +489,13 @@
       "deleteAllRecurrences": "All recurrences of this activity",
       "deleteSuccess": "Activity deleted successfully",
       "deleteAllSuccess": "Deleted {{count}} activities",
-      "deleteError": "Failed to delete activity"
+      "deleteError": "Failed to delete activity",
+      "editRecurringTitle": "Edit Activity",
+      "editRecurringDescription": "This activity is part of a recurring series. Which activities should be updated?",
+      "editSingle": "Only this activity",
+      "editAllRecurrences": "All recurrences",
+      "recurrenceRemaining": "remaining",
+      "recurrenceOf": "of"
     },
     "quickView": {
       "type": "Type",

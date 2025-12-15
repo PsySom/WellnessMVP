@@ -54,12 +54,29 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
   const { t } = useTranslation();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isEditConfirmOpen, setIsEditConfirmOpen] = useState(false);
   const [deleteMode, setDeleteMode] = useState<'single' | 'all'>('single');
+  const [editMode, setEditMode] = useState<'single' | 'all'>('single');
 
   // Check if activity is part of a recurrence group
   const repetitionConfig = activity?.repetition_config || {};
   const recurrenceGroupId = repetitionConfig.recurrence_group_id;
   const isRecurring = recurrenceGroupId && repetitionConfig.recurrence_type !== 'none';
+
+  const handleEditClick = () => {
+    if (isRecurring) {
+      setIsEditConfirmOpen(true);
+    } else {
+      setIsEditOpen(true);
+      onOpenChange(false);
+    }
+  };
+
+  const handleEditConfirm = () => {
+    setIsEditConfirmOpen(false);
+    setIsEditOpen(true);
+    onOpenChange(false);
+  };
 
   const handleDelete = async () => {
     if (deleteMode === 'all' && recurrenceGroupId) {
@@ -224,10 +241,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
             <div className="flex gap-3 md:gap-4 pt-6">
               <Button
                 variant="outline"
-                onClick={() => {
-                  setIsEditOpen(true);
-                  onOpenChange(false);
-                }}
+                onClick={handleEditClick}
                 className="flex-1 h-10 md:h-11 text-sm md:text-base hover-scale transition-all"
               >
                 <Edit className="h-4 w-4 md:h-5 md:w-5 mr-2" />
@@ -246,6 +260,44 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
         </DialogContent>
       </Dialog>
 
+      {/* Edit confirmation dialog for recurring activities */}
+      <AlertDialog open={isEditConfirmOpen} onOpenChange={setIsEditConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('calendar.detail.editRecurringTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('calendar.detail.editRecurringDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <RadioGroup 
+            value={editMode} 
+            onValueChange={(v) => setEditMode(v as 'single' | 'all')}
+            className="my-4 space-y-3"
+          >
+            <div className="flex items-center space-x-3">
+              <RadioGroupItem value="single" id="edit-single" />
+              <Label htmlFor="edit-single" className="cursor-pointer font-normal">
+                {t('calendar.detail.editSingle')}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3">
+              <RadioGroupItem value="all" id="edit-all" />
+              <Label htmlFor="edit-all" className="cursor-pointer font-normal">
+                {t('calendar.detail.editAllRecurrences')}
+              </Label>
+            </div>
+          </RadioGroup>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEditConfirm}>
+              {t('calendar.detail.edit')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <ActivityFormModal
         open={isEditOpen}
         onOpenChange={(open) => {
@@ -255,6 +307,7 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
           }
         }}
         activity={activity}
+        editMode={editMode}
       />
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>

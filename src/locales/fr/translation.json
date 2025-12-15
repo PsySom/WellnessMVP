@@ -363,6 +363,7 @@
       "saving": "Enregistrement...",
       "saveError": "Échec de l'enregistrement de l'activité",
       "updateSuccess": "Activité mise à jour",
+      "updateAllSuccess": "{{count}} activités mises à jour",
       "createSuccess": "Activité créée",
       "recurrence": {
         "none": "Ne pas répéter",
@@ -488,7 +489,13 @@
       "deleteAllRecurrences": "Toutes les occurrences de cette activité",
       "deleteSuccess": "Activité supprimée avec succès",
       "deleteAllSuccess": "{{count}} activités supprimées",
-      "deleteError": "Échec de la suppression de l'activité"
+      "deleteError": "Échec de la suppression de l'activité",
+      "editRecurringTitle": "Modifier l'activité",
+      "editRecurringDescription": "Cette activité fait partie d'une série récurrente. À quelles activités appliquer les modifications ?",
+      "editSingle": "Uniquement cette activité",
+      "editAllRecurrences": "Toutes les occurrences",
+      "recurrenceRemaining": "restantes",
+      "recurrenceOf": "sur"
     },
     "quickView": {
       "type": "Type",

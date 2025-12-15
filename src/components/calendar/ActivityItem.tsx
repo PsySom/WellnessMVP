@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,10 +7,10 @@ import { toast } from '@/hooks/use-toast';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import confetti from 'canvas-confetti';
-import { format } from 'date-fns';
+import { format, parseISO, isAfter } from 'date-fns';
 import { ActivityDetailModal } from './ActivityDetailModal';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Play } from 'lucide-react';
+import { ChevronDown, Play, Repeat } from 'lucide-react';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface ActivityItemProps {
@@ -45,7 +45,46 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [recurrenceInfo, setRecurrenceInfo] = useState<{ total: number; remaining: number } | null>(null);
   const isCompleted = activity.status === 'completed';
+
+  // Get recurrence info
+  const repetitionConfig = activity?.repetition_config || {};
+  const recurrenceGroupId = repetitionConfig.recurrence_group_id;
+  const isRecurring = recurrenceGroupId && repetitionConfig.recurrence_type !== 'none';
+
+  useEffect(() => {
+    const fetchRecurrenceInfo = async () => {
+      if (!isRecurring || !recurrenceGroupId) return;
+
+      const { data: allActivities, error } = await supabase
+        .from('activities')
+        .select('id, date, repetition_config')
+        .eq('user_id', activity.user_id);
+
+      if (error || !allActivities) return;
+
+      // Filter activities with the same recurrence_group_id
+      const groupActivities = allActivities.filter((a: any) => {
+        const config = a.repetition_config as any;
+        return config?.recurrence_group_id === recurrenceGroupId;
+      });
+
+      const total = groupActivities.length;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Count remaining (current date and future)
+      const remaining = groupActivities.filter((a: any) => {
+        const actDate = parseISO(a.date);
+        return isAfter(actDate, today) || actDate.toDateString() === today.toDateString();
+      }).length;
+
+      setRecurrenceInfo({ total, remaining });
+    };
+
+    fetchRecurrenceInfo();
+  }, [isRecurring, recurrenceGroupId, activity.user_id]);
 
   const handleDragStart = (e: React.DragEvent) => {
     e.stopPropagation();
@@ -146,13 +185,19 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                     </span>
                   </div>
                 )}
-                {activity.duration_minutes && (
+              {activity.duration_minutes && (
                   <Badge variant="secondary" className="text-sm font-medium px-2.5 py-1 transition-all duration-300 hover:bg-primary hover:text-primary-foreground">
                     {activity.duration_minutes} {t('calendar.form.minutesShort')}
                   </Badge>
                 )}
                 <div className={`w-3 h-3 rounded-full ${impactColor} shadow-lg transition-all duration-300 group-hover:scale-150 group-hover:shadow-xl`} 
                      title={activity.impact_type} />
+                {isRecurring && recurrenceInfo && (
+                  <Badge variant="outline" className="text-xs font-medium px-2 py-0.5 flex items-center gap-1">
+                    <Repeat className="h-3 w-3" />
+                    {recurrenceInfo.remaining}/{recurrenceInfo.total}
+                  </Badge>
+                )}
               </div>
 
               {activity.description && (
