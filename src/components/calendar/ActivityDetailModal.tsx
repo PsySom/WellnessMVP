@@ -19,6 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface ActivityDetailModalProps {
   activity: any;
@@ -52,27 +54,82 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
   const { t } = useTranslation();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteMode, setDeleteMode] = useState<'single' | 'all'>('single');
+
+  // Check if activity is part of a recurrence group
+  const repetitionConfig = activity?.repetition_config || {};
+  const recurrenceGroupId = repetitionConfig.recurrence_group_id;
+  const isRecurring = recurrenceGroupId && repetitionConfig.recurrence_type !== 'none';
 
   const handleDelete = async () => {
-    const { error } = await supabase
-      .from('activities')
-      .delete()
-      .eq('id', activity.id);
+    if (deleteMode === 'all' && recurrenceGroupId) {
+      // Delete all activities in the recurrence group
+      const { data: allActivities, error: fetchError } = await supabase
+        .from('activities')
+        .select('id, repetition_config')
+        .eq('user_id', activity.user_id);
 
-    if (error) {
-      toast({
-        title: t('common.error'),
-        description: t('calendar.detail.deleteError'),
-        variant: 'destructive'
-      });
+      if (fetchError) {
+        toast({
+          title: t('common.error'),
+          description: t('calendar.detail.deleteError'),
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      // Filter activities with the same recurrence_group_id
+      const activityIds = allActivities
+        ?.filter((a: any) => {
+          const config = a.repetition_config as any;
+          return config?.recurrence_group_id === recurrenceGroupId;
+        })
+        .map((a: any) => a.id) || [];
+
+      if (activityIds.length > 0) {
+        const { error } = await supabase
+          .from('activities')
+          .delete()
+          .in('id', activityIds);
+
+        if (error) {
+          toast({
+            title: t('common.error'),
+            description: t('calendar.detail.deleteError'),
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: t('common.success'),
+            description: t('calendar.detail.deleteAllSuccess', { count: activityIds.length })
+          });
+          onOpenChange(false);
+          onUpdate();
+          triggerActivityUpdate();
+        }
+      }
     } else {
-      toast({
-        title: t('common.success'),
-        description: t('calendar.detail.deleteSuccess')
-      });
-      onOpenChange(false);
-      onUpdate();
-      triggerActivityUpdate();
+      // Delete single activity
+      const { error } = await supabase
+        .from('activities')
+        .delete()
+        .eq('id', activity.id);
+
+      if (error) {
+        toast({
+          title: t('common.error'),
+          description: t('calendar.detail.deleteError'),
+          variant: 'destructive'
+        });
+      } else {
+        toast({
+          title: t('common.success'),
+          description: t('calendar.detail.deleteSuccess')
+        });
+        onOpenChange(false);
+        onUpdate();
+        triggerActivityUpdate();
+      }
     }
   };
 
@@ -152,6 +209,16 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
                   {t(`calendar.status.${activity.status}`)}
                 </Badge>
               </div>
+
+              {isRecurring && (
+                <div className="p-4 md:p-5 rounded-lg bg-muted/50 col-span-2">
+                  <h4 className="text-sm md:text-base font-medium mb-2">{t('calendar.detail.recurrence')}</h4>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    {t(`calendar.form.recurrence.${repetitionConfig.recurrence_type}`)}
+                    {repetitionConfig.recurrence_count && ` (${repetitionConfig.recurrence_count} ${t('calendar.detail.occurrences')})`}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 md:gap-4 pt-6">
@@ -195,9 +262,34 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
           <AlertDialogHeader>
             <AlertDialogTitle>{t('calendar.detail.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('calendar.detail.deleteConfirmation')}
+              {isRecurring 
+                ? t('calendar.detail.deleteRecurringDescription')
+                : t('calendar.detail.deleteConfirmation')
+              }
             </AlertDialogDescription>
           </AlertDialogHeader>
+          
+          {isRecurring && (
+            <RadioGroup 
+              value={deleteMode} 
+              onValueChange={(v) => setDeleteMode(v as 'single' | 'all')}
+              className="my-4 space-y-3"
+            >
+              <div className="flex items-center space-x-3">
+                <RadioGroupItem value="single" id="delete-single" />
+                <Label htmlFor="delete-single" className="cursor-pointer font-normal">
+                  {t('calendar.detail.deleteSingle')}
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3">
+                <RadioGroupItem value="all" id="delete-all" />
+                <Label htmlFor="delete-all" className="cursor-pointer font-normal">
+                  {t('calendar.detail.deleteAllRecurrences')}
+                </Label>
+              </div>
+            </RadioGroup>
+          )}
+          
           <AlertDialogFooter>
             <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground">
