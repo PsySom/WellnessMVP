@@ -653,12 +653,19 @@ export type Database = {
           activation_start_date: string | null
           activities: Json
           created_at: string
+          custom_end_count: number | null
+          custom_end_date: string | null
+          custom_end_type: string | null
+          custom_interval: number | null
+          custom_unit: string | null
           emoji: string
           id: string
           is_active: boolean | null
           is_archived: boolean | null
           last_activated_at: string | null
           name: string
+          recurrence_count: number | null
+          recurrence_type: string | null
           tags: string[] | null
           updated_at: string
           user_id: string
@@ -668,12 +675,19 @@ export type Database = {
           activation_start_date?: string | null
           activities?: Json
           created_at?: string
+          custom_end_count?: number | null
+          custom_end_date?: string | null
+          custom_end_type?: string | null
+          custom_interval?: number | null
+          custom_unit?: string | null
           emoji?: string
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
           last_activated_at?: string | null
           name: string
+          recurrence_count?: number | null
+          recurrence_type?: string | null
           tags?: string[] | null
           updated_at?: string
           user_id: string
@@ -683,12 +697,19 @@ export type Database = {
           activation_start_date?: string | null
           activities?: Json
           created_at?: string
+          custom_end_count?: number | null
+          custom_end_date?: string | null
+          custom_end_type?: string | null
+          custom_interval?: number | null
+          custom_unit?: string | null
           emoji?: string
           id?: string
           is_active?: boolean | null
           is_archived?: boolean | null
           last_activated_at?: string | null
           name?: string
+          recurrence_count?: number | null
+          recurrence_type?: string | null
           tags?: string[] | null
           updated_at?: string
           user_id?: string

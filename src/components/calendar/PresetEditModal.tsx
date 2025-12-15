@@ -74,6 +74,7 @@ interface UserPreset {
   name: string;
   emoji: string;
   activities: PresetActivity[];
+  tags?: string[];
   recurrence_type?: string;
   recurrence_count?: number;
   custom_interval?: number;
@@ -258,6 +259,13 @@ export const PresetEditModal = ({ open, onOpenChange, preset }: PresetEditModalP
         name: data.name, 
         emoji: data.emoji, 
         activities: activitiesJson,
+        recurrence_type: data.recurrence_type,
+        recurrence_count: data.recurrence_count,
+        custom_interval: data.custom_interval,
+        custom_unit: data.custom_unit,
+        custom_end_type: data.custom_end_type,
+        custom_end_date: data.custom_end_date,
+        custom_end_count: data.custom_end_count,
       };
 
       if (preset?.id) {
