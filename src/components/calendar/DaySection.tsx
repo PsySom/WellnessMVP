@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { ActivityItem } from './ActivityItem';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useTranslation } from 'react-i18next';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 interface DaySectionProps {
   title: string;
@@ -12,8 +16,18 @@ interface DaySectionProps {
 }
 
 export const DaySection = ({ title, timeRange, activities, onUpdate, date }: DaySectionProps) => {
+  const { t } = useTranslation();
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [dragConfirmDialog, setDragConfirmDialog] = useState<{
+    open: boolean;
+    activityId: string;
+    newTime: string;
+    hasGroup: boolean;
+    recurrenceGroupId: string | null;
+    userPresetId: string | null;
+  } | null>(null);
+  const [dragMode, setDragMode] = useState<'single' | 'all'>('single');
   
   // Sort activities by start_time
   const sortedActivities = [...activities].sort((a, b) => {
@@ -128,22 +142,45 @@ export const DaySection = ({ title, timeRange, activities, onUpdate, date }: Day
     // Если перетаскиваем существующую активность
     if (!activityId) return;
 
+    // Find the activity data to check if it's recurring
+    const activityData = e.dataTransfer.getData('activityData');
+    let parsedActivity: any = null;
+    try {
+      parsedActivity = activityData ? JSON.parse(activityData) : null;
+    } catch {}
+
     let newTime: string;
     
     if (sortedActivities.length === 0) {
-      // Пустой день - используем 9:00
       newTime = '09:00';
     } else if (targetIndex === undefined) {
-      // Перетащили в конец списка - добавляем после последней активности
       const lastActivity = sortedActivities[sortedActivities.length - 1];
       newTime = calculateNewTime(lastActivity, 'after');
     } else {
-      // Перетащили между активностями
       const targetActivity = sortedActivities[targetIndex];
       if (activityId === targetActivity.id) return;
       newTime = calculateNewTime(targetActivity, 'before');
     }
 
+    // Check if activity is part of a group
+    const config = parsedActivity?.repetition_config || {};
+    const recurrenceGroupId = config.recurrence_group_id;
+    const userPresetId = parsedActivity?.user_preset_id;
+    const hasGroup = Boolean(recurrenceGroupId) || Boolean(userPresetId);
+
+    if (hasGroup) {
+      setDragConfirmDialog({
+        open: true,
+        activityId,
+        newTime,
+        hasGroup,
+        recurrenceGroupId,
+        userPresetId
+      });
+      return;
+    }
+
+    // Simple update for non-recurring
     const { error } = await supabase
       .from('activities')
       .update({ start_time: newTime })
@@ -151,8 +188,8 @@ export const DaySection = ({ title, timeRange, activities, onUpdate, date }: Day
 
     if (error) {
       toast({
-        title: 'Ошибка',
-        description: 'Не удалось обновить время активности',
+        title: t('common.error'),
+        description: t('calendar.form.saveError'),
         variant: 'destructive'
       });
       return;
@@ -161,10 +198,69 @@ export const DaySection = ({ title, timeRange, activities, onUpdate, date }: Day
     onUpdate();
   };
 
+  const handleDragConfirm = async () => {
+    if (!dragConfirmDialog) return;
+    
+    const { activityId, newTime, recurrenceGroupId, userPresetId } = dragConfirmDialog;
+    
+    if (dragMode === 'all') {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: allActivities } = await supabase
+        .from('activities')
+        .select('id, repetition_config, user_preset_id')
+        .eq('user_id', user.id);
+
+      const activityIds = allActivities
+        ?.filter((a: any) => {
+          if (recurrenceGroupId) {
+            const config = a.repetition_config as any;
+            return config?.recurrence_group_id === recurrenceGroupId;
+          }
+          if (userPresetId) {
+            return a.user_preset_id === userPresetId;
+          }
+          return false;
+        })
+        .map((a: any) => a.id) || [];
+
+      await supabase.from('activities').update({ start_time: newTime }).in('id', activityIds);
+    } else {
+      await supabase.from('activities').update({ start_time: newTime }).eq('id', activityId);
+    }
+    
+    setDragConfirmDialog(null);
+    onUpdate();
+  };
+
   const completionPercentage = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
   const minHeight = isEmpty ? 'min-h-[60px]' : 'min-h-0';
 
   return (
+    <>
+    <AlertDialog open={!!dragConfirmDialog?.open} onOpenChange={(open) => !open && setDragConfirmDialog(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t('calendar.detail.editRecurringTitle')}</AlertDialogTitle>
+          <AlertDialogDescription>{t('calendar.detail.editRecurringDescription')}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <RadioGroup value={dragMode} onValueChange={(v) => setDragMode(v as 'single' | 'all')} className="my-4 space-y-3">
+          <div className="flex items-center space-x-3">
+            <RadioGroupItem value="single" id="drag-single" />
+            <Label htmlFor="drag-single" className="cursor-pointer font-normal">{t('calendar.detail.editSingle')}</Label>
+          </div>
+          <div className="flex items-center space-x-3">
+            <RadioGroupItem value="all" id="drag-all" />
+            <Label htmlFor="drag-all" className="cursor-pointer font-normal">{t('calendar.detail.editAllRecurrences')}</Label>
+          </div>
+        </RadioGroup>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDragConfirm}>{t('calendar.form.save')}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
     <div className={`mb-8 animate-fade-in ${minHeight}`}>
       <div className="flex items-center justify-between mb-4 px-1">
         <div className="flex items-center gap-3">
@@ -272,5 +368,6 @@ export const DaySection = ({ title, timeRange, activities, onUpdate, date }: Day
         )}
       </div>
     </div>
+    </>
   );
 };

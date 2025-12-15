@@ -58,34 +58,27 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
   const [deleteMode, setDeleteMode] = useState<'single' | 'all'>('single');
   const [editMode, setEditMode] = useState<'single' | 'all'>('single');
 
-  // Check if activity is part of a recurrence group
+  // Check if activity is part of a recurrence group or preset
   const repetitionConfig = activity?.repetition_config || {};
   const recurrenceGroupId = repetitionConfig.recurrence_group_id;
-  // Check for recurrence - only show options if recurrence_group_id exists
+  const userPresetId = activity?.user_preset_id;
   const recurrenceType = repetitionConfig.recurrence_type || 'none';
   const isRecurring = Boolean(recurrenceGroupId) && recurrenceType !== 'none';
+  const isFromPreset = Boolean(userPresetId);
+  const hasGroup = isRecurring || isFromPreset;
 
   const handleEditClick = () => {
-    if (isRecurring) {
-      setIsEditConfirmOpen(true);
-    } else {
-      setIsEditOpen(true);
-      onOpenChange(false);
-    }
-  };
-
-  const handleEditConfirm = () => {
-    setIsEditConfirmOpen(false);
+    // Always open edit form first, confirmation will be shown on save if needed
     setIsEditOpen(true);
     onOpenChange(false);
   };
 
   const handleDelete = async () => {
-    if (deleteMode === 'all' && recurrenceGroupId) {
-      // Delete all activities in the recurrence group
+    if (deleteMode === 'all' && hasGroup) {
+      // Delete all activities in the group (recurrence or preset)
       const { data: allActivities, error: fetchError } = await supabase
         .from('activities')
-        .select('id, repetition_config')
+        .select('id, repetition_config, user_preset_id')
         .eq('user_id', activity.user_id);
 
       if (fetchError) {
@@ -97,11 +90,17 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
         return;
       }
 
-      // Filter activities with the same recurrence_group_id
+      // Filter activities with the same group
       const activityIds = allActivities
         ?.filter((a: any) => {
-          const config = a.repetition_config as any;
-          return config?.recurrence_group_id === recurrenceGroupId;
+          if (recurrenceGroupId) {
+            const config = a.repetition_config as any;
+            return config?.recurrence_group_id === recurrenceGroupId;
+          }
+          if (userPresetId) {
+            return a.user_preset_id === userPresetId;
+          }
+          return false;
         })
         .map((a: any) => a.id) || [];
 
@@ -262,44 +261,6 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
         </DialogContent>
       </Dialog>
 
-      {/* Edit confirmation dialog for recurring activities */}
-      <AlertDialog open={isEditConfirmOpen} onOpenChange={setIsEditConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{t('calendar.detail.editRecurringTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t('calendar.detail.editRecurringDescription')}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          
-          <RadioGroup 
-            value={editMode} 
-            onValueChange={(v) => setEditMode(v as 'single' | 'all')}
-            className="my-4 space-y-3"
-          >
-            <div className="flex items-center space-x-3">
-              <RadioGroupItem value="single" id="edit-single" />
-              <Label htmlFor="edit-single" className="cursor-pointer font-normal">
-                {t('calendar.detail.editSingle')}
-              </Label>
-            </div>
-            <div className="flex items-center space-x-3">
-              <RadioGroupItem value="all" id="edit-all" />
-              <Label htmlFor="edit-all" className="cursor-pointer font-normal">
-                {t('calendar.detail.editAllRecurrences')}
-              </Label>
-            </div>
-          </RadioGroup>
-          
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleEditConfirm}>
-              {t('calendar.detail.edit')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <ActivityFormModal
         open={isEditOpen}
         onOpenChange={(open) => {
@@ -309,7 +270,6 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
           }
         }}
         activity={activity}
-        editMode={editMode}
       />
 
       <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
@@ -317,14 +277,14 @@ export const ActivityDetailModal = ({ activity, open, onOpenChange, onUpdate }: 
           <AlertDialogHeader>
             <AlertDialogTitle>{t('calendar.detail.deleteTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              {isRecurring 
+              {hasGroup 
                 ? t('calendar.detail.deleteRecurringDescription')
                 : t('calendar.detail.deleteConfirmation')
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
           
-          {isRecurring && (
+          {hasGroup && (
             <RadioGroup 
               value={deleteMode} 
               onValueChange={(v) => setDeleteMode(v as 'single' | 'all')}

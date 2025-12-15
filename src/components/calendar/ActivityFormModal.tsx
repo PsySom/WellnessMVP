@@ -29,7 +29,6 @@ interface ActivityFormModalProps {
   exerciseId?: string;
   testId?: string;
   initialValues?: any;
-  editMode?: 'single' | 'all';
 }
 
 const activitySchema = z.object({
@@ -45,7 +44,7 @@ const IMPACT_TYPES = [
   { value: 'neutral' as const, color: 'bg-secondary' }
 ];
 
-export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, testId, initialValues, editMode = 'single' }: ActivityFormModalProps) => {
+export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, testId, initialValues }: ActivityFormModalProps) => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -54,6 +53,20 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     open: false, 
     onConfirm: () => {} 
   });
+  const [editConfirmDialog, setEditConfirmDialog] = useState<{ open: boolean; onConfirm: (mode: 'single' | 'all') => void }>({ 
+    open: false, 
+    onConfirm: () => {} 
+  });
+  const [editMode, setEditMode] = useState<'single' | 'all'>('single');
+
+  // Check if activity is part of a recurrence group or preset
+  const repetitionConfig = activity?.repetition_config || {};
+  const recurrenceGroupId = repetitionConfig.recurrence_group_id;
+  const userPresetId = activity?.user_preset_id;
+  const recurrenceType = repetitionConfig.recurrence_type || 'none';
+  const isRecurring = Boolean(recurrenceGroupId) && recurrenceType !== 'none';
+  const isFromPreset = Boolean(userPresetId);
+  const hasGroup = isRecurring || isFromPreset;
   
   const [formData, setFormData] = useState({
     title: '',
@@ -183,23 +196,9 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     }
   }, [open, activity, initialValues, defaultDate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const performSave = async (selectedEditMode: 'single' | 'all') => {
     if (!user) return;
-
-    try {
-      activitySchema.parse({
-        title: formData.title,
-        description: formData.description,
-        duration_minutes: formData.duration_minutes,
-      });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-        return;
-      }
-    }
-
+    
     setLoading(true);
 
     let startTime = null;
@@ -238,74 +237,154 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       }
     };
 
-    if (isEditing) {
-      const recurrenceGroupId = activity?.repetition_config?.recurrence_group_id;
+    if (selectedEditMode === 'all') {
+      // Get group identifier
+      const groupId = recurrenceGroupId || userPresetId;
       
-      if (editMode === 'all' && recurrenceGroupId) {
-        // Update all activities in the recurrence group
-        const { data: allActivities, error: fetchError } = await supabase
-          .from('activities')
-          .select('id, repetition_config')
-          .eq('user_id', user!.id);
+      // Update all activities in the group
+      const { data: allActivities, error: fetchError } = await supabase
+        .from('activities')
+        .select('id, repetition_config, user_preset_id')
+        .eq('user_id', user!.id);
 
-        if (fetchError) {
-          setLoading(false);
-          toast.error(t('calendar.form.saveError'));
-          return;
-        }
+      if (fetchError) {
+        setLoading(false);
+        toast.error(t('calendar.form.saveError'));
+        return;
+      }
 
-        // Filter activities with the same recurrence_group_id
-        const activityIds = allActivities
-          ?.filter((a: any) => {
+      // Filter activities with the same group
+      const activityIds = allActivities
+        ?.filter((a: any) => {
+          if (recurrenceGroupId) {
             const config = a.repetition_config as any;
             return config?.recurrence_group_id === recurrenceGroupId;
-          })
-          .map((a: any) => a.id) || [];
+          }
+          if (userPresetId) {
+            return a.user_preset_id === userPresetId;
+          }
+          return false;
+        })
+        .map((a: any) => a.id) || [];
 
-        // Update data without changing date/time for individual activities
-        const updateData = {
-          title: formData.title,
-          description: formData.description || null,
-          duration_minutes: formData.duration_minutes,
-          impact_type: formData.impact_type,
-          category: formData.category,
-          priority: formData.priority,
-          reminder_enabled: formData.reminder_enabled,
-          reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
-          emoji: formData.emoji || '📌',
-        };
+      // Update data without changing date/time for individual activities
+      const updateData = {
+        title: formData.title,
+        description: formData.description || null,
+        duration_minutes: formData.duration_minutes,
+        impact_type: formData.impact_type,
+        category: formData.category,
+        priority: formData.priority,
+        reminder_enabled: formData.reminder_enabled,
+        reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
+        emoji: formData.emoji || '📌',
+      };
 
-        const { error } = await supabase
-          .from('activities')
-          .update(updateData as any)
-          .in('id', activityIds);
-        
-        setLoading(false);
+      const { error } = await supabase
+        .from('activities')
+        .update(updateData as any)
+        .in('id', activityIds);
+      
+      setLoading(false);
 
-        if (error) {
-          console.error('Activity save error:', error);
-          toast.error(t('calendar.form.saveError'));
-        } else {
-          toast.success(t('calendar.form.updateAllSuccess', { count: activityIds.length }));
-          onOpenChange(false);
-          triggerActivityUpdate();
-        }
+      if (error) {
+        console.error('Activity save error:', error);
+        toast.error(t('calendar.form.saveError'));
       } else {
-        // Update single activity
-        const { error } = await supabase.from('activities').update(baseActivityData as any).eq('id', activity.id);
-        
-        setLoading(false);
-
-        if (error) {
-          console.error('Activity save error:', error);
-          toast.error(t('calendar.form.saveError'));
-        } else {
-          toast.success(t('calendar.form.updateSuccess'));
-          onOpenChange(false);
-          triggerActivityUpdate();
-        }
+        toast.success(t('calendar.form.updateAllSuccess', { count: activityIds.length }));
+        onOpenChange(false);
+        triggerActivityUpdate();
       }
     } else {
+      // Update single activity
+      const { error } = await supabase.from('activities').update(baseActivityData as any).eq('id', activity.id);
+      
+      setLoading(false);
+
+      if (error) {
+        console.error('Activity save error:', error);
+        toast.error(t('calendar.form.saveError'));
+      } else {
+        toast.success(t('calendar.form.updateSuccess'));
+        onOpenChange(false);
+        triggerActivityUpdate();
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      activitySchema.parse({
+        title: formData.title,
+        description: formData.description,
+        duration_minutes: formData.duration_minutes,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+        return;
+      }
+    }
+
+    // If editing a recurring activity, show confirmation dialog
+    if (isEditing && hasGroup) {
+      setEditConfirmDialog({
+        open: true,
+        onConfirm: (mode) => {
+          setEditConfirmDialog({ open: false, onConfirm: () => {} });
+          performSave(mode);
+        }
+      });
+      return;
+    }
+
+    // If editing non-recurring activity
+    if (isEditing) {
+      performSave('single');
+      return;
+    }
+
+    // New activity - continue with existing logic
+    setLoading(true);
+
+    let startTime = null;
+    if (formData.timeSlot === 'exact_time') {
+      startTime = formData.start_time || null;
+    } else if (formData.timeSlot !== 'anytime') {
+      startTime = getDefaultTimeForSlot(formData.timeSlot as TimeSlot);
+    }
+
+    const baseActivityData = {
+      title: formData.title,
+      description: formData.description || null,
+      date: format(formData.date, 'yyyy-MM-dd'),
+      start_time: startTime,
+      duration_minutes: formData.duration_minutes,
+      impact_type: formData.impact_type,
+      category: formData.category,
+      priority: formData.priority,
+      is_recurring: formData.recurrence_type !== 'none',
+      recurrence_pattern: formData.recurrence_type !== 'none' ? formData.recurrence_type : null,
+      reminder_enabled: formData.reminder_enabled,
+      reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
+      user_id: user!.id,
+      exercise_id: exerciseId || null,
+      test_id: testId || null,
+      emoji: formData.emoji || '📌',
+      repetition_config: {
+        recurrence_type: formData.recurrence_type,
+        recurrence_count: formData.recurrence_count,
+        recurrence_group_id: formData.recurrence_type !== 'none' ? crypto.randomUUID() : null,
+        custom_interval: formData.custom_interval,
+        custom_unit: formData.custom_unit,
+        custom_end_type: formData.custom_end_type,
+        custom_end_date: formData.custom_end_type === 'date' ? format(formData.custom_end_date, 'yyyy-MM-dd') : null,
+        custom_end_count: formData.custom_end_type === 'count' ? formData.custom_end_count : null,
+      }
+    };
       // Check for duplicates first
       const { data: existingActivities } = await supabase
         .from('activities')
@@ -420,7 +499,6 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
       } else {
         await createActivities();
       }
-    }
   };
 
   return (
@@ -437,6 +515,44 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
             <AlertDialogCancel>{t('calendar.duplicateDialog.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={duplicateDialog.onConfirm}>
               {t('calendar.duplicateDialog.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Edit confirmation dialog for recurring activities */}
+      <AlertDialog open={editConfirmDialog.open} onOpenChange={(open) => setEditConfirmDialog({ ...editConfirmDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('calendar.detail.editRecurringTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('calendar.detail.editRecurringDescription')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <RadioGroup 
+            value={editMode} 
+            onValueChange={(v) => setEditMode(v as 'single' | 'all')}
+            className="my-4 space-y-3"
+          >
+            <div className="flex items-center space-x-3">
+              <RadioGroupItem value="single" id="edit-form-single" />
+              <Label htmlFor="edit-form-single" className="cursor-pointer font-normal">
+                {t('calendar.detail.editSingle')}
+              </Label>
+            </div>
+            <div className="flex items-center space-x-3">
+              <RadioGroupItem value="all" id="edit-form-all" />
+              <Label htmlFor="edit-form-all" className="cursor-pointer font-normal">
+                {t('calendar.detail.editAllRecurrences')}
+              </Label>
+            </div>
+          </RadioGroup>
+          
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('calendar.form.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => editConfirmDialog.onConfirm(editMode)}>
+              {t('calendar.form.save')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
