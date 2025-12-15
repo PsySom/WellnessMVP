@@ -10,7 +10,7 @@ import confetti from 'canvas-confetti';
 import { format, parseISO, isAfter } from 'date-fns';
 import { ActivityDetailModal } from './ActivityDetailModal';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, Play, Repeat } from 'lucide-react';
+import { ChevronDown, Play, Repeat, Star } from 'lucide-react';
 import { triggerActivityUpdate } from '@/utils/activitySync';
 
 interface ActivityItemProps {
@@ -185,6 +185,15 @@ export const ActivityItem = ({ activity, onUpdate }: ActivityItemProps) => {
                 }`}>
                   {activity.title}
                 </h4>
+                {/* Priority stars */}
+                <div className="flex items-center gap-0.5">
+                  {Array.from({ length: activity.priority || 3 }).map((_, i) => (
+                    <Star 
+                      key={i} 
+                      className="h-3 w-3 fill-yellow-400 text-yellow-400" 
+                    />
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center gap-2.5 mb-2 flex-wrap">
