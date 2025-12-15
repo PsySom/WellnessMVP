@@ -363,6 +363,7 @@
       "saving": "Сохранение...",
       "saveError": "Не удалось сохранить активность",
       "updateSuccess": "Активность обновлена",
+      "updateAllSuccess": "Обновлено {{count}} активностей",
       "createSuccess": "Активность создана",
       "recurrence": {
         "none": "Не повторять",
@@ -488,7 +489,13 @@
       "deleteAllRecurrences": "Все повторения этой активности",
       "deleteSuccess": "Активность успешно удалена",
       "deleteAllSuccess": "Удалено {{count}} активностей",
-      "deleteError": "Не удалось удалить активность"
+      "deleteError": "Не удалось удалить активность",
+      "editRecurringTitle": "Редактировать активность",
+      "editRecurringDescription": "Эта активность является частью повторяющейся серии. К каким активностям применить изменения?",
+      "editSingle": "Только к этой активности",
+      "editAllRecurrences": "Ко всем повторениям",
+      "recurrenceRemaining": "осталось",
+      "recurrenceOf": "из"
     },
     "quickView": {
       "type": "Тип",

@@ -29,6 +29,7 @@ interface ActivityFormModalProps {
   exerciseId?: string;
   testId?: string;
   initialValues?: any;
+  editMode?: 'single' | 'all';
 }
 
 const activitySchema = z.object({
@@ -44,7 +45,7 @@ const IMPACT_TYPES = [
   { value: 'neutral' as const, color: 'bg-secondary' }
 ];
 
-export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, testId, initialValues }: ActivityFormModalProps) => {
+export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, exerciseId, testId, initialValues, editMode = 'single' }: ActivityFormModalProps) => {
   const { user } = useAuth();
   const { t, i18n } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -238,18 +239,71 @@ export const ActivityFormModal = ({ open, onOpenChange, defaultDate, activity, e
     };
 
     if (isEditing) {
-      // For editing, update single activity
-      const { error } = await supabase.from('activities').update(baseActivityData as any).eq('id', activity.id);
+      const recurrenceGroupId = activity?.repetition_config?.recurrence_group_id;
       
-      setLoading(false);
+      if (editMode === 'all' && recurrenceGroupId) {
+        // Update all activities in the recurrence group
+        const { data: allActivities, error: fetchError } = await supabase
+          .from('activities')
+          .select('id, repetition_config')
+          .eq('user_id', user!.id);
 
-      if (error) {
-        console.error('Activity save error:', error);
-        toast.error(t('calendar.form.saveError'));
+        if (fetchError) {
+          setLoading(false);
+          toast.error(t('calendar.form.saveError'));
+          return;
+        }
+
+        // Filter activities with the same recurrence_group_id
+        const activityIds = allActivities
+          ?.filter((a: any) => {
+            const config = a.repetition_config as any;
+            return config?.recurrence_group_id === recurrenceGroupId;
+          })
+          .map((a: any) => a.id) || [];
+
+        // Update data without changing date/time for individual activities
+        const updateData = {
+          title: formData.title,
+          description: formData.description || null,
+          duration_minutes: formData.duration_minutes,
+          impact_type: formData.impact_type,
+          category: formData.category,
+          priority: formData.priority,
+          reminder_enabled: formData.reminder_enabled,
+          reminder_minutes_before: formData.reminder_enabled ? formData.reminder_minutes_before : null,
+          emoji: formData.emoji || '📌',
+        };
+
+        const { error } = await supabase
+          .from('activities')
+          .update(updateData as any)
+          .in('id', activityIds);
+        
+        setLoading(false);
+
+        if (error) {
+          console.error('Activity save error:', error);
+          toast.error(t('calendar.form.saveError'));
+        } else {
+          toast.success(t('calendar.form.updateAllSuccess', { count: activityIds.length }));
+          onOpenChange(false);
+          triggerActivityUpdate();
+        }
       } else {
-        toast.success(t('calendar.form.updateSuccess'));
-        onOpenChange(false);
-        triggerActivityUpdate();
+        // Update single activity
+        const { error } = await supabase.from('activities').update(baseActivityData as any).eq('id', activity.id);
+        
+        setLoading(false);
+
+        if (error) {
+          console.error('Activity save error:', error);
+          toast.error(t('calendar.form.saveError'));
+        } else {
+          toast.success(t('calendar.form.updateSuccess'));
+          onOpenChange(false);
+          triggerActivityUpdate();
+        }
       }
     } else {
       // Check for duplicates first
