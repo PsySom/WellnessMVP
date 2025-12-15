@@ -276,16 +276,15 @@ export const TemplatesSidebar = ({ selectedDate, onOpenActivityModal }: Template
 
       const startDate = new Date(selectedDate);
       
-      // Get recurrence settings from preset (stored in activities JSON or preset fields)
-      const presetData = preset as any;
+      // Get recurrence settings from preset
       const recurrenceSettings = {
-        recurrence_type: presetData.recurrence_type || 'none',
-        recurrence_count: presetData.recurrence_count || 7,
-        custom_interval: presetData.custom_interval || 1,
-        custom_unit: presetData.custom_unit || 'day',
-        custom_end_type: presetData.custom_end_type || 'never',
-        custom_end_date: presetData.custom_end_date,
-        custom_end_count: presetData.custom_end_count || 30,
+        recurrence_type: preset.recurrence_type || 'none',
+        recurrence_count: preset.recurrence_count || 7,
+        custom_interval: preset.custom_interval || 1,
+        custom_unit: preset.custom_unit || 'day',
+        custom_end_type: preset.custom_end_type || 'never',
+        custom_end_date: preset.custom_end_date,
+        custom_end_count: preset.custom_end_count || 30,
       };
 
       // Generate all dates based on recurrence

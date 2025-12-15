@@ -151,6 +151,14 @@ const ActivityTemplates = () => {
     setName(preset.name);
     setActivities(preset.activities || []);
     setSelectedTags(preset.tags || []);
+    // Load recurrence settings from preset
+    setRecurrenceType(preset.recurrence_type || 'none');
+    setRecurrenceCount(preset.recurrence_count || 7);
+    setCustomInterval(preset.custom_interval || 1);
+    setCustomUnit(preset.custom_unit || 'day');
+    setCustomEndType(preset.custom_end_type || 'never');
+    setCustomEndDate(preset.custom_end_date ? new Date(preset.custom_end_date) : addMonths(new Date(), 1));
+    setCustomEndCount(preset.custom_end_count || 30);
   };
 
   // Clear editor
@@ -255,6 +263,13 @@ const ActivityTemplates = () => {
         emoji: selectedTags.length > 0 ? TAG_EMOJIS[selectedTags[0] as PresetTag] || '📋' : '📋', 
         activities: activitiesJson,
         tags: selectedTags,
+        recurrence_type: recurrenceType,
+        recurrence_count: recurrenceCount,
+        custom_interval: customInterval,
+        custom_unit: customUnit,
+        custom_end_type: customEndType,
+        custom_end_date: format(customEndDate, 'yyyy-MM-dd'),
+        custom_end_count: customEndCount,
       };
 
       if (editingPreset?.id) {
@@ -343,22 +358,22 @@ const ActivityTemplates = () => {
     },
   });
 
-  // Activate preset - creates activities in calendar based on recurrence settings
+  // Activate preset - creates activities in calendar based on recurrence settings from the preset
   const activateMutation = useMutation({
     mutationFn: async (preset: UserPreset) => {
       if (!user) throw new Error('Not authenticated');
 
       const startDate = new Date();
       
-      // Build recurrence settings from current state
+      // Use recurrence settings from the PRESET, not from current state
       const recurrenceSettings = {
-        recurrence_type: recurrenceType,
-        recurrence_count: recurrenceCount,
-        custom_interval: customInterval,
-        custom_unit: customUnit,
-        custom_end_type: customEndType,
-        custom_end_date: format(customEndDate, 'yyyy-MM-dd'),
-        custom_end_count: customEndCount,
+        recurrence_type: preset.recurrence_type || 'none',
+        recurrence_count: preset.recurrence_count || 7,
+        custom_interval: preset.custom_interval || 1,
+        custom_unit: preset.custom_unit || 'day',
+        custom_end_type: preset.custom_end_type || 'never',
+        custom_end_date: preset.custom_end_date,
+        custom_end_count: preset.custom_end_count || 30,
       };
 
       // Generate all dates based on recurrence using shared utility
