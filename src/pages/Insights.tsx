@@ -21,12 +21,12 @@ import PatternCards from '@/components/insights/PatternCards';
 import RecommendationsCard from '@/components/insights/RecommendationsCard';
 import { useTranslation } from 'react-i18next';
 
-type Period = 'week' | 'month' | '3months' | 'year';
+type Period = 'day' | 'week' | 'month' | '3months' | 'year';
 
 const Insights = () => {
   const { user } = useAuth();
   const { t } = useTranslation();
-  const [period, setPeriod] = useState<Period>('month');
+  const [period, setPeriod] = useState<Period>('week');
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
 
@@ -43,6 +43,9 @@ const Insights = () => {
       const startDate = new Date();
       
       switch (period) {
+        case 'day':
+          startDate.setDate(now.getDate() - 1);
+          break;
         case 'week':
           startDate.setDate(now.getDate() - 7);
           break;
@@ -127,6 +130,9 @@ const Insights = () => {
     const startDate = new Date();
     
     switch (period) {
+      case 'day':
+        startDate.setDate(now.getDate() - 1);
+        break;
       case 'week':
         startDate.setDate(now.getDate() - 7);
         break;
@@ -174,7 +180,8 @@ const Insights = () => {
 
           {/* Period Selector */}
           <Tabs value={period} onValueChange={(v) => setPeriod(v as Period)}>
-            <TabsList className="grid grid-cols-4 w-full max-w-md lg:max-w-lg">
+            <TabsList className="grid grid-cols-5 w-full max-w-lg lg:max-w-xl">
+              <TabsTrigger value="day" className="text-xs md:text-sm">{t('insights.period.day')}</TabsTrigger>
               <TabsTrigger value="week" className="text-xs md:text-sm">{t('insights.period.week')}</TabsTrigger>
               <TabsTrigger value="month" className="text-xs md:text-sm">{t('insights.period.month')}</TabsTrigger>
               <TabsTrigger value="3months" className="text-xs md:text-sm">{t('insights.period.3months')}</TabsTrigger>

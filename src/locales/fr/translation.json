@@ -755,6 +755,7 @@
   "insights": {
     "title": "Analyses",
     "period": {
+      "day": "Jour",
       "week": "Semaine",
       "month": "Mois",
       "3months": "3 mois",
