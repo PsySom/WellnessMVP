@@ -5,6 +5,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 
+// Security: Allowed file types and size limits
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
 interface AvatarUploadProps {
   avatarUrl: string | null;
   fullName: string;
@@ -15,6 +20,26 @@ export const AvatarUpload = ({ avatarUrl, fullName, onUploadComplete }: AvatarUp
   const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
 
+  const validateFile = (file: File): { valid: boolean; error?: string } => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return { valid: false, error: 'File size must be less than 5MB' };
+    }
+
+    // Check MIME type
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      return { valid: false, error: 'Only image files (JPG, PNG, GIF, WebP) are allowed' };
+    }
+
+    // Check file extension
+    const fileExt = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExt || !ALLOWED_EXTENSIONS.includes(fileExt)) {
+      return { valid: false, error: 'Invalid file extension. Allowed: JPG, PNG, GIF, WebP' };
+    }
+
+    return { valid: true };
+  };
+
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {
       setUploading(true);
@@ -23,9 +48,23 @@ export const AvatarUpload = ({ avatarUrl, fullName, onUploadComplete }: AvatarUp
         return;
       }
 
+      if (!user?.id) {
+        toast.error('You must be logged in to upload an avatar');
+        return;
+      }
+
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user?.id}-${Math.random()}.${fileExt}`;
+
+      // Validate file before upload
+      const validation = validateFile(file);
+      if (!validation.valid) {
+        toast.error(validation.error);
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop()?.toLowerCase();
+      // Use folder structure: {user_id}/{filename} for proper RLS policy matching
+      const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
 
       // Upload to Supabase Storage
       const { error: uploadError } = await supabase.storage
@@ -43,7 +82,7 @@ export const AvatarUpload = ({ avatarUrl, fullName, onUploadComplete }: AvatarUp
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ avatar_url: publicUrl })
-        .eq('id', user?.id);
+        .eq('id', user.id);
 
       if (updateError) throw updateError;
 
@@ -93,14 +132,14 @@ export const AvatarUpload = ({ avatarUrl, fullName, onUploadComplete }: AvatarUp
       <input
         id="avatar-upload"
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/gif,image/webp"
         onChange={handleAvatarUpload}
         disabled={uploading}
         className="hidden"
         aria-describedby="avatar-upload-description"
       />
       <span id="avatar-upload-description" className="sr-only">
-        Upload a new profile picture. Maximum file size: 5MB. Supported formats: JPG, PNG, GIF
+        Upload a new profile picture. Maximum file size: 5MB. Supported formats: JPG, PNG, GIF, WebP
       </span>
     </div>
   );
