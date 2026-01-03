@@ -16,16 +16,18 @@ import { NotificationSettings } from '@/components/settings/NotificationSettings
 import { AppearanceSettings } from '@/components/settings/AppearanceSettings';
 import { DataPrivacySettings } from '@/components/settings/DataPrivacySettings';
 import { LanguageSettings } from '@/components/settings/LanguageSettings';
+import { AdminPanel } from '@/components/admin/AdminPanel';
+import { useUserRole } from '@/hooks/useUserRole';
 import { useTranslation } from 'react-i18next';
 
 const Profile = () => {
   const { user, signOut } = useAuth();
   const { t, i18n } = useTranslation();
   const themeContext = useTheme();
+  const { isAdmin, loading: roleLoading } = useUserRole();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
-
   useEffect(() => {
     if (user) {
       fetchProfile();
@@ -111,8 +113,11 @@ const Profile = () => {
         </div>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+          <TabsList className={`grid w-full gap-1 ${isAdmin ? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-5'}`}>
             <TabsTrigger value="profile" className="text-sm">{t('settings.tabs.profile')}</TabsTrigger>
+            {isAdmin && (
+              <TabsTrigger value="admin" className="text-sm text-primary">{t('settings.tabs.admin')}</TabsTrigger>
+            )}
             <TabsTrigger value="notifications" className="text-sm">{t('settings.tabs.notifications')}</TabsTrigger>
             <TabsTrigger value="appearance" className="text-sm">{t('settings.tabs.appearance')}</TabsTrigger>
             <TabsTrigger value="language" className="text-sm">{t('settings.language.title')}</TabsTrigger>
@@ -128,6 +133,12 @@ const Profile = () => {
             <ProfileInfo profile={profile} />
             <ProfileStats userId={profile.id} joinDate={profile.created_at} />
           </TabsContent>
+
+          {isAdmin && (
+            <TabsContent value="admin" className="mt-6 animate-fade-in">
+              <AdminPanel />
+            </TabsContent>
+          )}
 
           <TabsContent value="notifications" className="mt-6 animate-fade-in">
             <NotificationSettings profile={profile} onUpdate={handleUpdate} />

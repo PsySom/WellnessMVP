@@ -989,7 +989,8 @@
     "times": "times",
     "minutes": "minutes",
     "hour": "hour",
-    "clear": "Clear"
+    "clear": "Clear",
+    "create": "Create"
   },
   "testDetail": {
     "backToTests": "Back to Tests",
@@ -1083,6 +1084,76 @@
       "day": "Day",
       "week": "Week",
       "month": "Month"
+    }
+  },
+  "admin": {
+    "title": "Administrator Panel",
+    "tabs": {
+      "stats": "Statistics",
+      "exercises": "Exercises",
+      "tests": "Tests"
+    },
+    "stats": {
+      "totalUsers": "Total Users",
+      "totalActivities": "Total Activities",
+      "journalSessions": "Journal Sessions",
+      "testResults": "Test Results",
+      "exerciseSessions": "Exercise Sessions"
+    },
+    "exercises": {
+      "searchPlaceholder": "Search exercises...",
+      "add": "Add",
+      "noExercises": "No exercises found",
+      "edit": "Edit Exercise",
+      "create": "Create Exercise",
+      "nameEn": "Name (English)",
+      "nameRu": "Name (Russian)",
+      "nameFr": "Name (French)",
+      "descriptionEn": "Description (English)",
+      "emoji": "Emoji",
+      "category": "Category",
+      "difficulty": "Difficulty",
+      "duration": "Duration (min)",
+      "created": "Exercise created",
+      "updated": "Exercise updated",
+      "deleted": "Exercise deleted",
+      "fetchError": "Failed to load exercises",
+      "saveError": "Failed to save exercise",
+      "deleteError": "Failed to delete exercise",
+      "deleteConfirmTitle": "Delete Exercise?",
+      "deleteConfirmDesc": "This action cannot be undone. The exercise will be permanently deleted."
+    },
+    "tests": {
+      "searchPlaceholder": "Search tests...",
+      "add": "Add",
+      "noTests": "No tests found",
+      "questions": "questions",
+      "edit": "Edit Test",
+      "create": "Create Test",
+      "nameEn": "Name (English)",
+      "nameRu": "Name (Russian)",
+      "nameFr": "Name (French)",
+      "slug": "Slug",
+      "descriptionEn": "Description (English)",
+      "totalQuestions": "Total Questions",
+      "duration": "Duration (min)",
+      "created": "Test created",
+      "updated": "Test updated",
+      "deleted": "Test deleted",
+      "fetchError": "Failed to load tests",
+      "saveError": "Failed to save test",
+      "deleteError": "Failed to delete test",
+      "deleteConfirmTitle": "Delete Test?",
+      "deleteConfirmDesc": "This action cannot be undone. The test will be permanently deleted."
+    }
+  },
+  "settings": {
+    "tabs": {
+      "profile": "Profile",
+      "notifications": "Notifications",
+      "appearance": "Appearance",
+      "privacy": "Privacy",
+      "admin": "Admin"
     }
   }
 }
