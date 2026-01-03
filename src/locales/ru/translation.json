@@ -991,7 +991,8 @@
     "times": "раза",
     "minutes": "минут",
     "hour": "час",
-    "clear": "Очистить"
+    "clear": "Очистить",
+    "create": "Создать"
   },
   "testDetail": {
     "backToTests": "Назад к тестам",
@@ -1037,6 +1038,76 @@
       "day": "День",
       "week": "Неделя",
       "month": "Месяц"
+    }
+  },
+  "admin": {
+    "title": "Панель администратора",
+    "tabs": {
+      "stats": "Статистика",
+      "exercises": "Упражнения",
+      "tests": "Тесты"
+    },
+    "stats": {
+      "totalUsers": "Всего пользователей",
+      "totalActivities": "Всего активностей",
+      "journalSessions": "Сессий дневника",
+      "testResults": "Результатов тестов",
+      "exerciseSessions": "Сессий упражнений"
+    },
+    "exercises": {
+      "searchPlaceholder": "Поиск упражнений...",
+      "add": "Добавить",
+      "noExercises": "Упражнения не найдены",
+      "edit": "Редактировать упражнение",
+      "create": "Создать упражнение",
+      "nameEn": "Название (English)",
+      "nameRu": "Название (Русский)",
+      "nameFr": "Название (Français)",
+      "descriptionEn": "Описание (English)",
+      "emoji": "Эмодзи",
+      "category": "Категория",
+      "difficulty": "Сложность",
+      "duration": "Длительность (мин)",
+      "created": "Упражнение создано",
+      "updated": "Упражнение обновлено",
+      "deleted": "Упражнение удалено",
+      "fetchError": "Ошибка загрузки упражнений",
+      "saveError": "Ошибка сохранения упражнения",
+      "deleteError": "Ошибка удаления упражнения",
+      "deleteConfirmTitle": "Удалить упражнение?",
+      "deleteConfirmDesc": "Это действие необратимо. Упражнение будет удалено навсегда."
+    },
+    "tests": {
+      "searchPlaceholder": "Поиск тестов...",
+      "add": "Добавить",
+      "noTests": "Тесты не найдены",
+      "questions": "вопросов",
+      "edit": "Редактировать тест",
+      "create": "Создать тест",
+      "nameEn": "Название (English)",
+      "nameRu": "Название (Русский)",
+      "nameFr": "Название (Français)",
+      "slug": "Slug",
+      "descriptionEn": "Описание (English)",
+      "totalQuestions": "Всего вопросов",
+      "duration": "Длительность (мин)",
+      "created": "Тест создан",
+      "updated": "Тест обновлён",
+      "deleted": "Тест удалён",
+      "fetchError": "Ошибка загрузки тестов",
+      "saveError": "Ошибка сохранения теста",
+      "deleteError": "Ошибка удаления теста",
+      "deleteConfirmTitle": "Удалить тест?",
+      "deleteConfirmDesc": "Это действие необратимо. Тест будет удалён навсегда."
+    }
+  },
+  "settings": {
+    "tabs": {
+      "profile": "Профиль",
+      "notifications": "Уведомления",
+      "appearance": "Внешний вид",
+      "privacy": "Конфиденциальность",
+      "admin": "Админ"
     }
   }
 }
